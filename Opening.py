@@ -205,7 +205,8 @@ class Opening:
         pygame.init()
         self.screen = pygame.display.set_mode((MAX_X, MAX_Y))
         pygame.display.set_caption("First Game")
-        pygame.mouse.set_visible(0)
+        # uncomment to make cursor invisible
+        # pygame.mouse.set_visible(0)
         try:
             self.bg = pygame.image.load('bg.jpg')
         except pygame.error:
@@ -238,11 +239,10 @@ class Opening:
             if self.bar == 0:
                 self.music.song()
 
-            for note in self.music.notes[self.bar]:
-                if note.play:
-                    note.sound.play()
+            if self.bar % 2 == 0:
+                self.music.seq[self.bar // 2].sound.play()
 
-            self.bar = (self.bar + 1) % 16
+            self.bar = (self.bar + 1) % 32
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
