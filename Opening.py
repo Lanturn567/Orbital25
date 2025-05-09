@@ -230,7 +230,6 @@ class Opening:
             Star.init_images(STAR_PATHS)
             Comet.init_images(COMET_PATHS)
             self.first = False
-            self.music.song()
 
         while self.running:
             pygame.time.delay(100)
