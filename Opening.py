@@ -8,6 +8,8 @@ MAX_X, MAX_Y = 740, 493
 ASSET_SIZE = 16
 COMET_PATHS = ["comet1.jpg"]
 STAR_PATHS = ["star1.png"]
+VOL_BUTTONS = ["NoMute.png", "Mute.png"]
+
 
 class BGAsset:
     def __init__(self):
@@ -33,6 +35,7 @@ class BGAsset:
 
     def render(self, screen):
         screen.blit(self.images[self.curr_img], (self.x, self.y))
+
 
 class Star(BGAsset):
     images = []
@@ -63,6 +66,7 @@ class Star(BGAsset):
         if not success:
             Star.count -= 1
         return success
+
 
 class Comet(BGAsset):
     images = []
@@ -99,6 +103,7 @@ class Comet(BGAsset):
             Comet.count -= 1
         return success
 
+
 class Button:
     def __init__(self, x, y, width, height, text, color, hover_color, text_color, action=None):
         self.rect = pygame.Rect(x, y, width, height)
@@ -108,11 +113,11 @@ class Button:
         self.text_color = text_color
         self.action = action
         self.is_hovered = False
-        self.font = pygame.font.SysFont('Arial', 24, bold=True)
+        self.font = pygame.font.SysFont('aquakana', 24, italic=True)
         self.shadow_offset = 3
-        self.click_offset = 1
+        self.click_offset = 5
         self.is_clicked = False
-        self.glow_alpha = 0
+        self.glow_alpha = 10
         self.glow_surface = pygame.Surface((width + 20, height + 20), pygame.SRCALPHA)
 
     def draw(self, surface):
@@ -177,7 +182,60 @@ class Button:
 
         return False
 
-def make_buttons():
+
+class VolumeButton:
+    images = []
+    volX = MAX_X - 50
+    volY = MAX_Y - 50
+    off = False
+
+    @classmethod
+    def init_images(cls, paths):
+        cls.images = []
+        for path in paths:
+            try:
+                img = pygame.image.load(path)
+                img = pygame.transform.scale(img, (32, 32))  # Scale to appropriate size
+                cls.images.append(img)
+            except pygame.error:
+                print(f"Image not found: {path}")
+                surf = pygame.Surface((32, 32))
+                surf.fill((255, 255, 255))
+                cls.images.append(surf)
+
+    def __init__(self, opening):
+        self.opening = opening
+        self.current_img = 0
+        self.rect = pygame.Rect(self.volX, self.volY, 32, 32)
+        self.is_clicked = False
+
+    def draw(self, surface):
+        # Draw the current volume image
+        surface.blit(self.images[self.current_img], (self.volX, self.volY))
+
+    def check_hover(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                self.is_clicked = True
+                return False
+
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.rect.collidepoint(event.pos) and self.is_clicked:
+                self.is_clicked = False
+                self.toggle_volume()
+                return True
+            self.is_clicked = False
+        return False
+
+    def toggle_volume(self):
+        self.opening.muted = not self.opening.muted
+        self.current_img = 1 if self.opening.muted else 0
+
+
+def make_buttons(opening):
     def start_game():
         print("Game started!")
 
@@ -196,9 +254,11 @@ def make_buttons():
         Button(MAX_X//2 - 125, MAX_Y//2 - 60, 250, 60, "START GAME",
                start_color, start_hover, (240, 240, 240), start_game),
         Button(MAX_X//2 - 125, MAX_Y//2 + 20, 250, 60, "QUIT",
-               quit_color, quit_hover, (240, 240, 240), quit_game)
+               quit_color, quit_hover, (240, 240, 240), quit_game),
+        VolumeButton(opening)
     ]
     return buttons
+
 
 class Opening:
     def __init__(self):
@@ -215,7 +275,8 @@ class Opening:
         self.comets = []
         self.stars = []
 
-        self.buttons = make_buttons()
+        self.muted = False  # Initialize muted state
+        self.buttons = make_buttons(self)
         self.current_button = 0
         self.running = True
         self.first = True
@@ -223,25 +284,25 @@ class Opening:
         self.music = ToneMatrix.ToneMatrix()
         self.bar = 0
 
-
-
     def run(self):
         if self.first:
             Star.init_images(STAR_PATHS)
             Comet.init_images(COMET_PATHS)
+            VolumeButton.init_images(VOL_BUTTONS)
             self.first = False
 
         while self.running:
             pygame.time.delay(100)
             mouse_pos = pygame.mouse.get_pos()
 
-            if self.bar == 0:
-                self.music.song()
+            if not self.muted:
+                if self.bar == 0:
+                    self.music.song()
 
-            if self.bar % 2 == 0:
-                self.music.seq[self.bar // 2].sound.play()
+                if self.bar % 2 == 0 and self.music.seq[self.bar // 2] != None:
+                    self.music.seq[self.bar // 2].sound.play()
 
-            self.bar = (self.bar + 1) % 32
+                self.bar = (self.bar + 1) % 32
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -260,8 +321,9 @@ class Opening:
 
             # Update button hover states
             for i, button in enumerate(self.buttons):
-                button.check_hover(mouse_pos)
-                if i == self.current_button:
+                if hasattr(button, 'check_hover'):
+                    button.check_hover(mouse_pos)
+                if i == self.current_button and hasattr(button, 'is_hovered'):
                     button.is_hovered = True
 
             # Randomly create stars and comets
@@ -293,6 +355,7 @@ class Opening:
             button.draw(self.screen)
 
         pygame.display.flip()
+
 
 if __name__ == "__main__":
     game = Opening()
