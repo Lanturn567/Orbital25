@@ -1,5 +1,7 @@
 import random
 import math
+import Item
+import Move
 
 NO_EFFECT = 0
 NOT_EFFECTIVE = 0.5
@@ -96,7 +98,7 @@ class Pokemon:
         self.name = name #nickname if None, use Species name
         self.moves = moves #list of Moves
         self.dead = False
-        self.status = "" #poison, para, slp, freeze, burn
+        self.status = "" #poison, para, slp, freeze, burn, infat
         self.exp = 0
         self.type = type #max 1 type for now
 
@@ -106,7 +108,7 @@ class Pokemon:
 
         if self.status == "sleep" or self.status == "freeze":
             return
-        elif self.status == "para" and random.randint(0, 100) < 50:
+        elif (self.status == "para" or self.status == "infatuated") and random.randint(0, 100) < 50:
             return
 
         move = self.moves[moveIndex]
@@ -160,6 +162,21 @@ class Pokemon:
             return NORMAL
 
         return Pokemon.typeWeb[move_type][pokemon_type]
+
+    #at end of turn update status
+    def status(self):
+        if self.status == "poison":
+            damage(self.maxHp // 10)
+        elif self.status == "burn":
+            damage(self.maxHp // 16)
+        elif (self.status == "freeze" or self.status == "sleep") and random.randint(0, 100) < 30:
+            self.status = ""
+        elif self.status == "infatuated" and random.randint(0, 100) < 20:
+            self.status = ""
+        else:
+            pass
+
+
 
 
 

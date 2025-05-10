@@ -210,7 +210,7 @@ class Opening:
         self.initialize_assets()
         self.create_buttons()
         self.title = Title()
-        self.player = Player.Player()
+        self.player = Player.OpeningPlayer()
 
         self.opening = True
 
@@ -221,7 +221,7 @@ class Opening:
         Button.init_images(MAIN_BUTTON_PATHS)
         VolumeButton.init_images(VOL_BUTTON_PATHS)
         Title.init_images()
-        Player.Player.init_images()
+        Player.OpeningPlayer.init_images()
 
     def create_buttons(self):
         """Create all UI buttons"""
