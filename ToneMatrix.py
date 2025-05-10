@@ -10,12 +10,20 @@ class ToneMatrix:
 
         self.seq = []
         for i in range(16):
-            self.seq.append(self.notes[random.randint(0, 15)])
+            next = random.randint(-7, 15)
+            if next >= 0:
+                self.seq.append(self.notes[next])
+            else:
+                self.seq.append(None)
 
     def song(self):
 
         for i in range(16):
-            self.seq[i] = self.notes[random.randint(0, 15)]
+            next = random.randint(-7, 15)
+            if next >= 0:
+                self.seq[i] = self.notes[next]
+            else:
+                self.seq[i] = None
 
 
 
