@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 import pygame
 import random
 import sys
@@ -8,10 +10,14 @@ import LevelOne
 # Constants
 MAX_X, MAX_Y = 740, 493
 ASSET_SIZE = 16
+PHASE_CHANGE_DELAY = 3
+STARTING_PHASE, LOADING_PHASE, END_PHASE = 0, 1, 2
 COMET_PATHS = ["comet1.jpg"]
 STAR_PATHS = ["star1.png"]
-VOL_BUTTON_PATHS = ["NoMute.png", "Mute.png"]
-MAIN_BUTTON_PATHS = ["Start.png", "Quit.png"]
+VOL_BUTTON_PATHS = ["./Buttons/NoMute.png", "./Buttons/Mute.png"]
+MAIN_BUTTON_PATHS = ["./Buttons/Start.png", "./Buttons/Quit.png",
+                     "./Buttons/NewGame.png", "./Buttons/LoadGame.png",
+                     "./Buttons/Back.png"]
 
 
 class BGAsset:
@@ -137,7 +143,7 @@ class Button:
         self.is_hovered = self.rect.collidepoint(mouse_pos)
         return self.is_hovered
 
-    def handle_event(self, event, game):
+    def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.is_hovered:
                 self.is_clicked = True
@@ -146,7 +152,7 @@ class Button:
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.is_hovered and self.is_clicked and self.action:
                 self.is_clicked = False
-                self.action(game)
+                self.action()
                 return True
             self.is_clicked = False
         return False
@@ -159,7 +165,7 @@ class VolumeButton(Button):
         self.opening = opening
         self.update_image()
 
-    def toggle_volume(self, game):
+    def toggle_volume(self):
         self.opening.muted = not self.opening.muted
         self.update_image()
 
@@ -187,6 +193,7 @@ class Title:
 
 
 class Opening:
+
     """Main game opening screen"""
     def __init__(self):
         pygame.init()
@@ -208,11 +215,15 @@ class Opening:
         self.bar = 0
 
         self.initialize_assets()
-        self.create_buttons()
+        self.create_buttons(STARTING_PHASE)
         self.title = Title()
         self.player = Player.OpeningPlayer()
 
         self.opening = True
+        self.currPhase = STARTING_PHASE
+        self.prevPhase = STARTING_PHASE
+        self.changingPhase = False
+        self.phaseChangeDelay = 0
 
     def initialize_assets(self):
         """Initialize all game assets"""
@@ -223,21 +234,38 @@ class Opening:
         Title.init_images()
         Player.OpeningPlayer.init_images()
 
-    def create_buttons(self):
+    def create_buttons(self, phase):
         """Create all UI buttons"""
-        def start_game(game):
+        def start_game():
             print("Game started!")
-            game.opening = False
+            self.opening = False
 
-        def quit_game(game):
+        def quit_game():
             pygame.quit()
             sys.exit()
 
-        self.buttons = [
-            Button(MAX_X//2 - 125, MAX_Y - 300, 250, 60, 0, start_game),
-            Button(MAX_X//2 - 125, MAX_Y - 210, 250, 60, 1, quit_game),
-            VolumeButton(MAX_X - 50, MAX_Y - 50, self)
-        ]
+        def select_phase():
+            print("Select Option!")
+            self.changingPhase = True
+
+        def load_game():
+            print("Loading Save...")
+
+        def back_to_start():
+            print("Going Back...")
+            self.changingPhase = True
+
+        if phase == 0:
+            self.buttons = [Button(MAX_X//2 - 125, MAX_Y - 300, 250, 60, 0, select_phase),
+                            Button(MAX_X//2 - 125, MAX_Y - 210, 250, 60, 1, quit_game),
+                            VolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        elif phase == 1:
+            self.buttons = [VolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        elif phase == 2:
+            self.buttons = [Button(MAX_X//2 - 125, MAX_Y - 300, 250, 60, 2, start_game),
+                            Button(MAX_X//2 - 125, MAX_Y - 210, 250, 60, 3, load_game),
+                            Button(MAX_X//2 + 160, MAX_Y - 150, 100, 60, 4, back_to_start),
+                            VolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
     def run(self):
         """Main game loop"""
@@ -251,7 +279,7 @@ class Opening:
             pygame.quit()
         else:
             nextStage = LevelOne.LevelOne(self)
-            nextStage.run()
+            return nextStage
 
     def handle_events(self):
         """Handle all pygame events"""
@@ -267,7 +295,7 @@ class Opening:
 
             # Handle button events
             for button in self.buttons:
-                if button.handle_event(event, self):
+                if button.handle_event(event):
                     break  # If a button was clicked, don't process other buttons
 
     def update_game_state(self):
@@ -292,6 +320,21 @@ class Opening:
                 self.music.seq[self.bar // 2].sound.play()
 
             self.bar = (self.bar + 1) % 32
+
+        # Phase changing
+        if self.changingPhase and self.phaseChangeDelay >= PHASE_CHANGE_DELAY and self.currPhase == LOADING_PHASE:
+            nextPhase = END_PHASE if self.prevPhase == STARTING_PHASE else STARTING_PHASE
+            self.create_buttons(nextPhase)
+            self.phaseChangeDelay = 0
+            self.changingPhase = False
+            self.currPhase = nextPhase
+            self.prevPhase = nextPhase
+        elif self.changingPhase:
+            if self.phaseChangeDelay == 0:
+                self.create_buttons(LOADING_PHASE)
+            self.currPhase = LOADING_PHASE
+            self.phaseChangeDelay += 1
+
 
         #update player
         keys = pygame.key.get_pressed()
@@ -339,4 +382,10 @@ class Opening:
 
 if __name__ == "__main__":
     game = Opening()
-    game.run()
+    nextStage = game.run()
+    if nextStage is not None:
+        nextStage.run()
+    else:
+        pygame.quit()
+        sys.exit()
+
