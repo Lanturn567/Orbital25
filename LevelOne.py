@@ -109,6 +109,7 @@ class LevelOneVolumeButton(Opening.Button):
 
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+        TextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
         self.playing = not self.playing
         self.update_image()
 
