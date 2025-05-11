@@ -61,7 +61,7 @@ class LevelOne:
     def init_assets(self):
         for i in range(BACKGROUND_FRAMES):
             try:
-                image = pygame.image.load("../BGL1/BgL1-" + str(i + 1) + ".png")
+                image = pygame.image.load("./BGL1/BgL1-" + str(i + 1) + ".png")
             except FileNotFoundError:
                 image = pygame.Surface((MAX_X, MAX_Y))
                 image.fill((0, 0, 0))
