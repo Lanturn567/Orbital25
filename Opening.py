@@ -7,6 +7,7 @@ import ToneMatrix
 import Player
 import LevelOne
 
+
 # Constants
 MAX_X, MAX_Y = 740, 493
 ASSET_SIZE = 16
@@ -262,7 +263,6 @@ class Opening:
             print("Going Back...")
             self.changingPhase = True
 
-        #TELL ME IF CHANGE CODE HERE NEED TO CHANGE elseWHere
         if phase == 0:
             self.buttons = [Button(MAX_X//2 - 125, MAX_Y - 300, 250, 60, 0, select_phase),
                             Button(MAX_X//2 - 125, MAX_Y - 210, 250, 60, 1, quit_game),
