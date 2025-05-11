@@ -17,12 +17,12 @@ BLOCKS_PER_FADE = 30
 COLOR_CHANGE_PER_FADE = 15
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 STARTING_PHASE, LOADING_PHASE, END_PHASE, FADE_OUT = 0, 1, 2, 3
-COMET_PATHS = ["comet1.jpg"]
-STAR_PATHS = ["star1.png"]
-VOL_BUTTON_PATHS = ["./Buttons/NoMute.png", "./Buttons/Mute.png"]
-MAIN_BUTTON_PATHS = ["./Buttons/Start.png", "./Buttons/Quit.png",
-                     "./Buttons/NewGame.png", "./Buttons/LoadGame.png",
-                     "./Buttons/Back.png"]
+COMET_PATHS = ["./Assets/comet1.png"]
+STAR_PATHS = ["./Assets/star1.png"]
+VOL_BUTTON_PATHS = ["./UI/Buttons/NoMute.png", "./UI/Buttons/Mute.png"]
+MAIN_BUTTON_PATHS = ["./UI/Buttons/Start.png", "./UI/Buttons/Quit.png",
+                     "./UI/Buttons/NewGame.png", "./UI/Buttons/LoadGame.png",
+                     "./UI/Buttons/Back.png"]
 
 
 class BGAsset:
@@ -206,7 +206,7 @@ class Opening:
         pygame.display.set_caption("First Game")
 
         try:
-            self.bg = pygame.image.load('bg.jpg')
+            self.bg = pygame.image.load('Assets/bg.jpg')
         except pygame.error:
             self.bg = pygame.Surface((MAX_X, MAX_Y))
             self.bg.fill((0, 0, 30))
