@@ -10,9 +10,10 @@ import LevelOne
 # Constants
 MAX_X, MAX_Y = 740, 493
 ASSET_SIZE = 16
-PHASE_CHANGE_DELAY = 2
+GAME_DELAY = 100
+PHASE_CHANGE_DELAY, TRANSITION_DELAY = 2, 8 * GAME_DELAY
 BLOCKS_PER_FADE = 30
-COLOR_CHANGE_PER_FADE = 10
+COLOR_CHANGE_PER_FADE = 15
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 STARTING_PHASE, LOADING_PHASE, END_PHASE, FADE_OUT = 0, 1, 2, 3
 COMET_PATHS = ["comet1.jpg"]
@@ -261,6 +262,7 @@ class Opening:
             print("Going Back...")
             self.changingPhase = True
 
+        #TELL ME IF CHANGE CODE HERE NEED TO CHANGE elseWHere
         if phase == 0:
             self.buttons = [Button(MAX_X//2 - 125, MAX_Y - 300, 250, 60, 0, select_phase),
                             Button(MAX_X//2 - 125, MAX_Y - 210, 250, 60, 1, quit_game),
@@ -276,15 +278,16 @@ class Opening:
     def run(self):
         """Main game loop"""
         while self.running and self.opening:
-            pygame.time.delay(100)
+            pygame.time.delay(GAME_DELAY)
             self.handle_events()
             self.update_game_state()
             self.redraw()
 
+        pygame.time.delay(TRANSITION_DELAY)
         if not self.running:
             pygame.quit()
         else:
-            nextStage = LevelOne.LevelOne(self.screen)
+            nextStage = LevelOne.LevelOne(self)
             return nextStage
 
     def handle_events(self):
@@ -384,11 +387,35 @@ class Opening:
             button.draw(self.screen)
 
         if self.currPhase == FADE_OUT and self.fadeCount > TIMESFADE:
-            self.opening = False
-        elif self.currPhase == FADE_OUT and self.fadeCount >= PHASE_CHANGE_DELAY:
+            # Create a surface with per-pixel alpha
+            fade_surface = pygame.Surface((MAX_X, BLOCKS_PER_FADE * self.fadeCount), pygame.SRCALPHA)
+
+            # Calculate the color with alpha if needed (example assumes RGB, modify if you want alpha)
             diff = self.fadeCount * COLOR_CHANGE_PER_FADE
             colors = (max(0, 230 - diff), max(215 - diff, 0), max(0, 255 - diff))
-            pygame.draw.rect(self.screen, colors, (0, 0, MAX_X, BLOCKS_PER_FADE * self.fadeCount), 0)
+
+            # Draw on the surface
+            pygame.draw.rect(fade_surface, colors, (0, 0, MAX_X, BLOCKS_PER_FADE * self.fadeCount), 0)
+
+            # Blit the surface to the screen
+            self.screen.blit(fade_surface, (0, 0))
+
+            self.fadeCount += 1
+            self.opening = False
+        elif self.currPhase == FADE_OUT and self.fadeCount >= PHASE_CHANGE_DELAY:
+            # Create a surface with per-pixel alpha
+            fade_surface = pygame.Surface((MAX_X, BLOCKS_PER_FADE * self.fadeCount), pygame.SRCALPHA)
+
+            # Calculate the color with alpha if needed (example assumes RGB, modify if you want alpha)
+            diff = self.fadeCount * COLOR_CHANGE_PER_FADE
+            colors = (max(0, 230 - diff), max(215 - diff, 0), max(0, 255 - diff))
+
+            # Draw on the surface
+            pygame.draw.rect(fade_surface, colors, (0, 0, MAX_X, BLOCKS_PER_FADE * (self.fadeCount - PHASE_CHANGE_DELAY)), 0)
+
+            # Blit the surface to the screen
+            self.screen.blit(fade_surface, (0, 0))
+
             self.fadeCount += 1
         elif self.currPhase == FADE_OUT:
             self.fadeCount += 1
