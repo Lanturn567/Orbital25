@@ -10,8 +10,11 @@ import LevelOne
 # Constants
 MAX_X, MAX_Y = 740, 493
 ASSET_SIZE = 16
-PHASE_CHANGE_DELAY = 3
-STARTING_PHASE, LOADING_PHASE, END_PHASE = 0, 1, 2
+PHASE_CHANGE_DELAY = 2
+BLOCKS_PER_FADE = 30
+COLOR_CHANGE_PER_FADE = 10
+TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
+STARTING_PHASE, LOADING_PHASE, END_PHASE, FADE_OUT = 0, 1, 2, 3
 COMET_PATHS = ["comet1.jpg"]
 STAR_PATHS = ["star1.png"]
 VOL_BUTTON_PATHS = ["./Buttons/NoMute.png", "./Buttons/Mute.png"]
@@ -225,6 +228,9 @@ class Opening:
         self.changingPhase = False
         self.phaseChangeDelay = 0
 
+        self.fadeCount = 0
+
+
     def initialize_assets(self):
         """Initialize all game assets"""
         Star.init_images(STAR_PATHS)
@@ -238,7 +244,7 @@ class Opening:
         """Create all UI buttons"""
         def start_game():
             print("Game started!")
-            self.opening = False
+            self.currPhase = FADE_OUT
 
         def quit_game():
             pygame.quit()
@@ -278,7 +284,7 @@ class Opening:
         if not self.running:
             pygame.quit()
         else:
-            nextStage = LevelOne.LevelOne(self)
+            nextStage = LevelOne.LevelOne(self.screen)
             return nextStage
 
     def handle_events(self):
@@ -377,15 +383,29 @@ class Opening:
         for button in self.buttons:
             button.draw(self.screen)
 
+        if self.currPhase == FADE_OUT and self.fadeCount > TIMESFADE:
+            self.opening = False
+        elif self.currPhase == FADE_OUT and self.fadeCount >= PHASE_CHANGE_DELAY:
+            diff = self.fadeCount * COLOR_CHANGE_PER_FADE
+            colors = (max(0, 230 - diff), max(215 - diff, 0), max(0, 255 - diff))
+            pygame.draw.rect(self.screen, colors, (0, 0, MAX_X, BLOCKS_PER_FADE * self.fadeCount), 0)
+            self.fadeCount += 1
+        elif self.currPhase == FADE_OUT:
+            self.fadeCount += 1
+
+
         pygame.display.flip()
 
+def checkExit(nextStage):
+    if nextStage is not None:
+        return nextStage.run()
+    else:
+        pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     game = Opening()
     nextStage = game.run()
-    if nextStage is not None:
-        nextStage.run()
-    else:
-        pygame.quit()
-        sys.exit()
+    while True:
+        nextStage = checkExit(nextStage)
 
