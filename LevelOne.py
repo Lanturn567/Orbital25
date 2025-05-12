@@ -5,6 +5,7 @@ import LevelTwo
 
 MAX_X, MAX_Y = 740, 493
 BACKGROUND_FRAMES = 5
+BGPATHS = ["./BGL1/BgL1-", ".png"]
 FRAME_DELAY, GAME_DELAY, FADE_DELAY = 15, 100, 2
 DELAY_AFTER_CLICK = 3
 BLOCKS_PER_FADE = 30
@@ -150,7 +151,7 @@ class LevelOne:
     def init_assets(self):
         for i in range(BACKGROUND_FRAMES):
             try:
-                image = pygame.image.load("../BGL1/BgL1-" + str(i + 1) + ".png")
+                image = pygame.image.load(BGPATHS[0] + str(i + 1) + BGPATHS[1])
             except FileNotFoundError:
                 image = pygame.Surface((MAX_X, MAX_Y))
                 image.fill((0, 0, 0))

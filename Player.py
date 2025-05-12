@@ -5,12 +5,12 @@ MAX_X, MAX_Y = 740, 493
 class OpeningPlayer:
     images = []
     numFrames = 3
-    playerWidth = 64
-    playerHeight = 64
+    playerWidth = 48
+    playerHeight = 48
     playerSpeed = 10
-    jumpFrames = 10
+    jumpFrames = 8
     faceForward = 14
-    yboundary = 100
+    yboundary = 80
 
     @classmethod
     def init_images(cls):

@@ -10,7 +10,7 @@ import LevelOne
 
 # Constants
 MAX_X, MAX_Y = 740, 493
-ASSET_SIZE = 16
+ASSET_SIZE = 96
 GAME_DELAY = 100
 PHASE_CHANGE_DELAY, TRANSITION_DELAY = 2, 8 * GAME_DELAY
 BLOCKS_PER_FADE = 30
@@ -45,10 +45,10 @@ class BGAsset:
                 cls.images.append(surf)
 
     def __init__(self):
-        self.x = random.randint(40, MAX_X * 2)
+        self.x = random.randint(40, MAX_X * 3 // 2)
         self.y = 0
-        self.dx = random.randint(5, 25)
-        self.dy = random.randint(5, 25)
+        self.dx = 10
+        self.dy = 12
         self.curr_img = 0
 
     def update_position(self):
@@ -88,16 +88,28 @@ class Star(BGAsset):
     default_color = (255, 255, 255)  # White
     max_count = 6
 
+    @classmethod
+    def init_images(cls, paths):
+        super().init_images(paths)
+        cls.images = [pygame.transform.rotate(image, 14) for image in cls.images]
+
 
 class Comet(BGAsset):
     """Comet background assets"""
     default_color = (255, 0, 0)  # Red
-    max_count = 2
+    max_count = 1
+
+    @classmethod
+    def init_images(cls, paths):
+        super().init_images(paths)
+        cls.images = [pygame.transform.rotate(image, -30) for image in cls.images]
+
 
     def __init__(self):
         super().__init__()
-        self.dx = random.randint(10, 50)
-        self.dy = random.randint(10, 50)
+        self.x = MAX_X + 40
+        self.dx = random.randint(2, 4)
+        self.dy = 0.6
 
 
 class Button:
@@ -310,7 +322,7 @@ class Opening:
     def update_game_state(self):
         """Update game objects and state"""
         # Randomly create stars and comets
-        if random.randint(0, 100) < 11:
+        if random.randint(0, 100) < 7:
             star = Star.create()
             if star:
                 self.stars.append(star)
