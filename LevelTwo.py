@@ -81,6 +81,7 @@ class LevelTwo:
         self.rect = self.screen.get_rect()
         self.fadeInSurface = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
+    #To instantiate object layers sans Players:
     def init_assets(self, start_pos):
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -90,7 +91,15 @@ class LevelTwo:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Tile(pos=pos, surf=surf, groups=self.sprite_group)
 
-        for obj in LevelTwo.tmx.get_layer_by_name("Objects"):
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Tile(pos=pos, surf=surf, groups=self.sprite_group)
+
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Water").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Tile(pos=pos, surf=surf, groups=self.sprite_group)
+
+        for obj in LevelTwo.tmx.get_layer_by_name("Players"):
             if obj.properties["pos"] == start_pos:
                 self.player = MC((obj.x, obj.y), self.sprite_group)
 
