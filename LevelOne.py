@@ -26,6 +26,7 @@ ARROW_DIMENSIONS = (16, 16)
 ALPHA_CHANGE = 20
 MAX_ALPHA = 255
 FINAL_DELAY = 20
+START_POS = "begin"
 
 
 class TextBox(Opening.Button):
@@ -250,5 +251,5 @@ class LevelOne:
             pygame.quit()
             sys.exit()
         else:
-            return LevelTwo.LevelTwo(self.screen)
+            return LevelTwo.LevelTwo(self.screen, START_POS)
 

@@ -18,20 +18,20 @@ class OpeningPlayer:
 
         # Left movement spritesheet slicing
         left_sheet = pygame.image.load("./Player/walkLeft.png").convert_alpha()
-        frame_width = left_sheet.get_width() // 4
+        frame_width = left_sheet.get_width() // 3
         frame_height = left_sheet.get_height()
         left = []
-        for i in range(4):
+        for i in range(3):
             frame = left_sheet.subsurface(pygame.Rect(i * frame_width, 0, frame_width, frame_height)).copy()
             left.append(frame)
         cls.images.append(left)
 
         # Right movement spritesheet slicing
         right_sheet = pygame.image.load("./Player/walkRight.png").convert_alpha()
-        frame_width = right_sheet.get_width() // 4
+        frame_width = right_sheet.get_width() // 3
         frame_height = right_sheet.get_height()
         right = []
-        for i in range(4):
+        for i in range(3):
             frame = right_sheet.subsurface(pygame.Rect(i * frame_width, 0, frame_width, frame_height)).copy()
             right.append(frame)
         cls.images.append(right)
