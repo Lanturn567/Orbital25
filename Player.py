@@ -4,37 +4,27 @@ MAX_X, MAX_Y = 740, 493
 
 class OpeningPlayer:
     images = []
-    numFrames = 3
-    playerWidth = 48
-    playerHeight = 48
+    numFrames = 4
+    playerWidth = 32
+    playerHeight = 64
     playerSpeed = 10
     jumpFrames = 8
     faceForward = 14
-    yboundary = 80
+    yboundary = 100
 
     @classmethod
     def init_images(cls):
-        cls.images.append([pygame.image.load("./Player/standing.png")])
 
-        # Left movement spritesheet slicing
-        left_sheet = pygame.image.load("./Player/walkLeft.png").convert_alpha()
-        frame_width = left_sheet.get_width() // 3
-        frame_height = left_sheet.get_height()
-        left = []
-        for i in range(3):
-            frame = left_sheet.subsurface(pygame.Rect(i * frame_width, 0, frame_width, frame_height)).copy()
-            left.append(frame)
-        cls.images.append(left)
+        for dir in ["Front", "Left", "Right", "Back"]:
+            sheet = pygame.image.load("./Player/walk" + dir + ".png").convert_alpha()
+            frame_width = sheet.get_width() // cls.numFrames
+            frame_height = sheet.get_height()
+            curr = []
+            for i in range(cls.numFrames):
+                frame = sheet.subsurface(pygame.Rect(i * frame_width, 0, frame_width, frame_height)).copy()
+                curr.append(frame)
+            cls.images.append(curr)
 
-        # Right movement spritesheet slicing
-        right_sheet = pygame.image.load("./Player/walkRight.png").convert_alpha()
-        frame_width = right_sheet.get_width() // 3
-        frame_height = right_sheet.get_height()
-        right = []
-        for i in range(3):
-            frame = right_sheet.subsurface(pygame.Rect(i * frame_width, 0, frame_width, frame_height)).copy()
-            right.append(frame)
-        cls.images.append(right)
 
     def __init__(self):
         self.x = MAX_X // 2

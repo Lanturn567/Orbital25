@@ -10,6 +10,7 @@ import LevelOne
 
 # Constants
 MAX_X, MAX_Y = 740, 493
+MIN_SPEED, MAX_SPEED = 10, 20
 ASSET_SIZE = 96
 GAME_DELAY = 100
 PHASE_CHANGE_DELAY, TRANSITION_DELAY = 2, 8 * GAME_DELAY
@@ -360,6 +361,12 @@ class Opening:
         #update player
         keys = pygame.key.get_pressed()
         moved = False
+
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            self.player.speed = min(self.player.speed + 1, MAX_SPEED)
+        else:
+            self.player.speed = max(self.player.speed - 1, MIN_SPEED)
+
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.player.move(1)
             moved = True
