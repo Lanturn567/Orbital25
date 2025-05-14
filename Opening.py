@@ -5,7 +5,6 @@ import random
 import sys
 import ToneMatrix
 import Player
-import LevelOne
 
 
 # Constants
@@ -291,6 +290,7 @@ class Opening:
                             VolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
     def run(self):
+        import LevelOne
         """Main game loop"""
         while self.running and self.opening:
             pygame.time.delay(GAME_DELAY)
@@ -302,7 +302,7 @@ class Opening:
         if not self.running:
             pygame.quit()
         else:
-            nextStage = LevelOne.LevelOne(self)
+            nextStage = LevelOne.LevelOne(self.screen)
             return nextStage
 
     def handle_events(self):

@@ -1,7 +1,6 @@
 import pygame
 import sys
 import Opening
-import LevelTwo
 
 MAX_X, MAX_Y = 740, 493
 BACKGROUND_FRAMES = 5
@@ -11,8 +10,6 @@ DELAY_AFTER_CLICK = 3
 BLOCKS_PER_FADE = 30
 COLOR_CHANGE_PER_FADE = 15
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
-CHAR_NORMAL, CHAR_FAST = 5, 20
-NUMCHARS = 28
 VOL_BUTTON_PATHS = ["./UI/Buttons/NoMute.png", "./UI/Buttons/Mute.png"]
 VOL_BUTTON_DIMENSIONS = (32, 32)
 INTROPATH = "./music/LevelOneIntro.mp3"
@@ -65,7 +62,7 @@ class TextBox(Opening.Button):
         # Render the text (text, antialias, color)
         text_surface = font.render(self.currString, True, (255, 255, 255))  # White text
         surface.blit(text_surface, text_surface.get_rect(center=(MAX_X // 2 - 15, self.rect.y + TEXT_BOX_DIMENSIONS[1] // 2)))
-        # Center of the screen
+    # Center of the screen
 
     def textBoxClick(self):
         def nextBox():
@@ -122,8 +119,8 @@ class LevelOne:
     images = []
     songs = []
 
-    def __init__(self, game):
-        self.screen = game.screen
+    def __init__(self, screen):
+        self.screen = screen
         self.running = True
         self.nextStage = False
 
@@ -139,7 +136,8 @@ class LevelOne:
         self.PNGdelay = 0
         self.fadeDelay = 0
 
-        self.buttons = [LevelOneVolumeButton(MAX_X - 50, MAX_Y - 50, game),
+        #BUTTON_POS
+        self.buttons = [LevelOneVolumeButton(MAX_X - 50, MAX_Y - 50, self),
                         TextBox(65, MAX_Y - 140, self)]
 
         self.textComplete = False
@@ -190,7 +188,6 @@ class LevelOne:
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
 
-
         self.buttons[TEXT_BUTTON].updateString()
         if self.isClicked:
             self.clickDelay = (self.clickDelay + 1) % DELAY_AFTER_CLICK
@@ -231,6 +228,7 @@ class LevelOne:
             self.finalDelay += 1
 
     def run(self):
+        import LevelTwo
 
         try:
             pygame.mixer.music.load(INTROPATH)
@@ -252,4 +250,12 @@ class LevelOne:
             sys.exit()
         else:
             return LevelTwo.LevelTwo(self.screen, START_POS)
+
+if __name__ == "__main__":
+    # Initialize pygame
+    pygame.init()
+    screen = pygame.display.set_mode((MAX_X, MAX_Y))
+    pygame.display.set_caption("Level 1")
+    game = LevelOne(screen)
+    nextStage = game.run()
 
