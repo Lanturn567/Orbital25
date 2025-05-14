@@ -53,7 +53,7 @@ class BGAsset:
         self.curr_img = 0
 
     def update_position(self):
-        if self.x < -ASSET_SIZE or self.y >= MAX_Y:
+        if self.x < -ASSET_SIZE * 3 or self.y >= MAX_Y:
             return False
 
         if self.y + self.dy > MAX_Y:
@@ -104,13 +104,15 @@ class Comet(BGAsset):
     def init_images(cls, paths):
         super().init_images(paths)
         cls.images = [pygame.transform.rotate(image, -30) for image in cls.images]
+        cls.images = [pygame.transform.scale(image, (ASSET_SIZE * 3, ASSET_SIZE * 3)) for image in cls.images]
 
 
     def __init__(self):
         super().__init__()
-        self.x = MAX_X + 40
-        self.dx = random.randint(2, 4)
-        self.dy = 0.6
+        self.x = MAX_X + 25
+        self.y = -25
+        self.dx = random.randint(1, 2)
+        self.dy = 0.3
 
 
 class Button:
