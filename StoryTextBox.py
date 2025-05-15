@@ -16,13 +16,16 @@ class StoryTextBox(Opening.Button):
 
     @classmethod
     def init__text(cls, path):
+        next = []
         with open(path, "r") as file:
             lines = file.readlines()
             for line in lines:
-                cls.text.append(line.strip())
+                next.append(line.strip())
+        cls.text = next
         cls.length = len(cls.text)
         cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)
         cls.clickSound.set_volume(GAME_VOLUME)
+
 
     def __init__(self, x, y, game):
         super().__init__(x, y, TEXT_BOX_DIMENSIONS[0], TEXT_BOX_DIMENSIONS[1], 0, self.textBoxClick)
@@ -113,3 +116,12 @@ class StoryTextBox(Opening.Button):
             self.currString += StoryTextBox.text[self.currLine][self.currChar]
             self.currChar += 1
             self.wrapped_lines = self.wrap_text(self.currString)
+
+    def reset(self):
+        self.currLine = 0
+        self.currChar = 0
+        self.currString = ""
+        self.currLineLength = len(StoryTextBox.text[self.currLine])
+        self.wrapped_lines = []
+        self.game.boxFinished = False
+        self.game.textComplete = False
