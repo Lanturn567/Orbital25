@@ -10,25 +10,37 @@ from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE
 # Constants
 TMX_PATH = "LevelTwo-TileMap.tmx"
 START_POS = "begin"
+DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 3
-MAX_SPEED = BLOCK_SIZE * 7 // 10
+PLAYER_SPEED = BLOCK_SIZE // 4
+MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
 LEVEL_TWO_MUSIC_PATH = "./music/LevelTwoBGM.mp3"
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 6
-WATER_PATHS = ["./Assets/Water1.png", "./Assets/Water2.png", "./Assets/Water3.png"]
-PLAYER_PATHS = ["./Player/walkFront.png", "./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkBack.png"]
+WATER_PATHS = ["./Assets/Water/Water01.png", "./Assets/Water/Water04.png", "./Assets/Water/Water31.png", "./Assets/Water/Water04.png"]
+PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
 POKEMON_PATHS = ["./Assets/poke.png"]  # Assuming single image for simplicity
+TREE_PATH = ["./Assets/Tree.png"]
+FURINA_PATHS = ["./Player/WalkLeftFurina.png", "./Player/WalkRightFurina.png"]
+FURINA_ROAD = [RIGHT, RIGHT, RIGHT, UP, RIGHT, UP, RIGHT, UP, RIGHT,
+               RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
+FURINA_SIZE = (48, 64)
+FURINA_GO_DELAY = 4
+FURINA_PROD_TEXT = "LevelTwoWarpingWithoutFurina.txt"
+FURINA_EVENT_PATH = "LevelTwoFurinaEvent.txt"
+INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
+
 GAME_VOLUME = 0.3
-GAME_DELAY = 100
-DOWN, LEFT, RIGHT, UP = 0, 1, 2, 3
+GAME_DELAY = 80
+ANIM_DELAY = 6
 FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 0.4
 FLOAT_LENGTH = BLOCK_SIZE
 DIST_FROM_PLAYER = BLOCK_SIZE * 15
 POKEMON_CRY = "./music/Poke.wav"
+POKEMON_SIZE = (64, 64)
 DELAY_AFTER_CLICK = 3
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 0, 1
@@ -73,16 +85,16 @@ class AllSprites(pygame.sprite.LayeredUpdates):
 
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, z=2):
+    def __init__(self, pos, groups, size, z=2):
         super().__init__(groups)
         self.z = z
         self.facing = DOWN
         self.currImage = 0
         self.x = pos[0]
         self.y = pos[1]
-        self.rect = pygame.Rect(0, 0, PLAYER_SIZE[0], PLAYER_SIZE[1])
+        self.rect = pygame.Rect(0, 0, size[0], size[1])
         self.rect.center = pos
-        self.hitbox = pygame.Rect(self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4, PLAYER_SIZE[0] // 2, PLAYER_SIZE[1] // 2)
+        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 4, size[0] // 2, size[1] // 2)
         self.y_sort = self.rect.centery
 
     def input(self):
@@ -95,16 +107,18 @@ class Entity(pygame.sprite.Sprite):
         self.input()
         self.move()
 
+    def collide(self):
+        pass
 
 class MC(Entity):
     ini = False
     assets = []
 
-    def __init__(self, pos, paths, group, collidable, game, z=2):
+    def __init__(self, pos, paths, group, collidable, game, size, z=2):
         if not MC.ini:
             MC.init_assets(paths)
             MC.ini = True
-        super().__init__(pos, group, z)
+        super().__init__(pos, group, size, z)
         self.game = game
         self.image = MC.assets[self.facing][self.currImage]
         self.moved = False
@@ -113,6 +127,8 @@ class MC(Entity):
         self.old_x = self.x
         self.old_y = self.y
         self.speed = PLAYER_SPEED
+        self.hitbox = pygame.Rect(self.x + size[0] * 15 // 32, self.y + size[1] * 15 // 32, size[0] // 8, size[1] // 8)
+
 
     @classmethod
     def init_assets(cls, paths):
@@ -145,7 +161,7 @@ class MC(Entity):
 
     def input(self):
         # Store previous position
-        if self.game.poke.ran and self.game.textComplete:
+        if self.game.poke.ran and self.game.textComplete and not self.game.inEvent:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
@@ -221,16 +237,17 @@ class MC(Entity):
 
 
 class Poke(Entity):
-    def __init__(self, pos, image_path, group, player, z=4):
-        super().__init__(pos, group, z)
+    def __init__(self, pos, image_path, group, size, game, z=4):
+        super().__init__(pos, group, size, z)
         self.ran = False
         self.floatStage = 0
         self.inc = True
+        self.game = game
 
         self.cry = pygame.mixer.Sound(POKEMON_CRY)
         self.cry.set_volume(GAME_VOLUME)
 
-        self.player = player
+        self.player = game.player
         self.follow_distance = BLOCK_SIZE * 2
         try:
             self.image = pygame.image.load(image_path)
@@ -239,7 +256,12 @@ class Poke(Entity):
             self.image.fill((255, 0, 0))  # Red as error indicator
         self.rect = self.image.get_rect(center=pos)
 
+        #Furina takes him away
+        self.bye = False
+
     def update(self):
+        if self.bye:
+            self.player = self.game.furina
         if self.ran:
             # Follow player with some delay
             target_x = self.player.x
@@ -253,8 +275,8 @@ class Poke(Entity):
 
             # Normalize and scale by follow distance
             if distance > self.follow_distance:
-                self.x += dx * 0.15
-                self.y += dy * 0.15
+                self.x += dx * 0.1
+                self.y += dy * 0.1
 
             # Update facing direction
             if abs(dx) > abs(dy):
@@ -275,6 +297,125 @@ class Poke(Entity):
                     self.ran = True
                     self.cry.play()
 
+class Furina(Entity):
+
+    ini = False
+    assets = []
+
+    def __init__(self, pos, paths, group, game, size, road, z=2):
+        if not Furina.ini:
+            Furina.init_assets(paths)
+            Furina.ini = True
+        super().__init__(pos, group, size, z)
+        self.game = game
+        self.facing = LEFT
+        self.image = Furina.assets[self.facing][self.currImage]
+        self.road = road
+        self.currentStep = 0
+        self.maxSteps = len(self.road)
+        self.box = pygame.Rect(self.rect.x - INTERACTABLE_BOUNDS[0], self.rect.y - INTERACTABLE_BOUNDS[1], self.rect.width + 2 * INTERACTABLE_BOUNDS[0], self.rect.height + 2 * INTERACTABLE_BOUNDS[1])
+
+        #GO event
+        self.eventDone = False
+        self.ticker = 0
+        self.inEvent = False
+        self.go = False
+
+    @classmethod
+    def init_assets(cls, paths):
+        for path in paths:
+            try:
+                surface = pygame.image.load(path)
+            except FileNotFoundError:
+                surface = pygame.Surface(PLAYER_SIZE)
+                surface.fill((255, 255, 255))
+
+            sheet_width, sheet_height = surface.get_size()
+            columns = sheet_width // FURINA_SIZE[0]
+            rows = sheet_height // FURINA_SIZE[1]
+
+            frames = []
+            for row in range(rows):
+                for col in range(columns):
+                    x = col * FURINA_SIZE[0]
+                    y = row * FURINA_SIZE[1]
+                    rect = pygame.Rect(x, y, FURINA_SIZE[0], FURINA_SIZE[1])
+                    frame = surface.subsurface(rect)
+                    frames.append(frame)
+
+            cls.assets.append(frames)
+
+        cls.leftFrames = len(cls.assets[LEFT])
+        cls.rightFrames = len(cls.assets[RIGHT])
+
+    def move(self):
+        # Store previous position
+        if self.go and self.currentStep < self.maxSteps:
+            self.game.poke.bye = True
+            down = self.road[self.currentStep] == DOWN
+            left = self.road[self.currentStep] == LEFT
+            right = self.road[self.currentStep] == RIGHT
+            up = self.road[self.currentStep] == UP
+
+
+            if left and not right:
+                self.x -= BLOCK_SIZE // FURINA_GO_DELAY
+                if self.facing == LEFT:
+                    self.currImage = (self.currImage + 1) % Furina.leftFrames
+                else:
+                    self.facing = LEFT
+                    self.currImage = 0
+
+            elif right and not left:
+                self.x += BLOCK_SIZE // FURINA_GO_DELAY
+                if self.facing == RIGHT:
+                    self.currImage = (self.currImage + 1) % Furina.rightFrames
+                else:
+                    self.facing = RIGHT
+                    self.currImage = 0
+
+            else:
+                self.y = self.y + BLOCK_SIZE // FURINA_GO_DELAY if down else self.y - BLOCK_SIZE // FURINA_GO_DELAY
+                if self.facing == RIGHT:
+                    self.currImage = (self.currImage + 1) % Furina.rightFrames
+                else:
+                    self.currImage = (self.currImage + 1) % Furina.leftFrames
+            self.currentStep = self.currentStep + 1 if self.ticker == FURINA_GO_DELAY else self.currentStep
+            self.ticker = 0 if self.ticker == FURINA_GO_DELAY else self.ticker + 1
+        elif self.go:
+            self.game.inEvent = False
+            self.game.met = True
+            self.kill()
+            self.game.poke.kill()
+        else:
+            pass
+
+
+    def collide(self):
+        keys = pygame.key.get_pressed()
+        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_e] and not self.eventDone:
+            self.eventDone = True
+            self.inEvent = True
+            self.game.inEvent = True
+            self.makeEvent()
+
+    def update(self):
+        # Update position
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
+
+        # Check for collisions
+        if self.inEvent and self.game.textComplete:
+            self.go = True
+
+        # Update sprite properties
+        self.move()
+        self.y_sort = self.rect.centery
+        self.image = Furina.assets[self.facing][self.currImage]
+
+    def makeEvent(self):
+        StoryTextBox.init__text(FURINA_EVENT_PATH)
+        self.game.buttons[TEXT_BUTTON].reset()
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
@@ -296,6 +437,7 @@ class AnimatedSprite(Sprite):
             AnimatedSprite.ini = True
         super().__init__(pos, AnimatedSprite.assets[0], groups, z)
         self.currImage = 0
+        self.delay = 0
 
     @classmethod
     def init_assets(cls, paths):
@@ -309,13 +451,19 @@ class AnimatedSprite(Sprite):
         cls.length = len(cls.assets)
 
     def update(self, *args, **kwargs):
-        self.currImage = (self.currImage + 1) % AnimatedSprite.length
-        self.image = AnimatedSprite.assets[self.currImage]
+        if self.delay > ANIM_DELAY:
+            self.delay = 0
+            self.currImage = (self.currImage + 1) % AnimatedSprite.length
+            self.image = AnimatedSprite.assets[self.currImage]
+        else:
+            self.delay += 1
+
+
 
 class Warp(Sprite):
 
-    def __init__(self, pos, stage, image, groups, game, z=2):
-        super().__init__(pos, image, groups, z=2)
+    def __init__(self, pos, stage, image, groups, game, z=1):
+        super().__init__(pos, image, groups, z)
         self.game = game
         self.stage = STAGES.get(stage)(game.screen)
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
@@ -323,6 +471,47 @@ class Warp(Sprite):
 
     def warp(self):
         self.game.nextStage = self.stage
+
+class EventWarp(Warp):
+
+    def __init__(self, pos, stage, image, groups, game, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, z)
+        self.cond = cond
+        self.eventDone = False
+
+
+    def warp(self):
+        if self.cond():
+            self.game.nextStage = self.stage
+        else:
+            self.makeEvent()
+
+    def makeEvent(self):
+        pass
+
+class FurinaWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, cond, z)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(FURINA_PROD_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.poke.cry.play()
+        self.game.player.x = self.rect.x
+        self.game.player.y = self.rect.y
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.x = self.rect.x - BLOCK_SIZE
+                self.game.player.facing = LEFT
+
+        self.game.updateEvent = checker
 
 class LevelTwo:
     tmx = load_pygame(TMX_PATH)
@@ -332,16 +521,22 @@ class LevelTwo:
         self.screen = screen
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
+        self.entities = pygame.sprite.Group()
         self.alpha = 255
         self.rect = self.screen.get_rect()
         self.fadeInSurface = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
         self.ticker = 0
 
+        self.met = False
         self.textComplete = False
         self.boxFinished = False
         self.isClicked = False
         self.clickDelay = 0
+
+        self.inEvent = False
+        self.updateEvent = None
+
 
         self.nextStage = None
         self.stageDone = False
@@ -362,7 +557,7 @@ class LevelTwo:
         # Player
         for obj in LevelTwo.tmx.get_layer_by_name("Players"):
             if obj.properties["pos"] == start_pos:
-                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, z=2)
+                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=2)
 
         # Grass tiles
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Grass").tiles():
@@ -370,15 +565,22 @@ class LevelTwo:
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
 
         # Trees
+        tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            tree = Sprite(pos=pos, image=tree_image, groups=(self.sprite_group, self.collide), z=2)
 
         # Warps
         for obj in LevelTwo.tmx.get_layer_by_name("Warps"):
-            Warp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
+            FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.met, z=1)
 
-        self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_path=POKEMON_PATHS[0], group=self.sprite_group, player=self.player, z=4)
+        self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_path=POKEMON_PATHS[0], group=self.sprite_group, game=self, size=POKEMON_SIZE, z=4)
+
+        #def __init__(self, pos, paths, group, game, road, z=2):
+
+        for obj in LevelTwo.tmx.get_layer_by_name("Trainers"):
+                if obj.name == "Furina":
+                    self.furina = Furina((obj.x + FURINA_SIZE[0] // 2, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=2)
 
     def fade(self):
         if not self.nextStage:
@@ -400,13 +602,15 @@ class LevelTwo:
 
     def update_game_state(self):
         #update player
+        keys = pygame.key.get_pressed()
+        for entity in self.entities:
+            entity.collide()
+
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
 
-        keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
-
 
         self.buttons[TEXT_BUTTON].updateString()
         if self.isClicked:
@@ -441,6 +645,9 @@ class LevelTwo:
                 if not self.textComplete or not isinstance(button, StoryTextBox):
                     if button.handle_event(event):
                         break  # If a button was clicked, don't process other buttons
+
+        if self.updateEvent:
+            self.updateEvent()
 
     def run(self):
         self.init_assets(self.start_pos)
