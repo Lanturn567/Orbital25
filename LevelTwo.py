@@ -5,7 +5,7 @@ from Home import Home
 from Mountain import Mountain
 from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
-from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE
+from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
 
 # Constants
 TMX_PATH = "LevelTwo-TileMap.tmx"
@@ -21,7 +21,7 @@ FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 6
 WATER_PATHS = ["./Assets/Water/Water01.png", "./Assets/Water/Water04.png", "./Assets/Water/Water31.png", "./Assets/Water/Water04.png"]
 PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
-POKEMON_PATHS = ["./Assets/poke.png"]  # Assuming single image for simplicity
+POKEMON_PATHS = ["./Assets/pokeL.png", "./Assets/pokeR.png"]  # Assuming single image for simplicity
 TREE_PATH = ["./Assets/Tree.png"]
 FURINA_PATHS = ["./Player/WalkLeftFurina.png", "./Player/WalkRightFurina.png"]
 FURINA_ROAD = [RIGHT, RIGHT, RIGHT, UP, RIGHT, UP, RIGHT, UP, RIGHT,
@@ -33,7 +33,7 @@ FURINA_EVENT_PATH = "LevelTwoFurinaEvent.txt"
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 GAME_VOLUME = 0.3
-GAME_DELAY = 80
+GAME_DELAY = 20
 ANIM_DELAY = 6
 FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 0.4
@@ -43,7 +43,7 @@ POKEMON_CRY = "./music/Poke.wav"
 POKEMON_SIZE = (64, 64)
 DELAY_AFTER_CLICK = 3
 TEXT_BOX_POS = (65, MAX_Y - 140)
-TEXT_BUTTON, VOLUME_BUTTON = 0, 1
+TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH = "LevelTwoText.txt"
 TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 DELAY_AT_START = 55
@@ -60,6 +60,18 @@ pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y))
 pygame.display.set_caption("Level 2")
 
+
+class LevelTwoVolumeButton(LevelOneVolumeButton):
+
+    def toggle_volume(self):
+        pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+        StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+        self.game.poke.cry.set_volume(0 if self.playing else GAME_VOLUME)
+        self.playing = not self.playing
+        self.update_image()
+
+    def update_image(self):
+        self.image_idx = 1 if not self.playing else 0
 
 class AllSprites(pygame.sprite.LayeredUpdates):
     def __init__(self):
@@ -237,7 +249,7 @@ class MC(Entity):
 
 
 class Poke(Entity):
-    def __init__(self, pos, image_path, group, size, game, z=4):
+    def __init__(self, pos, image_paths, group, size, game, z=4):
         super().__init__(pos, group, size, z)
         self.ran = False
         self.floatStage = 0
@@ -249,17 +261,23 @@ class Poke(Entity):
 
         self.player = game.player
         self.follow_distance = BLOCK_SIZE * 2
-        try:
-            self.image = pygame.image.load(image_path)
-        except FileNotFoundError:
-            self.image = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-            self.image.fill((255, 0, 0))  # Red as error indicator
+
+        self.images = []
+        for path in image_paths:
+            try:
+                image = pygame.image.load(path)
+            except FileNotFoundError:
+                image = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                image.fill((255, 0, 0))  # Red as error indicator
+            self.images.append(image)
+        self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
         self.rect = self.image.get_rect(center=pos)
 
         #Furina takes him away
         self.bye = False
 
     def update(self):
+        self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
         if self.bye:
             self.player = self.game.furina
         if self.ran:
@@ -574,7 +592,7 @@ class LevelTwo:
         for obj in LevelTwo.tmx.get_layer_by_name("Warps"):
             FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.met, z=1)
 
-        self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_path=POKEMON_PATHS[0], group=self.sprite_group, game=self, size=POKEMON_SIZE, z=4)
+        self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_paths=POKEMON_PATHS, group=self.sprite_group, game=self, size=POKEMON_SIZE, z=4)
 
         #def __init__(self, pos, paths, group, game, road, z=2):
 
@@ -656,7 +674,8 @@ class LevelTwo:
         pygame.mixer.music.play(-1, 10, 5000)
         StoryTextBox.init__text(TEXT_PATH)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
-        self.buttons = [StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self)]
+        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
+        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
 
         clock = pygame.time.Clock()
@@ -668,7 +687,7 @@ class LevelTwo:
                 self.ticker += 1
             elif self.ticker == DELAY_AT_START:
                 self.ticker += 1
-                self.buttons = [StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self)]
+                self.buttons.append(StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self))
             pygame.time.delay(GAME_DELAY)
 
             if not self.nextStage:
