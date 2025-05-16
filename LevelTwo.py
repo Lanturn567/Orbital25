@@ -1,17 +1,20 @@
 import pygame
 import sys
 import math
+import random
 from Home import Home
 from Mountain import Mountain
 from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
 from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
+from Opening import BGAsset
 
 # Constants
 TMX_PATH = "LevelTwo-TileMap.tmx"
 START_POS = "begin"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
+ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
 PLAYER_SPEED = BLOCK_SIZE // 4
 MAX_SPEED = BLOCK_SIZE // 4 * 3
@@ -23,6 +26,7 @@ WATER_PATHS = ["./Assets/Water/Water01.png", "./Assets/Water/Water04.png", "./As
 PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
 POKEMON_PATHS = ["./Assets/pokeL.png", "./Assets/pokeR.png"]  # Assuming single image for simplicity
 TREE_PATH = ["./Assets/Tree.png"]
+LEAF_PATH = ["./Assets/Leaf.png"]
 FURINA_PATHS = ["./Player/WalkLeftFurina.png", "./Player/WalkRightFurina.png"]
 FURINA_ROAD = [RIGHT, RIGHT, RIGHT, UP, RIGHT, UP, RIGHT, UP, RIGHT,
                RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
@@ -33,8 +37,12 @@ FURINA_EVENT_PATH = "LevelTwoFurinaEvent.txt"
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 GAME_VOLUME = 0.3
-GAME_DELAY = 20
-ANIM_DELAY = 6
+GAME_DELAY = 80
+ANIM_DELAY = 8
+SWAY_SPEED = random.randint(1, 2)
+SWAY_INTERVAL = 0.2
+SWAY_LENGTH = BLOCK_SIZE // 8
+SWAY_DELAY = 50
 FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 0.4
 FLOAT_LENGTH = BLOCK_SIZE
@@ -49,16 +57,65 @@ TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 DELAY_AT_START = 55
 WARP_PATH = "./Assets/Warp.png"
 LOCATION = "lake"
-STAGES = {"home" : lambda screen: Home(screen, LOCATION),
+STAGES = lambda: {"home" : lambda screen: Home(screen, LOCATION),
           "mountain" : lambda screen: Mountain(screen, LOCATION)}
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
 
+
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y))
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("Level 2")
+
+
+class Leaf(BGAsset):
+    """Comet background assets"""
+    default_color = (255, 0, 0)  # Red
+    max_count = 10
+    tick = 0
+    tick_betw_leaves = SWAY_DELAY
+
+    def __init__(self, player):
+        super().__init__()
+        self.player = player
+        self.x = self.player.x + random.randint(-MAX_X // 2, MAX_X // 2)
+        self.y = self.player.y - MAX_Y // 2 - 20
+        self.ticker = 0
+        self.dx = math.cos(self.ticker) * SWAY_LENGTH
+        self.dy = SWAY_SPEED
+
+
+    def update_position(self):
+        # If leaf is out of view (past bottom of screen relative to player), remove it
+        if abs(self.y - self.player.y) >= MAX_Y or abs(self.x - self.player.x) >= MAX_X:
+            return False
+
+        # Update leaf's local position in world space (independent of screen)
+        self.y += self.dy
+        self.x += self.dx
+
+        # Animate
+        self.curr_img = (self.curr_img + 1) % len(self.images)
+        self.ticker += SWAY_INTERVAL
+        self.dx = math.cos(self.ticker) * SWAY_LENGTH
+        return True
+
+
+    def render(self, screen):
+        screen_x = self.x - self.player.x + MAX_X // 2
+        screen_y = self.y - self.player.y + MAX_Y // 2
+        screen.blit(self.images[self.curr_img], (screen_x, screen_y))
+
+
+    @classmethod
+    def create(cls, player):
+        if cls.count < cls.max_count and cls.tick > cls.tick_betw_leaves:
+            cls.count += 1
+            cls.tick = 0
+            return cls(player)
+        return None
 
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):
@@ -275,10 +332,14 @@ class Poke(Entity):
 
         #Furina takes him away
         self.bye = False
+        self.byecry = True
 
     def update(self):
         self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
         if self.bye:
+            if self.byecry:
+                self.game.poke.cry.play()
+                self.byecry = False
             self.player = self.game.furina
         if self.ran:
             # Follow player with some delay
@@ -312,8 +373,8 @@ class Poke(Entity):
             self.floatStage += FLOAT_INTERVAL
 
             if self.x >= self.player.x + BLOCK_SIZE * 1.5:
-                    self.ran = True
-                    self.cry.play()
+                self.ran = True
+                self.cry.play()
 
 class Furina(Entity):
 
@@ -483,12 +544,18 @@ class Warp(Sprite):
     def __init__(self, pos, stage, image, groups, game, z=1):
         super().__init__(pos, image, groups, z)
         self.game = game
-        self.stage = STAGES.get(stage)(game.screen)
+        self.stage = stage
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
 
     def warp(self):
-        self.game.nextStage = self.stage
+        from Home import Home
+        from Mountain import Mountain
+        stages = {
+            "home": lambda screen: Home(screen, LOCATION),
+            "mountain": lambda screen: Mountain(screen, LOCATION),
+        }
+        self.game.nextStage = stages.get(self.stage)(self.game.screen)
 
 class EventWarp(Warp):
 
@@ -499,8 +566,15 @@ class EventWarp(Warp):
 
 
     def warp(self):
+        from Home import Home
+        from Mountain import Mountain
+        stages = {
+            "home": lambda screen: Home(screen, LOCATION),
+            "mountain": lambda screen: Mountain(screen, LOCATION),
+        }
+        stage = stages.get(self.stage)(self.game.screen)
         if self.cond():
-            self.game.nextStage = self.stage
+            self.game.nextStage = stage
         else:
             self.makeEvent()
 
@@ -540,6 +614,8 @@ class LevelTwo:
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
+        self.buttons = []
+        self.leaves = []
         self.alpha = 255
         self.rect = self.screen.get_rect()
         self.fadeInSurface = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
@@ -600,12 +676,21 @@ class LevelTwo:
                 if obj.name == "Furina":
                     self.furina = Furina((obj.x + FURINA_SIZE[0] // 2, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=2)
 
+        pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
+        pygame.mixer.music.set_volume(GAME_VOLUME)
+        pygame.mixer.music.play(-1, 10, 5000)
+        StoryTextBox.init__text(TEXT_PATH)
+        StoryTextBox.init_images(TEXT_BOX_PATHS)
+        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
+        Leaf.init_images(LEAF_PATH)
+        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+
     def fade(self):
         if not self.nextStage:
             self.fadeInSurface.fill((0, 0, 0, max(self.alpha, FADE_LEVEL)))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha -= FADE_CHANGE_PER_FRAME
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, 0)
 
         else:
             self.fadeInSurface.fill((0, 0, 0, min(MAX_ALPHA, self.alpha)))
@@ -623,6 +708,13 @@ class LevelTwo:
         keys = pygame.key.get_pressed()
         for entity in self.entities:
             entity.collide()
+
+        # Randomly create stars and comets
+        Leaf.tick += 1
+        if random.randint(0, 100) < 8:
+            leaf = Leaf.create(self.player)
+            if leaf:
+                self.leaves.append(leaf)
 
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
@@ -642,6 +734,9 @@ class LevelTwo:
             for i, button in enumerate(self.buttons):
                 if i != TEXT_BUTTON or not self.textComplete:
                     button.draw(self.screen)
+
+        # Update and draw leaf
+        self.leaves = [leaf for leaf in self.leaves if leaf.update(self.screen)]
 
     def handle_events(self):
 
@@ -669,14 +764,6 @@ class LevelTwo:
 
     def run(self):
         self.init_assets(self.start_pos)
-        pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
-        pygame.mixer.music.set_volume(GAME_VOLUME)
-        pygame.mixer.music.play(-1, 10, 5000)
-        StoryTextBox.init__text(TEXT_PATH)
-        StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
-
 
         clock = pygame.time.Clock()
         self.running = True
@@ -708,8 +795,16 @@ class LevelTwo:
             sys.exit()
 
 
+def checkExit(nextStage):
+    if nextStage is not None:
+        return nextStage.run()
+    else:
+        pygame.quit()
+        sys.exit()
+
 if __name__ == "__main__":
     game = LevelTwo(screen, START_POS)
-    next = game.run()
-    next.run()
+    nextStage = game.run()
+    while True:
+        nextStage = checkExit(nextStage)
 

@@ -254,7 +254,7 @@ class LevelOne:
 if __name__ == "__main__":
     # Initialize pygame
     pygame.init()
-    screen = pygame.display.set_mode((MAX_X, MAX_Y))
+    screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
     pygame.display.set_caption("Level 1")
     game = LevelOne(screen)
     nextStage = game.run()

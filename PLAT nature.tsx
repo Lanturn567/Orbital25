@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.2" name="PLAT Nature" tilewidth="32" tileheight="32" tilecount="2304" columns="36">
- <image source="../Assets/PLAT Nature.png" trans="f05ba1" width="1152" height="2048"/>
+<tileset version="1.10" tiledversion="1.11.2" name="PLAT Nature" tilewidth="32" tileheight="32" tilecount="2304" columns="36">
+ <image source="TilemapsPNG/PLAT Nature.png" trans="f05ba1" width="1152" height="2048"/>
  <tile id="877">
   <animation>
    <frame tileid="1980" duration="200"/>
