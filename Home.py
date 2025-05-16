@@ -6,7 +6,7 @@ from StoryTextBox import StoryTextBox
 from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
 
 # Constants
-TMX_PATH = "Home.tmx"
+TMX_PATH = "./TilemapsPNG/Home.tmx"
 START_POS = "lake"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -35,7 +35,8 @@ SMALL_POKEMON_SIZE = (32, 32)
 DELAY_AFTER_CLICK = 3
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
-TEXT_PATH = "Home.txt"
+TEXT_PATH1 = "Home1.txt"
+TEXT_PATH2 = "Home2.txt"
 TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 DELAY_AT_START = 25
 WARP_PATH = "./Assets/Warp.png"
@@ -357,10 +358,23 @@ class Warp(Sprite):
         from Right import Right
         from Left import Left
         from Lake import Lake
+        from House import House
+        from Gym import Gym
+        from Party import Party
+        from Dawn import Dawn
+        from Blue import Blue
+        from Mart import Mart
+
         stages = {
             "lake": lambda screen: Lake(screen, LOCATION),
             "right": lambda screen: Right(screen, LOCATION),
-            "left": lambda screen: Left(screen, LOCATION)
+            "left": lambda screen: Left(screen, LOCATION),
+            "house": lambda screen: House(screen, LOCATION),
+            "gym": lambda screen: Gym(screen, LOCATION),
+            "party": lambda screen: Party(screen, LOCATION),
+            "dawn": lambda screen: Dawn(screen, LOCATION),
+            "blue": lambda screen: Blue(screen, LOCATION),
+            "mart": lambda screen: Mart(screen, LOCATION)
         }
         self.game.nextStage = stages.get(self.stage_name)(self.game.screen)
 
@@ -377,10 +391,23 @@ class EventWarp(Warp):
         from Right import Right
         from Left import Left
         from Lake import Lake
+        from House import House
+        from Gym import Gym
+        from Party import Party
+        from Dawn import Dawn
+        from Blue import Blue
+        from Mart import Mart
+
         stages = {
             "lake": lambda screen: Lake(screen, LOCATION),
             "right": lambda screen: Right(screen, LOCATION),
-            "left": lambda screen: Left(screen, LOCATION)
+            "left": lambda screen: Left(screen, LOCATION),
+            "house": lambda screen: House(screen, LOCATION),
+            "gym": lambda screen: Gym(screen, LOCATION),
+            "party": lambda screen: Party(screen, LOCATION),
+            "dawn": lambda screen: Dawn(screen, LOCATION),
+            "blue": lambda screen: Blue(screen, LOCATION),
+            "mart": lambda screen: Mart(screen, LOCATION)
         }
         stage = stages.get(self.stage_name)(self.game.screen)
         if self.cond():
@@ -467,16 +494,17 @@ class Home:
 
     def fade(self):
         if not self.nextStage:
-            self.fadeInSurface.fill((0, 0, 0, max(self.alpha, FADE_LEVEL)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, 0)
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, FADE_LEVEL)
 
         else:
-            self.fadeInSurface.fill((0, 0, 0, min(MAX_ALPHA, self.alpha)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha += FADE_CHANGE_PER_FRAME
+                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME, MAX_ALPHA)
+
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
             elif self.alpha >= MAX_ALPHA:
@@ -536,7 +564,7 @@ class Home:
         pygame.mixer.music.load(HOME_MUSIC_PATH)
         pygame.mixer.music.set_volume(GAME_VOLUME)
         pygame.mixer.music.play(-1, 10, 5000)
-        StoryTextBox.init__text(TEXT_PATH)
+        StoryTextBox.init__text(TEXT_PATH1 if self.start_pos in ["lake", "left", "right"] else TEXT_PATH2)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]

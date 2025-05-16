@@ -10,7 +10,7 @@ from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_B
 from Opening import BGAsset
 
 # Constants
-TMX_PATH = "LevelTwo-TileMap.tmx"
+TMX_PATH = "./TilemapsPNG/LevelTwo-TileMap.tmx"
 START_POS = "begin"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -687,16 +687,16 @@ class LevelTwo:
 
     def fade(self):
         if not self.nextStage:
-            self.fadeInSurface.fill((0, 0, 0, max(self.alpha, FADE_LEVEL)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, 0)
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, FADE_LEVEL)
 
         else:
-            self.fadeInSurface.fill((0, 0, 0, min(MAX_ALPHA, self.alpha)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha += FADE_CHANGE_PER_FRAME
+                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True

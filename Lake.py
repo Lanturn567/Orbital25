@@ -8,7 +8,7 @@ from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_B
 from Opening import BGAsset
 
 # Constants
-TMX_PATH = "LevelTwo-TileMap.tmx"
+TMX_PATH = "./TilemapsPNG/LevelTwo-TileMap.tmx"
 START_POS = "home"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -99,7 +99,7 @@ class Leaf(BGAsset):
         return None
 
 
-class LevelTwoVolumeButton(LevelOneVolumeButton):
+class LakeVolumeButton(LevelOneVolumeButton):
 
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
@@ -437,16 +437,16 @@ class Lake:
 
     def fade(self):
         if not self.nextStage:
-            self.fadeInSurface.fill((0, 0, 0, max(self.alpha, FADE_LEVEL)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha -= FADE_CHANGE_PER_FRAME
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, FADE_LEVEL)
 
         else:
-            self.fadeInSurface.fill((0, 0, 0, min(MAX_ALPHA, self.alpha)))
+            self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha += FADE_CHANGE_PER_FRAME
+                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -519,9 +519,9 @@ class Lake:
         pygame.mixer.music.play(-1, 10, 5000)
         StoryTextBox.init__text(TEXT_PATH)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
+        LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         Leaf.init_images(LEAF_PATH)
-        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
 
         clock = pygame.time.Clock()

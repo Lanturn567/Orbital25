@@ -216,7 +216,7 @@ class Opening:
     """Main game opening screen"""
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((MAX_X, MAX_Y))
+        self.screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
         pygame.display.set_caption("First Game")
 
         try:
