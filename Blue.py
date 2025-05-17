@@ -11,7 +11,7 @@ from Lake import LakeVolumeButton
 from Trainer import *
 
 # Constants
-TMX_PATH = "./TilemapsPNG/House.tmx"
+TMX_PATH = "./TilemapsPNG/Blue.tmx"
 START_POS = "home"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -313,52 +313,45 @@ class Blue:
 
     def init_assets(self, start_pos):
         from Home import Home
+        from Basement import  Basement
         global STAGES
         STAGES = {
             "home": lambda screen: Home(screen, LOCATION),
+            "basement": lambda screen: Basement(screen, LOCATION)
         }
 
         # Ground tiles
         for x, y, surf in Blue.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=self.sprite_group, z=0)
 
         # Water tiles
         for x, y, surf in Blue.tmx.get_layer_by_name("Wall").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+            Sprite(pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
 
         # Player
         for obj in Blue.tmx.get_layer_by_name("Player"):
             if obj.properties["pos"] == start_pos:
-                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
+                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=2)
 
         # Boundary
         for x, y, surf in Blue.tmx.get_layer_by_name("Boundary").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
-
-        #Movable
-        for x, y, surf in Blue.tmx.get_layer_by_name("Movable").tiles():
-            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=1)
 
         # Furniture
         for x, y, surf in Blue.tmx.get_layer_by_name("Furniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
 
         # Warps
         for obj in Blue.tmx.get_layer_by_name("Warps"):
-            Warp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
-
-        # Trainers
-        for obj in Blue.tmx.get_layer_by_name("Trainers"):
-            facing = obj.properties["dir"]
-            type = obj.type
-            dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
-
+            image = pygame.image.load(WARP_PATH)
+            if obj.properties["size"] == "small":
+                image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
+            print((obj.x, obj.y))
+            Warp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=1)
 
 
     def fade(self):
