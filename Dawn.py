@@ -6,6 +6,7 @@ import sys
 from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
 from Lake import LakeVolumeButton
+from Trainer import *
 
 # Constants
 TMX_PATH = "./TilemapsPNG/House.tmx"
@@ -16,7 +17,7 @@ PLAYER_SIZE = (32, 64)
 PLAYER_SPEED = BLOCK_SIZE // 4
 MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
-LEVEL_TWO_MUSIC_PATH = "./music/LevelTwoBGM.mp3"
+LEVEL_TWO_MUSIC_PATH = "./music/Home.mp3"
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
@@ -39,11 +40,12 @@ LOCATION = "dawn"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
+STAGES = {}
 
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
-pygame.display.set_caption("House")
+pygame.display.set_caption("Dawn")
 
 
 class AllSprites(pygame.sprite.LayeredUpdates):
@@ -62,8 +64,10 @@ class AllSprites(pygame.sprite.LayeredUpdates):
         water_sprites = sorted([sprite for sprite in self if sprite.z == 1], key=lambda sprite: sprite.y_sort)
         base_sprites = sorted([sprite for sprite in self if sprite.z == 2], key=lambda sprite: sprite.y_sort)
         tree_sprites = sorted([sprite for sprite in self if sprite.z == 3], key=lambda sprite: sprite.y_sort)
+        wall_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
 
-        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites):
+
+        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, wall_sprites):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
@@ -78,8 +82,9 @@ class Entity(pygame.sprite.Sprite):
         self.x = pos[0]
         self.y = pos[1]
         self.rect = pygame.Rect(0, 0, size[0], size[1])
-        self.rect.center = pos
-        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 4, size[0] // 2, size[1] // 2)
+        center = (self.x, self.y)
+        self.rect.center = center
+        self.hitbox = pygame.Rect(center[0], center[1], size[0], size[1])
         self.y_sort = self.rect.centery
 
     def input(self):
@@ -272,11 +277,7 @@ class Warp(Sprite):
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
     def warp(self):
-        from Home import Home
-        stages = {
-            "home": lambda screen: Home(screen, LOCATION),
-        }
-        self.game.nextStage = stages.get(self.stage_name)(self.game.screen)
+        self.game.nextStage = STAGES.get(self.stage_name)(self.game.screen)
 
 class Dawn:
     tmx = load_pygame(TMX_PATH)
@@ -309,6 +310,12 @@ class Dawn:
 
 
     def init_assets(self, start_pos):
+        from Home import Home
+        global STAGES
+        STAGES = {
+            "home": lambda screen: Home(screen, LOCATION),
+        }
+
         # Ground tiles
         for x, y, surf in Dawn.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -317,7 +324,7 @@ class Dawn:
         # Water tiles
         for x, y, surf in Dawn.tmx.get_layer_by_name("Wall").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
 
         # Player
         for obj in Dawn.tmx.get_layer_by_name("Player"):
@@ -343,9 +350,13 @@ class Dawn:
         for obj in Dawn.tmx.get_layer_by_name("Warps"):
             Warp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
 
-        #def __init__(self, pos, paths, group, game, road, z=2):
+        # Trainers
+        for obj in Dawn.tmx.get_layer_by_name("Trainers"):
+            facing = obj.properties["dir"]
+            type = obj.type
+            dis = obj.properties["dis"]
+            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
-        # for obj in Lake.tmx.get_layer_by_name("Trainers"):
 
 
     def fade(self):

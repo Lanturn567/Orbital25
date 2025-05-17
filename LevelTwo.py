@@ -2,8 +2,6 @@ import pygame
 import sys
 import math
 import random
-from Home import Home
-from Mountain import Mountain
 from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
 from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
@@ -30,6 +28,8 @@ LEAF_PATH = ["./Assets/Leaf.png"]
 FURINA_PATHS = ["./Player/WalkLeftFurina.png", "./Player/WalkRightFurina.png"]
 FURINA_ROAD = [RIGHT, RIGHT, RIGHT, UP, RIGHT, UP, RIGHT, UP, RIGHT,
                RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
+
+STAGES = {}
 FURINA_SIZE = (48, 64)
 FURINA_GO_DELAY = 4
 FURINA_PROD_TEXT = "LevelTwoWarpingWithoutFurina.txt"
@@ -57,18 +57,8 @@ TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 DELAY_AT_START = 55
 WARP_PATH = "./Assets/Warp.png"
 LOCATION = "lake"
-STAGES = lambda: {"home" : lambda screen: Home(screen, LOCATION),
-          "mountain" : lambda screen: Mountain(screen, LOCATION)}
 MAX_ALPHA = 255
 FINAL_DELAY = 5
-
-
-
-# Initialize pygame
-pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
-pygame.display.set_caption("Level 2")
-
 
 class Leaf(BGAsset):
     """Comet background assets"""
@@ -472,7 +462,7 @@ class Furina(Entity):
 
     def collide(self):
         keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_e] and not self.eventDone:
+        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_SPACE] and not self.eventDone:
             self.eventDone = True
             self.inEvent = True
             self.game.inEvent = True
@@ -549,13 +539,7 @@ class Warp(Sprite):
 
 
     def warp(self):
-        from Home import Home
-        from Mountain import Mountain
-        stages = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
-        self.game.nextStage = stages.get(self.stage)(self.game.screen)
+        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
 
 class EventWarp(Warp):
 
@@ -566,13 +550,7 @@ class EventWarp(Warp):
 
 
     def warp(self):
-        from Home import Home
-        from Mountain import Mountain
-        stages = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
-        stage = stages.get(self.stage)(self.game.screen)
+        stage = STAGES.get(self.stage)(self.game.screen)
         if self.cond():
             self.game.nextStage = stage
         else:
@@ -606,9 +584,9 @@ class FurinaWarp(EventWarp):
         self.game.updateEvent = checker
 
 class LevelTwo:
-    tmx = load_pygame(TMX_PATH)
 
     def __init__(self, screen, start_pos):
+        LevelTwo.tmx = load_pygame(TMX_PATH)
         self.start_pos = start_pos
         self.screen = screen
         self.sprite_group = AllSprites()
@@ -638,35 +616,52 @@ class LevelTwo:
 
 
     def init_assets(self, start_pos):
+        from Home import Home
+        from Mountain import Mountain
+        global STAGES
+        STAGES = {
+            "home": lambda screen: Home(screen, LOCATION),
+            "mountain": lambda screen: Mountain(screen, LOCATION),
+        }
+
         # Ground tiles
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=1)
 
         # Water tiles
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Water").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group, self.collide), z=1)
+            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group, self.collide), z=0)
 
         # Player
         for obj in LevelTwo.tmx.get_layer_by_name("Players"):
             if obj.properties["pos"] == start_pos:
-                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=2)
+                self.player = MC((obj.x, obj.y + 16), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
 
         # Grass tiles
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Grass").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
 
         # Trees
-        tree_image = pygame.image.load(TREE_PATH[0])
+        #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=tree_image, groups=(self.sprite_group, self.collide), z=2)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Waterside").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Base").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
 
         # Warps
         for obj in LevelTwo.tmx.get_layer_by_name("Warps"):
-            FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.met, z=1)
+            FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.met, z=2)
 
         self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_paths=POKEMON_PATHS, group=self.sprite_group, game=self, size=POKEMON_SIZE, z=4)
 
@@ -674,7 +669,7 @@ class LevelTwo:
 
         for obj in LevelTwo.tmx.get_layer_by_name("Trainers"):
                 if obj.name == "Furina":
-                    self.furina = Furina((obj.x + FURINA_SIZE[0] // 2, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=2)
+                    self.furina = Furina((obj.x + FURINA_SIZE[0] // 4, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=3)
 
         pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
         pygame.mixer.music.set_volume(GAME_VOLUME)
@@ -803,6 +798,10 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
+    # Initialize pygame
+    pygame.init()
+    screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
+    pygame.display.set_caption("Level 2")
     game = LevelTwo(screen, START_POS)
     nextStage = game.run()
     while True:

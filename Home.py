@@ -3,6 +3,7 @@ import sys
 import math
 from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
+from Trainer import *
 from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
 
 # Constants
@@ -44,6 +45,7 @@ LOCATION = "home"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
+STAGES = {}
 
 # Initialize pygame
 pygame.init()
@@ -94,8 +96,9 @@ class Entity(pygame.sprite.Sprite):
         self.x = pos[0]
         self.y = pos[1]
         self.rect = pygame.Rect(0, 0, size[0], size[1])
-        self.rect.center = pos
-        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 4, size[0] // 2, size[1] // 2)
+        center = (self.x, self.y)
+        self.rect.center = center
+        self.hitbox = pygame.Rect(center[0], center[1], size[0], size[1])
         self.y_sort = self.rect.centery
 
     def input(self):
@@ -355,28 +358,7 @@ class Warp(Sprite):
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
     def warp(self):
-        from Right import Right
-        from Left import Left
-        from Lake import Lake
-        from House import House
-        from Gym import Gym
-        from Party import Party
-        from Dawn import Dawn
-        from Blue import Blue
-        from Mart import Mart
-
-        stages = {
-            "lake": lambda screen: Lake(screen, LOCATION),
-            "right": lambda screen: Right(screen, LOCATION),
-            "left": lambda screen: Left(screen, LOCATION),
-            "house": lambda screen: House(screen, LOCATION),
-            "gym": lambda screen: Gym(screen, LOCATION),
-            "party": lambda screen: Party(screen, LOCATION),
-            "dawn": lambda screen: Dawn(screen, LOCATION),
-            "blue": lambda screen: Blue(screen, LOCATION),
-            "mart": lambda screen: Mart(screen, LOCATION)
-        }
-        self.game.nextStage = stages.get(self.stage_name)(self.game.screen)
+        self.game.nextStage = STAGES.get(self.stage_name)(self.game.screen)
 
 
 class EventWarp(Warp):
@@ -388,28 +370,7 @@ class EventWarp(Warp):
 
 
     def warp(self):
-        from Right import Right
-        from Left import Left
-        from Lake import Lake
-        from House import House
-        from Gym import Gym
-        from Party import Party
-        from Dawn import Dawn
-        from Blue import Blue
-        from Mart import Mart
-
-        stages = {
-            "lake": lambda screen: Lake(screen, LOCATION),
-            "right": lambda screen: Right(screen, LOCATION),
-            "left": lambda screen: Left(screen, LOCATION),
-            "house": lambda screen: House(screen, LOCATION),
-            "gym": lambda screen: Gym(screen, LOCATION),
-            "party": lambda screen: Party(screen, LOCATION),
-            "dawn": lambda screen: Dawn(screen, LOCATION),
-            "blue": lambda screen: Blue(screen, LOCATION),
-            "mart": lambda screen: Mart(screen, LOCATION)
-        }
-        stage = stages.get(self.stage_name)(self.game.screen)
+        stage = STAGES.get(self.stage_name)(self.game.screen)
         if self.cond():
             self.game.nextStage = stage
         else:
@@ -449,6 +410,29 @@ class Home:
 
 
     def init_assets(self, start_pos):
+        from Right import Right
+        from Left import Left
+        from Lake import Lake
+        from House import House
+        from Gym import Gym
+        from Party import Party
+        from Dawn import Dawn
+        from Blue import Blue
+        from Mart import Mart
+
+        global STAGES
+        STAGES = {
+            "lake": lambda screen: Lake(screen, LOCATION),
+            "right": lambda screen: Right(screen, LOCATION),
+            "left": lambda screen: Left(screen, LOCATION),
+            "house": lambda screen: House(screen, LOCATION),
+            "gym": lambda screen: Gym(screen, LOCATION),
+            "party": lambda screen: Party(screen, LOCATION),
+            "dawn": lambda screen: Dawn(screen, LOCATION),
+            "blue": lambda screen: Blue(screen, LOCATION),
+            "mart": lambda screen: Mart(screen, LOCATION)
+        }
+
         # Ground tiles
         for x, y, surf in Home.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -485,12 +469,20 @@ class Home:
         # Trees
         for x, y, surf in Home.tmx.get_layer_by_name("Buildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        # Trees
+        for x, y, surf in Home.tmx.get_layer_by_name("TallBuildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
 
 
-        #def __init__(self, pos, paths, group, game, road, z=2):
-        #for obj in Home.tmx.get_layer_by_name("Trainers"):
-            #Furina((obj.x + FURINA_SIZE[0] // 2, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=2)
+        # Trainers
+        for obj in Home.tmx.get_layer_by_name("Trainers"):
+            facing = obj.properties["dir"]
+            type = obj.type
+            dis = obj.properties["dis"]
+            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
     def fade(self):
         if not self.nextStage:

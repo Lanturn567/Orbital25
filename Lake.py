@@ -6,6 +6,7 @@ from pytmx.util_pygame import load_pygame
 from StoryTextBox import StoryTextBox
 from LevelOne import LevelOneVolumeButton, ALPHA_CHANGE, VOL_BUTTON_PATHS, VOL_BUTTON_DIMENSIONS
 from Opening import BGAsset
+from Trainer import Trainer
 
 # Constants
 TMX_PATH = "./TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -27,7 +28,6 @@ WATER_PATHS = ["./Assets/Water/Water01.png", "./Assets/Water/Water04.png", "./As
 PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
 TREE_PATH = ["./Assets/Tree.png"]
 LEAF_PATH = ["./Assets/Leaf.png"]
-INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 GAME_VOLUME = 0.3
 GAME_DELAY = 80
@@ -43,6 +43,8 @@ WARP_PATH = "./Assets/Warp.png"
 LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
+
+STAGES = {}
 
 
 # Initialize pygame
@@ -142,7 +144,7 @@ class Entity(pygame.sprite.Sprite):
         self.y = pos[1]
         self.rect = pygame.Rect(0, 0, size[0], size[1])
         self.rect.center = pos
-        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 4, size[0] // 2, size[1] // 2)
+        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 2, size[0] // 2, size[1] // 8 * 3)
         self.y_sort = self.rect.centery
 
     def input(self):
@@ -157,6 +159,7 @@ class Entity(pygame.sprite.Sprite):
 
     def collide(self):
         pass
+
 
 class MC(Entity):
     ini = False
@@ -334,13 +337,7 @@ class Warp(Sprite):
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
     def warp(self):
-        from Home import Home
-        from Mountain import Mountain
-        stages = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
-        self.game.nextStage = stages.get(self.stage_name)(self.game.screen)
+        self.game.nextStage = STAGES.get(self.stage_name)(self.game.screen)
 
 
 class EventWarp(Warp):
@@ -352,13 +349,7 @@ class EventWarp(Warp):
 
 
     def warp(self):
-        from Home import Home
-        from Mountain import Mountain
-        stages = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
-        stage = stages.get(self.stage_name)(self.game.screen)
+        stage = STAGES.get(self.stage_name)(self.game.screen)
         if self.cond():
             self.game.nextStage = stage
         else:
@@ -400,39 +391,60 @@ class Lake:
 
 
     def init_assets(self, start_pos):
+        from Home import Home
+        from Mountain import Mountain
+        global STAGES
+        STAGES = {
+            "home": lambda screen: Home(screen, LOCATION),
+            "mountain": lambda screen: Mountain(screen, LOCATION),
+        }
         # Ground tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=1)
 
         # Water tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Water").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group, self.collide), z=1)
+            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group, self.collide), z=0)
 
         # Player
         for obj in Lake.tmx.get_layer_by_name("Players"):
             if obj.properties["pos"] == start_pos:
-                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=2)
+                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
 
         # Grass tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Grass").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
 
         # Trees
-        tree_image = pygame.image.load(TREE_PATH[0])
+        #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in Lake.tmx.get_layer_by_name("Trees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=tree_image, groups=(self.sprite_group, self.collide), z=2)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        for x, y, surf in Lake.tmx.get_layer_by_name("Waterside").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
+        for x, y, surf in Lake.tmx.get_layer_by_name("Base").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
 
         # Warps
         for obj in Lake.tmx.get_layer_by_name("Warps"):
-            Warp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            Warp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
 
-        #def __init__(self, pos, paths, group, game, road, z=2):
 
-        # for obj in Lake.tmx.get_layer_by_name("Trainers"):
+        #def __init__(self, pos, paths, group, game, size, road, z=2):
+        # Trainers
+        for obj in Lake.tmx.get_layer_by_name("Trainers"):
+            facing = obj.properties["dir"]
+            type = obj.type
+            dis = obj.properties["dis"]
+            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
 
 
     def fade(self):
