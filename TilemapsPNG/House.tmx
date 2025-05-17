@@ -129,6 +129,11 @@
   </object>
  </objectgroup>
  <objectgroup id="9" name="Trainers" locked="1">
-  <object id="10" name="Mom" gid="2487" x="448" y="384" width="32" height="64"/>
+  <object id="10" name="Mom" type="mom" gid="2487" x="448" y="384" width="32" height="64">
+   <properties>
+    <property name="dir" value="down"/>
+    <property name="dis" type="int" value="0"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
