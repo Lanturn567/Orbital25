@@ -9,7 +9,7 @@ from Lake import LakeVolumeButton
 from Trainer import *
 
 # Constants
-TMX_PATH = "./TilemapsPNG/House.tmx"
+TMX_PATH = "./TilemapsPNG/Dawn.tmx"
 START_POS = "home"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -32,6 +32,7 @@ DELAY_AFTER_CLICK = 3
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH = "Dawn.txt"
+TEXT_EVENTS_PATHS = ["DawnEvent1.txt", "DawnEvent2.txt"]
 TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 VOL_BUTTON_PATHS = ["./UI/Buttons/NoMute.png", "./UI/Buttons/Mute.png"]
 DELAY_AT_START = 25
@@ -319,12 +320,12 @@ class Dawn:
         # Ground tiles
         for x, y, surf in Dawn.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=self.sprite_group, z=0)
 
         # Water tiles
         for x, y, surf in Dawn.tmx.get_layer_by_name("Wall").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+            Sprite(pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
 
         # Player
         for obj in Dawn.tmx.get_layer_by_name("Player"):
@@ -334,17 +335,17 @@ class Dawn:
         # Boundary
         for x, y, surf in Dawn.tmx.get_layer_by_name("Boundary").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
 
         #Movable
         for x, y, surf in Dawn.tmx.get_layer_by_name("Movable").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=self.sprite_group, z=2)
 
         # Furniture
         for x, y, surf in Dawn.tmx.get_layer_by_name("Furniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
 
         # Warps
         for obj in Dawn.tmx.get_layer_by_name("Warps"):
@@ -355,7 +356,7 @@ class Dawn:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, text=TEXT_EVENTS_PATHS, facing=facing, z=3)
 
 
 

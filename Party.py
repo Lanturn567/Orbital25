@@ -7,7 +7,7 @@ class Party:
         self.start_pos = start_pos
 
     def run(self):
-        print("Going Left...")
+        print("The Party Begins...")
         pygame.quit()
         sys.exit()
         pass

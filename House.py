@@ -323,7 +323,7 @@ class House:
         # Water tiles
         for x, y, surf in House.tmx.get_layer_by_name("Wall").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=1)
 
         # Player
         for obj in House.tmx.get_layer_by_name("Player"):
@@ -333,12 +333,12 @@ class House:
         # Boundary
         for x, y, surf in House.tmx.get_layer_by_name("Boundary").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
 
         #Movable
         for x, y, surf in House.tmx.get_layer_by_name("Movable").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
 
         # Furniture
         for x, y, surf in House.tmx.get_layer_by_name("Furniture").tiles():

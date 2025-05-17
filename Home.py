@@ -457,7 +457,12 @@ class Home:
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
+
+        # Flowers
+        for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
 
         # Warps
         for obj in Home.tmx.get_layer_by_name("Warps"):

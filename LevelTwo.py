@@ -650,7 +650,6 @@ class LevelTwo:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
-
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
@@ -658,6 +657,12 @@ class LevelTwo:
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Base").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Buildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
 
         # Warps
         for obj in LevelTwo.tmx.get_layer_by_name("Warps"):

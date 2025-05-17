@@ -12,12 +12,11 @@ dirs = {"left" : LEFT,
         "up" : UP,
         "down" : DOWN}
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
-TRAINER_PATHS = { "furina" :
-                  ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
+TRAINER_PATHS = { "furina" : ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
                 }
 TRAINER_GO_DELAY = 4
 AFTER_EVENT_DELAY = 5
-TRAINER_EVENT_PATH = "Home1.txt"
+TRAINER_EVENT_PATH = ["Home1.txt"]
 
 
 class Trainer(Entity):
@@ -25,7 +24,7 @@ class Trainer(Entity):
     ini = False
     assets = []
 
-    def __init__(self, pos, groups, game, size, facing, type="furina", road=None, dis=0, txt=TRAINER_EVENT_PATH, z=2):
+    def __init__(self, pos, groups, game, size, facing, type="furina", road=None, dis=0, text=TRAINER_EVENT_PATH, z=2):
         if not Trainer.ini:
             Trainer.init_assets(TRAINER_PATHS["furina"])
             Trainer.ini = True
@@ -49,7 +48,9 @@ class Trainer(Entity):
 
 
         #GO event
-        self.txt = txt
+        self.text = text
+        self.currText = 0
+        self.maxTalks = len(text)
         self.ticker = 0
         self.inEvent = False
         self.delayAfterEvent = 0
@@ -162,5 +163,9 @@ class Trainer(Entity):
 
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.txt)
+        StoryTextBox.init__text(self.text[self.currText])
         self.game.buttons[TEXT_BUTTON].reset()
+        self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
+
+

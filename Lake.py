@@ -127,8 +127,10 @@ class AllSprites(pygame.sprite.LayeredUpdates):
         water_sprites = sorted([sprite for sprite in self if sprite.z == 1], key=lambda sprite: sprite.y_sort)
         base_sprites = sorted([sprite for sprite in self if sprite.z == 2], key=lambda sprite: sprite.y_sort)
         tree_sprites = sorted([sprite for sprite in self if sprite.z == 3], key=lambda sprite: sprite.y_sort)
+        build_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
 
-        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites):
+
+        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, build_sprites):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
@@ -431,6 +433,11 @@ class Lake:
         for x, y, surf in Lake.tmx.get_layer_by_name("Base").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in Lake.tmx.get_layer_by_name("Buildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
 
         # Warps
         for obj in Lake.tmx.get_layer_by_name("Warps"):
