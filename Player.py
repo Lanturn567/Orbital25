@@ -1,5 +1,7 @@
 import pygame
 
+ANIM_SPEED = 8
+ANIM_DIST = 4
 MAX_X, MAX_Y = 740, 493
 
 class OpeningPlayer:
@@ -37,42 +39,42 @@ class OpeningPlayer:
         self.stop = 0
 
     def draw(self, game):
-        image = OpeningPlayer.images[self.facing][self.walkCount if self.facing != 0 else 0]
+        image = OpeningPlayer.images[self.facing][int(self.walkCount) % 4]
         game.blit(image, (self.x, self.y, OpeningPlayer.playerWidth, OpeningPlayer.playerHeight))
 
     #move first then update
-    def move(self, direction):
+    def move(self, direction, dt):
         if self.stop >= OpeningPlayer.faceForward and direction == 0:
             self.facing = 0
             self.walkCount = 0
             self.stop = 0
         if direction == 1:
             self.facing = direction
-            posx = self.x - self.speed
+            posx = self.x - self.speed * dt * ANIM_SPEED
             self.x = max(-OpeningPlayer.playerWidth // 2, posx)
-            self.walkCount = (self.walkCount + 1) % OpeningPlayer.numFrames
+            self.walkCount += dt * ANIM_DIST
             self.stop = 0
         elif direction == 2:
-            posx = self.x + self.speed
+            posx = self.x + self.speed * dt * ANIM_SPEED
             self.facing = direction
             self.x = min(MAX_X - OpeningPlayer.playerWidth // 2, posx)
-            self.walkCount = (self.walkCount + 1) % OpeningPlayer.numFrames
+            self.walkCount += dt * ANIM_DIST
             self.stop = 0
         elif direction == 3:
-            posy = self.y - self.speed
+            posy = self.y - self.speed * dt * ANIM_SPEED
             self.y = max(MAX_Y - OpeningPlayer.yboundary, posy)
-            self.walkCount = (self.walkCount + 1) % OpeningPlayer.numFrames
+            self.walkCount += dt * ANIM_DIST
             self.stop = 0
         elif direction == 4:
-            self.y = min(MAX_Y - OpeningPlayer.playerHeight, self.y + self.speed)
-            self.walkCount = (self.walkCount + 1) % OpeningPlayer.numFrames
+            self.y = min(MAX_Y - OpeningPlayer.playerHeight, self.y + self.speed * dt * ANIM_SPEED)
+            self.walkCount += dt * ANIM_DIST
             self.stop = 0
         elif direction == 0 and self.facing != 0:
-            self.stop += 1
+            self.stop += dt * ANIM_DIST
         else:
             pass
 
-    def jump(self):
+    def jump(self, dt):
         if not self.jumping:
             self.jumping = True
             self.jumpCount = OpeningPlayer.jumpFrames
@@ -82,7 +84,7 @@ class OpeningPlayer:
                 if self.jumpCount < 0:  # Coming down
                     neg = -1
                 self.y -= (self.jumpCount ** 2) * 0.5 * neg
-                self.jumpCount -= 1
+                self.jumpCount -= dt * ANIM_DIST
             else:
                 self.jumping = False
                 self.jumpCount = OpeningPlayer.jumpFrames

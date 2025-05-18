@@ -6,10 +6,11 @@ import sys
 import ToneMatrix
 import Player
 
-
 # Constants
 MAX_X, MAX_Y = 740, 493
 MIN_SPEED, MAX_SPEED = 10, 20
+MAX_FPS = 60
+ANIM_SPEED = 8
 ASSET_SIZE = 96
 GAME_DELAY = 100
 PHASE_CHANGE_DELAY, TRANSITION_DELAY = 2, 8 * GAME_DELAY
@@ -30,6 +31,7 @@ class BGAsset:
     images = []
     count = 0
     max_count = 0
+    length = 0
 
     @classmethod
     def init_images(cls, paths):
@@ -46,27 +48,27 @@ class BGAsset:
 
     def __init__(self):
         self.x = random.randint(40, MAX_X * 3 // 2)
-        self.y = 0
+        self.y = -25
         self.dx = 10
         self.dy = 12
         self.curr_img = 0
 
-    def update_position(self):
+    def update_position(self, dt):
         if self.x < -ASSET_SIZE * 3 or self.y >= MAX_Y:
             return False
 
         if self.y + self.dy > MAX_Y:
             self.y = MAX_Y
-            self.x -= self.dx
+            self.x -= self.dx * dt * ANIM_SPEED
         else:
-            self.x -= self.dx
-            self.y += self.dy
+            self.x -= self.dx * dt * ANIM_SPEED
+        self.y += self.dy * dt * ANIM_SPEED
 
-        self.curr_img = (self.curr_img + 1) % len(self.images)
+        self.curr_img += dt * ANIM_SPEED
         return True
 
     def render(self, screen):
-        screen.blit(self.images[self.curr_img], (self.x, self.y))
+        screen.blit(self.images[int(self.curr_img) % self.__class__.length], (self.x, self.y))
 
     @classmethod
     def create(cls):
@@ -75,9 +77,9 @@ class BGAsset:
             return cls()
         return None
 
-    def update(self, screen):
+    def update(self, screen, dt):
         self.render(screen)
-        success = self.update_position()
+        success = self.update_position(dt)
         if not success:
             self.__class__.count -= 1
         return success
@@ -92,6 +94,7 @@ class Star(BGAsset):
     def init_images(cls, paths):
         super().init_images(paths)
         cls.images = [pygame.transform.rotate(image, 14) for image in cls.images]
+        cls.length = len(cls.images)
 
 
 class Comet(BGAsset):
@@ -104,7 +107,7 @@ class Comet(BGAsset):
         super().init_images(paths)
         cls.images = [pygame.transform.rotate(image, -30) for image in cls.images]
         cls.images = [pygame.transform.scale(image, (ASSET_SIZE * 3, ASSET_SIZE * 3)) for image in cls.images]
-
+        cls.length = len(cls.images)
 
     def __init__(self):
         super().__init__()
@@ -205,10 +208,10 @@ class Title:
         self.rect = pygame.Rect(MAX_X // 2 - 180, 40, 350, 150)
 
 
-    def update(self, game):
-        image = Title.images[self.count]
+    def update(self, game, dt):
+        image = Title.images[int(self.count) % Title.numFrames]
         game.blit(image, self.rect)
-        self.count = (self.count + 1) % Title.numFrames
+        self.count += dt * ANIM_SPEED
 
 
 class Opening:
@@ -232,6 +235,7 @@ class Opening:
         self.running = True
         self.music = ToneMatrix.ToneMatrix()
         self.bar = 0
+        self.lastNote = -1
 
         self.initialize_assets()
         self.create_buttons(STARTING_PHASE)
@@ -292,13 +296,13 @@ class Opening:
     def run(self):
         import LevelOne
         """Main game loop"""
+        self.clock = pygame.time.Clock()
         while self.running and self.opening:
-            pygame.time.delay(GAME_DELAY)
+            dt = self.clock.tick(MAX_FPS) / 1000
             self.handle_events()
-            self.update_game_state()
-            self.redraw()
+            self.update_game_state(dt)
+            self.redraw(dt)
 
-        pygame.time.delay(TRANSITION_DELAY)
         if not self.running:
             pygame.quit()
         else:
@@ -322,15 +326,15 @@ class Opening:
                 if button.handle_event(event):
                     break  # If a button was clicked, don't process other buttons
 
-    def update_game_state(self):
+    def update_game_state(self, dt):
         """Update game objects and state"""
         # Randomly create stars and comets
-        if random.randint(0, 100) < 7:
+        if random.randint(0, 100) < 7 * dt:
             star = Star.create()
             if star:
                 self.stars.append(star)
 
-        if random.randint(0, 100) < 30:
+        if random.randint(0, 100) < 30 * dt:
             comet = Comet.create()
             if comet:
                 self.comets.append(comet)
@@ -340,24 +344,29 @@ class Opening:
             if self.bar == 0:
                 self.music.song()
 
-            if self.bar % 2 == 0 and self.music.seq[self.bar // 2] is not None:
-                self.music.seq[self.bar // 2].sound.play()
+            if self.music.seq[int(self.bar)] is not None and int(self.bar) > self.lastNote:
+                self.music.seq[int(self.bar)].sound.play()
+                self.lastNote += 1
 
-            self.bar = (self.bar + 1) % 32
+            self.bar = self.bar + dt * 4 if self.bar + dt * 4 < 16 else 0
+            self.lastNote = -1 if self.bar == 0 else self.lastNote
 
         # Phase changing
-        if self.changingPhase and self.phaseChangeDelay >= PHASE_CHANGE_DELAY and self.currPhase == LOADING_PHASE:
-            nextPhase = END_PHASE if self.prevPhase == STARTING_PHASE else STARTING_PHASE
-            self.create_buttons(nextPhase)
-            self.phaseChangeDelay = 0
-            self.changingPhase = False
-            self.currPhase = nextPhase
-            self.prevPhase = nextPhase
-        elif self.changingPhase:
-            if self.phaseChangeDelay == 0:
+        if self.changingPhase:
+            if self.currPhase == LOADING_PHASE:
+                self.phaseChangeDelay += dt * ANIM_SPEED
+                if self.phaseChangeDelay >= 2.0:
+                    nextPhase = END_PHASE if self.prevPhase == STARTING_PHASE else STARTING_PHASE
+                    self.create_buttons(nextPhase)
+                    self.phaseChangeDelay = 0
+                    self.changingPhase = False
+                    self.currPhase = nextPhase
+                    self.prevPhase = nextPhase
+            else:
+                # Transition to loading phase
                 self.create_buttons(LOADING_PHASE)
-            self.currPhase = LOADING_PHASE
-            self.phaseChangeDelay += 1
+                self.currPhase = LOADING_PHASE
+                self.phaseChangeDelay = 0
 
 
         #update player
@@ -370,35 +379,35 @@ class Opening:
             self.player.speed = max(self.player.speed - 1, MIN_SPEED)
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.player.move(1)
+            self.player.move(1, dt)
             moved = True
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.player.move(2)
+            self.player.move(2, dt)
             moved = True
         if not moved:
-            self.player.move(0)
+            self.player.move(0, dt)
 
         if (keys[pygame.K_UP] or keys[pygame.K_w]) and not self.player.jumping:
-            self.player.move(3)
+            self.player.move(3, dt)
         if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not self.player.jumping:
-            self.player.move(4)
+            self.player.move(4, dt)
 
         if keys[pygame.K_SPACE] or self.player.jumping:
-            self.player.jump()
+            self.player.jump(dt)
 
 
-    def redraw(self):
+    def redraw(self, dt):
         """Redraw all game elements"""
         self.screen.blit(self.bg, (0, 0))
 
         # Update and draw stars
-        self.stars = [star for star in self.stars if star.update(self.screen)]
+        self.stars = [star for star in self.stars if star.update(self.screen, dt)]
 
         # Update and draw comets
-        self.comets = [comet for comet in self.comets if comet.update(self.screen)]
+        self.comets = [comet for comet in self.comets if comet.update(self.screen, dt)]
 
         #Update Title
-        self.title.update(self.screen)
+        self.title.update(self.screen, dt)
 
         #Update player
         self.player.draw(self.screen)
@@ -437,9 +446,9 @@ class Opening:
             # Blit the surface to the screen
             self.screen.blit(fade_surface, (0, 0))
 
-            self.fadeCount += 1
+            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE
         elif self.currPhase == FADE_OUT:
-            self.fadeCount += 1
+            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE
 
 
         pygame.display.flip()

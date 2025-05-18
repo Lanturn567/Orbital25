@@ -9,6 +9,7 @@ TEXT_BOX_DIMENSIONS = (580, 90)
 TEXT_BUTTON = 1
 ARROW_DIMENSIONS = (16, 16)
 FONT_SIZE = 20
+CHARACTERS_PER_SECOND = 30  # Speed of text display (characters per second)
 
 class StoryTextBox(Opening.Button):
     text = []
@@ -26,7 +27,6 @@ class StoryTextBox(Opening.Button):
         cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)
         cls.clickSound.set_volume(GAME_VOLUME)
 
-
     def __init__(self, x, y, game):
         super().__init__(x, y, TEXT_BOX_DIMENSIONS[0], TEXT_BOX_DIMENSIONS[1], 0, self.textBoxClick)
         self.game = game
@@ -35,12 +35,13 @@ class StoryTextBox(Opening.Button):
         self.currLineLength = len(StoryTextBox.text[self.currLine])
         self.currChar = 0
         self.text_padding = 30
-        self.line_padding = 5 # Space between wrapped lines
+        self.line_padding = 5
         self.font = pygame.font.SysFont("aquakana", FONT_SIZE, italic=True, bold=True)
-        self.max_line_width = TEXT_BOX_DIMENSIONS[0] - (2 * self.text_padding)  # Available width for text
-        self.wrapped_lines = []  # Stores the wrapped lines of current text
-        self.line_height = self.font.get_height()  # Height of each text line
-
+        self.max_line_width = TEXT_BOX_DIMENSIONS[0] - (2 * self.text_padding)
+        self.wrapped_lines = []
+        self.line_height = self.font.get_height()
+        self.accumulated_time = 0.0  # Tracks time between character updates
+        self.char_delay = 1.0 / CHARACTERS_PER_SECOND  # Time between characters
 
     def wrap_text(self, text):
         """Break text into multiple lines that fit within the text box width"""
@@ -49,18 +50,17 @@ class StoryTextBox(Opening.Button):
         current_line = []
 
         for word in words:
-            # Test if adding the word would exceed the width
             test_line = ' '.join(current_line + [word])
             test_width = self.font.size(test_line)[0]
 
             if test_width <= self.max_line_width:
                 current_line.append(word)
             else:
-                if current_line:  # If current line has content, add it
+                if current_line:
                     wrapped_lines.append(' '.join(current_line))
-                current_line = [word]  # Start new line with current word
+                current_line = [word]
 
-        if current_line:  # Add the last line
+        if current_line:
             wrapped_lines.append(' '.join(current_line))
 
         return wrapped_lines
@@ -75,7 +75,6 @@ class StoryTextBox(Opening.Button):
                                  self.rect.y + TEXT_BOX_DIMENSIONS[1] - 70,
                                  ARROW_DIMENSIONS[0], ARROW_DIMENSIONS[1]))
 
-        # Draw each wrapped line
         y_offset = self.rect.y + (TEXT_BOX_DIMENSIONS[1] - (len(self.wrapped_lines) * self.line_height)) // 2 - 5
         for line in self.wrapped_lines:
             text_surface = self.font.render(line, True, (255, 255, 255))
@@ -92,6 +91,7 @@ class StoryTextBox(Opening.Button):
                 self.currLine += 1
                 self.currChar = 0
                 self.currLineLength = len(StoryTextBox.text[self.currLine])
+                self.accumulated_time = 0.0  # Reset timer for new line
             else:
                 self.game.textComplete = True
 
@@ -100,6 +100,7 @@ class StoryTextBox(Opening.Button):
             self.currString = StoryTextBox.text[self.currLine]
             self.currChar = self.currLineLength
             self.wrapped_lines = self.wrap_text(self.currString)
+            self.game.boxFinished = True
 
         if self.game.isClicked:
             return
@@ -109,13 +110,27 @@ class StoryTextBox(Opening.Button):
         else:
             return skipBox()
 
-    def updateString(self):
+    def updateString(self, dt):
+        """Update text based on delta time"""
         if self.currChar >= self.currLineLength:
             self.game.boxFinished = True
-        else:
-            self.currString += StoryTextBox.text[self.currLine][self.currChar]
-            self.currChar += 1
+            return
+
+        # Accumulate time since last frame
+        self.accumulated_time += dt
+
+        # Determine how many characters to add based on accumulated time
+        chars_to_add = int(self.accumulated_time / self.char_delay)
+
+        if chars_to_add > 0:
+            # Add the characters
+            chars_to_add = min(chars_to_add, self.currLineLength - self.currChar)
+            self.currString += StoryTextBox.text[self.currLine][self.currChar:self.currChar + chars_to_add]
+            self.currChar += chars_to_add
             self.wrapped_lines = self.wrap_text(self.currString)
+
+            # Subtract the time we've accounted for
+            self.accumulated_time -= chars_to_add * self.char_delay
 
     def reset(self):
         self.currLine = 0
@@ -123,5 +138,6 @@ class StoryTextBox(Opening.Button):
         self.currString = ""
         self.currLineLength = len(StoryTextBox.text[self.currLine])
         self.wrapped_lines = []
+        self.accumulated_time = 0.0
         self.game.boxFinished = False
         self.game.textComplete = False

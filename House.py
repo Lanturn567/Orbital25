@@ -14,9 +14,10 @@ START_POS = "home"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 4
-MAX_SPEED = BLOCK_SIZE // 4 * 3
+PLAYER_SPEED = BLOCK_SIZE // 3
+MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
+MAX_FPS = 60
 LEVEL_TWO_MUSIC_PATH = "./music/Home.mp3"
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
@@ -25,16 +26,15 @@ INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 
 GAME_VOLUME = 0.3
-GAME_DELAY = 80
-ANIM_DELAY = 8
+ANIM_SPEED = 8
 
-DELAY_AFTER_CLICK = 3
+DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH = "House.txt"
 TEXT_BOX_PATHS = ["./UI/TextBox.png", "./UI/TextBoxArrow.png"]
 VOL_BUTTON_PATHS = ["./UI/Buttons/NoMute.png", "./UI/Buttons/Mute.png"]
-DELAY_AT_START = 25
+DELAY_AT_START = 10
 WARP_PATH = "./Assets/Warp.png"
 LOCATION = "house"
 MAX_ALPHA = 255
@@ -87,14 +87,14 @@ class Entity(pygame.sprite.Sprite):
         self.hitbox = pygame.Rect(center[0], center[1], size[0], size[1])
         self.y_sort = self.rect.centery
 
-    def input(self):
+    def input(self, dt):
         pass
 
     def move(self):
         pass
 
-    def update(self):
-        self.input()
+    def update(self, dt):
+        self.input(dt)
         self.move()
 
     def collide(self):
@@ -119,6 +119,14 @@ class MC(Entity):
         self.speed = PLAYER_SPEED
         self.hitbox = pygame.Rect(self.x + size[0] * 15 // 32, self.y + size[1] * 15 // 32, size[0] // 8, size[1] // 8)
 
+        if self.facing == LEFT:
+            self.maxFrames = MC.leftFrames
+        if self.facing == RIGHT:
+            self.maxFrames = MC.rightFrames
+        if self.facing == UP:
+            self.maxFrames = MC.upFrames
+        if self.facing == DOWN:
+            self.maxFrames = MC.downFrames
 
     @classmethod
     def init_assets(cls, paths):
@@ -149,7 +157,7 @@ class MC(Entity):
         cls.leftFrames = len(cls.assets[LEFT])
         cls.rightFrames = len(cls.assets[RIGHT])
 
-    def input(self):
+    def input(self, dt):
         # Store previous position
         if self.game.textComplete and not self.game.inEvent:
             self.old_x, self.old_y = self.x, self.y
@@ -165,39 +173,43 @@ class MC(Entity):
                 self.speed = max(self.speed - 1, PLAYER_SPEED)
 
             if up and not down:
-                self.y -= self.speed
+                self.y -= self.speed * dt * PLAYER_SPEED
                 if (right or left) and not (left and right):
                     pass
                 elif self.facing == UP:
-                    self.currImage = (self.currImage + 1) % MC.upFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = UP
+                    self.maxFrames = MC.upFrames
                     self.currImage = 0
 
             if down and not up:
-                self.y += self.speed
+                self.y += self.speed * dt * PLAYER_SPEED
                 if (left or right) and not (left and right):
                     pass
                 elif self.facing == DOWN:
-                    self.currImage = (self.currImage + 1) % MC.downFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = DOWN
+                    self.maxFrames = MC.downFrames
                     self.currImage = 0
 
             if left and not right:
-                self.x -= self.speed
+                self.x -= self.speed * dt * PLAYER_SPEED
                 if self.facing == LEFT:
-                    self.currImage = (self.currImage + 1) % MC.leftFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = LEFT
+                    self.maxFrames = MC.leftFrames
                     self.currImage = 0
 
             if right and not left:
-                self.x += self.speed
+                self.x += self.speed * dt * PLAYER_SPEED
                 if self.facing == RIGHT:
-                    self.currImage = (self.currImage + 1) % MC.rightFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = RIGHT
+                    self.maxFrames = MC.rightFrames
                     self.currImage = 0
 
     def move(self):
@@ -211,7 +223,7 @@ class MC(Entity):
 
         # Update sprite properties
         self.y_sort = self.rect.centery
-        self.image = MC.assets[self.facing][self.currImage]
+        self.image = MC.assets[self.facing][int(self.currImage) % self.maxFrames]
 
     def collide(self):
         # Check for collisions with all collidable sprites
@@ -224,6 +236,7 @@ class MC(Entity):
                 self.rect.center = (self.x, self.y)
                 self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
                 break
+
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
@@ -246,7 +259,6 @@ class AnimatedSprite(Sprite):
             AnimatedSprite.ini = True
         super().__init__(pos, AnimatedSprite.assets[0], groups, z)
         self.currImage = 0
-        self.delay = 0
 
     @classmethod
     def init_assets(cls, paths):
@@ -259,14 +271,9 @@ class AnimatedSprite(Sprite):
                 cls.assets.append(surface)
         cls.length = len(cls.assets)
 
-    def update(self, *args, **kwargs):
-        if self.delay > ANIM_DELAY:
-            self.delay = 0
-            self.currImage = (self.currImage + 1) % AnimatedSprite.length
-            self.image = AnimatedSprite.assets[self.currImage]
-        else:
-            self.delay += 1
-
+    def update(self, dt, *args, **kwargs):
+        self.currImage += ANIM_SPEED * dt
+        self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
 
 
 class Warp(Sprite):
@@ -274,7 +281,7 @@ class Warp(Sprite):
         super().__init__(pos, image, groups, z)
         self.game = game
         self.stage_name = stage_name
-        self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
+        self.hitbox = pygame.Rect(self.rect.x, self.rect.y, self.rect.width, self.rect.height)
 
     def warp(self):
         self.game.nextStage = STAGES.get(self.stage_name)(self.game.screen)
@@ -358,25 +365,25 @@ class House:
 
 
 
-    def fade(self):
+    def fade(self, dt):
         if not self.nextStage:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, FADE_LEVEL)
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, FADE_LEVEL)
 
         else:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
             elif self.alpha >= MAX_ALPHA:
-                self.finalDelay += 1
+                self.finalDelay += dt * ANIM_SPEED
 
-    def update_game_state(self):
+    def update_game_state(self, dt):
         #update player
         keys = pygame.key.get_pressed()
         for entity in self.entities:
@@ -387,19 +394,19 @@ class House:
 
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
+            self.clickDelay = DELAY_AFTER_CLICK
 
-        self.buttons[TEXT_BUTTON].updateString()
+        self.buttons[TEXT_BUTTON].updateString(dt)
         if self.isClicked:
-            self.clickDelay = (self.clickDelay + 1) % DELAY_AFTER_CLICK
-            if self.clickDelay == 0:
+            self.clickDelay -= dt * ANIM_SPEED
+            if self.clickDelay <= 0:
                 self.isClicked = False
 
     def redraw(self):
         # Draw buttons
-        if self.ticker > DELAY_AT_START:
-            for i, button in enumerate(self.buttons):
-                if i != TEXT_BUTTON or not self.textComplete:
-                    button.draw(self.screen)
+        for i, button in enumerate(self.buttons):
+            if i != TEXT_BUTTON or not self.textComplete:
+                button.draw(self.screen)
 
 
     def handle_events(self):
@@ -436,29 +443,26 @@ class House:
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
-
-        clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
         self.running = True
 
         while self.running and not self.stageDone:
-
+            dt = self.clock.tick(MAX_FPS) / 1000.0  # Convert milliseconds to seconds
             if self.ticker < DELAY_AT_START:
-                self.ticker += 1
+                self.ticker = min(self.ticker + dt * ANIM_SPEED, DELAY_AT_START)
             elif self.ticker == DELAY_AT_START:
-                self.ticker += 1
+                self.ticker += dt
                 self.buttons.append(StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self))
-            pygame.time.delay(GAME_DELAY)
 
             if not self.nextStage:
                 self.handle_events()
-                self.update_game_state()
+                self.update_game_state(dt)
                 self.screen.fill("black")
-                self.sprite_group.update()
+                self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
                 self.redraw()
-            self.fade()
+            self.fade(dt)
             pygame.display.flip()
-
 
         if self.nextStage:
             return self.nextStage

@@ -1,6 +1,6 @@
 import pygame
 import random
-from LevelTwo import Entity, VOLUME_BUTTON, TEXT_BUTTON
+from LevelTwo import Entity, TEXT_BUTTON
 from StoryTextBox import StoryTextBox
 
 
@@ -14,8 +14,9 @@ dirs = {"left" : LEFT,
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
 TRAINER_PATHS = { "furina" : ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
                 }
-TRAINER_GO_DELAY = 4
-AFTER_EVENT_DELAY = 5
+ANIM_SPEED = 4
+ANIM_DIST = 3
+AFTER_EVENT_DELAY = 1
 TRAINER_EVENT_PATH = ["Home1.txt"]
 
 
@@ -46,6 +47,16 @@ class Trainer(Entity):
         self.box = pygame.Rect(self.x, self.y, self.rect.width + INTERACTABLE_BOUNDS[0], self.rect.height + INTERACTABLE_BOUNDS[1])
         self.box.center = (self.x, self.y)
 
+        if self.facing == LEFT:
+            self.maxFrames = Trainer.leftFrames
+        if self.facing == RIGHT:
+            self.maxFrames = Trainer.rightFrames
+        if self.facing == UP:
+            self.maxFrames = Trainer.upFrames
+        if self.facing == DOWN:
+            self.maxFrames = Trainer.downFrames
+
+        self.TRAINER_GO_SPEED = random.randint(2, 4) * BLOCK_SIZE
 
         #GO event
         self.text = text
@@ -86,45 +97,51 @@ class Trainer(Entity):
         cls.upFrames = len(cls.assets[UP])
 
 
-    def move(self):
+    def move(self, dt):
         # Store previous position
         if not self.inEvent:
-            dir = self.road[self.currentStep] if self.road else self.facing
+            dir = self.road[int(self.currentStep) % self.maxSteps] if self.road else self.facing
             if not self.box.colliderect(self.game.player.hitbox) and self.maxSteps:
                 if dir == LEFT:
-                    self.x -= BLOCK_SIZE // TRAINER_GO_DELAY
+                    self.x -= dt * self.TRAINER_GO_SPEED
                     if self.facing == LEFT:
-                        self.currImage = (self.currImage + 1) % Trainer.leftFrames
+                        self.currImage += dt * ANIM_SPEED
                     else:
                         self.facing = LEFT
                         self.currImage = 0
+                        self.maxFrames = Trainer.leftFrames
+
 
                 elif dir == RIGHT:
-                    self.x += BLOCK_SIZE // TRAINER_GO_DELAY
+                    self.x += dt * self.TRAINER_GO_SPEED
                     if self.facing == RIGHT:
-                        self.currImage = (self.currImage + 1) % Trainer.rightFrames
+                        self.currImage += dt * ANIM_SPEED
                     else:
                         self.facing = RIGHT
                         self.currImage = 0
+                        self.maxFrames = Trainer.rightFrames
+
 
                 elif dir == DOWN:
-                    self.y += BLOCK_SIZE // TRAINER_GO_DELAY
+                    self.y += dt * self.TRAINER_GO_SPEED
                     if self.facing == DOWN:
-                        self.currImage = (self.currImage + 1) % Trainer.downFrames
+                        self.currImage += dt * ANIM_SPEED
                     else:
                         self.facing = DOWN
+                        self.maxFrames = Trainer.downFrames
                         self.currImage = 0
 
                 elif dir == UP:
-                    self.y -= BLOCK_SIZE // TRAINER_GO_DELAY
+                    self.y -= dt * self.TRAINER_GO_SPEED
                     if self.facing == UP:
-                        self.currImage = (self.currImage + 1) % Trainer.upFrames
+                        self.currImage += dt * ANIM_SPEED
                     else:
                         self.facing = UP
                         self.currImage = 0
+                        self.maxFrames = Trainer.upFrames
 
-                self.currentStep = (self.currentStep + 1) % self.maxSteps if self.ticker >= TRAINER_GO_DELAY else self.currentStep
-                self.ticker = 0 if self.ticker == TRAINER_GO_DELAY else self.ticker + 1
+
+                self.currentStep += dt * ANIM_DIST
                 self.box.center = (self.x, self.y)
 
             elif self.box.colliderect(self.game.player.hitbox):
@@ -146,16 +163,16 @@ class Trainer(Entity):
             self.game.inEvent = True
             self.makeEvent()
 
-    def update(self):
+    def update(self, dt):
         # Update position
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
-        self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else 1
+        self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
         # Check for collisions
         if not self.inEvent and self.game.textComplete:
-            self.move()
+            self.move(dt)
             self.y_sort = self.rect.centery
-            self.image = Trainer.assets[self.facing][self.currImage]
+            self.image = Trainer.assets[self.facing][int(self.currImage) % self.maxFrames]
         elif self.inEvent and self.game.textComplete:
             self.inEvent = False
             self.game.inEvent = False

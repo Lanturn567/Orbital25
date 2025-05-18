@@ -6,9 +6,9 @@ MAX_X, MAX_Y = 740, 493
 BACKGROUND_FRAMES = 5
 BGPATHS = ["./BGL1/BgL1-", ".png"]
 FRAME_DELAY, GAME_DELAY, FADE_DELAY = 15, 100, 2
-DELAY_AFTER_CLICK = 3
-BLOCKS_PER_FADE = 30
-COLOR_CHANGE_PER_FADE = 15
+DELAY_AFTER_CLICK = 8
+BLOCKS_PER_FADE = 12
+COLOR_CHANGE_PER_FADE = 7
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 VOL_BUTTON_PATHS = ["./UI/Buttons/NoMute.png", "./UI/Buttons/Mute.png"]
 VOL_BUTTON_DIMENSIONS = (32, 32)
@@ -48,6 +48,7 @@ class TextBox(Opening.Button):
         self.currLine = 0
         self.currLineLength = len(TextBox.text[self.currLine])
         self.currChar = 0
+        self.tick = 0
 
 
     #Override no enlarge and shrink on click
@@ -73,6 +74,7 @@ class TextBox(Opening.Button):
             if self.currLine < TextBox.length - 1:
                 self.currLine += 1
                 self.currChar = 0  # Reset character position
+                self.tick = 0
                 self.currLineLength = len(TextBox.text[self.currLine])  # Reset line length
             else:
                 self.game.textComplete = True
@@ -82,6 +84,7 @@ class TextBox(Opening.Button):
             self.game.isClicked = True
             self.currString = TextBox.text[self.currLine]
             self.currChar = self.currLineLength
+            self.tick = 0
 
         if self.game.isClicked:
             return
@@ -91,12 +94,15 @@ class TextBox(Opening.Button):
         else:
             return skipBox()
 
-    def updateString(self):
+    def updateString(self, dt):
         if self.currChar >= self.currLineLength:
             self.game.boxFinished = True
-        else:
+        elif self.tick >= self.currChar:
             self.currString += TextBox.text[self.currLine][self.currChar]
             self.currChar += 1
+        else:
+            self.tick += dt * 16
+
 
 class LevelOneVolumeButton(Opening.Button):
     """Volume control button"""
@@ -179,8 +185,7 @@ class LevelOne:
                     break  # If a button was clicked, don't process other buttons
 
 
-    def update_game_state(self):
-        #update player
+    def update_game_state(self, dt):
         if self.textComplete:
             return
 
@@ -188,20 +193,22 @@ class LevelOne:
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
 
-        self.buttons[TEXT_BUTTON].updateString()
+        self.buttons[TEXT_BUTTON].updateString(dt)
+
         if self.isClicked:
-            self.clickDelay = (self.clickDelay + 1) % DELAY_AFTER_CLICK
-            if self.clickDelay == 0:
+            self.clickDelay += dt
+            if self.clickDelay >= DELAY_AFTER_CLICK * 0.1:
+                self.clickDelay = 0
                 self.isClicked = False
 
 
-    def redraw(self):
+    def redraw(self, dt):
         self.screen.blit(LevelOne.images[self.currentPNG], (0, 0))
-        if self.PNGdelay >= FRAME_DELAY:
+
+        self.PNGdelay += dt
+        if self.PNGdelay >= FRAME_DELAY / 5:
             self.currentPNG = (self.currentPNG + 1) % BACKGROUND_FRAMES
             self.PNGdelay = 0
-        else:
-            self.PNGdelay += 1
 
         if self.fadeCount > TIMESFADE:
             pass
@@ -209,7 +216,10 @@ class LevelOne:
             diff = self.fadeCount * COLOR_CHANGE_PER_FADE
             colors = (max(0, 230 - diff), max(215 - diff, 0), max(0, 255 - diff))
             pygame.draw.rect(self.screen, colors, (0, 0, MAX_X, MAX_Y - BLOCKS_PER_FADE * max(0, (self.fadeCount - FADE_DELAY))), 0)
-            self.fadeCount += 1
+            self.fadeDelay += dt
+            if self.fadeDelay >= 0.1:
+                self.fadeCount += 1
+                self.fadeDelay = 0
 
         for i, button in enumerate(self.buttons):
             if i is not TEXT_BUTTON or not self.textComplete:
@@ -217,18 +227,21 @@ class LevelOne:
 
         self.fadeOutSurface.fill((0, 0, 0, min(MAX_ALPHA, self.alpha)))
         self.screen.blit(self.fadeOutSurface, self.rect)
+
         if self.textComplete:
-            self.alpha += ALPHA_CHANGE
+            self.alpha += ALPHA_CHANGE * dt * 8  # Scale alpha increment with dt
 
         pygame.display.flip()
 
         if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
             self.nextStage = True
         elif self.alpha >= MAX_ALPHA:
-            self.finalDelay += 1
+            self.finalDelay += dt * 12
 
     def run(self):
         import LevelTwo
+
+        clock = pygame.time.Clock()
 
         try:
             pygame.mixer.music.load(INTROPATH)
@@ -238,11 +251,10 @@ class LevelOne:
             print(f"Error loading music: {e}")
 
         while self.running and not self.nextStage:
-            pygame.time.delay(GAME_DELAY)
+            dt = clock.tick(60) / 1000.0  # Convert to seconds
             self.handle_events()
-            self.update_game_state()
-            self.redraw()
-
+            self.update_game_state(dt)
+            self.redraw(dt)
 
         if not self.nextStage:
             print("Quitting...")
@@ -250,7 +262,6 @@ class LevelOne:
             sys.exit()
         else:
             return LevelTwo.LevelTwo(self.screen, START_POS)
-
 if __name__ == "__main__":
     # Initialize pygame
     pygame.init()

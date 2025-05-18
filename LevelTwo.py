@@ -17,9 +17,10 @@ PLAYER_SIZE = (32, 64)
 PLAYER_SPEED = BLOCK_SIZE // 4
 MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
+MAX_FPS = 60
 LEVEL_TWO_MUSIC_PATH = "./music/LevelTwoBGM.mp3"
 FADE_LEVEL = 100
-FADE_CHANGE_PER_FRAME = 6
+FADE_CHANGE_PER_FRAME = 3
 WATER_PATHS = ["./Assets/Water/Water01.png", "./Assets/Water/Water04.png", "./Assets/Water/Water31.png", "./Assets/Water/Water04.png"]
 PLAYER_PATHS = ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
 POKEMON_PATHS = ["./Assets/pokeL.png", "./Assets/pokeR.png"]  # Assuming single image for simplicity
@@ -27,29 +28,30 @@ TREE_PATH = ["./Assets/Tree.png"]
 LEAF_PATH = ["./Assets/Leaf.png"]
 FURINA_PATHS = ["./Player/WalkLeftFurina.png", "./Player/WalkRightFurina.png"]
 FURINA_ROAD = [RIGHT, RIGHT, RIGHT, UP, RIGHT, UP, RIGHT, UP, RIGHT,
-               RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
+               RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT, RIGHT]
 
 STAGES = {}
 FURINA_SIZE = (48, 64)
-FURINA_GO_DELAY = 4
+FURINA_GO_SPEED = BLOCK_SIZE * 4
 FURINA_PROD_TEXT = "LevelTwoWarpingWithoutFurina.txt"
 FURINA_EVENT_PATH = "LevelTwoFurinaEvent.txt"
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
+WATER_SPEED = 1
 GAME_VOLUME = 0.3
-GAME_DELAY = 80
-ANIM_DELAY = 8
-SWAY_SPEED = random.randint(1, 2)
-SWAY_INTERVAL = 0.2
-SWAY_LENGTH = BLOCK_SIZE // 8
-SWAY_DELAY = 50
+ANIM_SPEED = 8
+ANIM_DIST = 4
+SWAY_SPEED = BLOCK_SIZE
+SWAY_INTERVAL = 2
+SWAY_LENGTH = BLOCK_SIZE
+SWAY_DELAY = 15
 FLOAT_SPEED = BLOCK_SIZE // 3
-FLOAT_INTERVAL = 0.4
+FLOAT_INTERVAL = 4
 FLOAT_LENGTH = BLOCK_SIZE
 DIST_FROM_PLAYER = BLOCK_SIZE * 15
 POKEMON_CRY = "./music/Poke.wav"
 POKEMON_SIZE = (64, 64)
-DELAY_AFTER_CLICK = 3
+DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH = "LevelTwoText.txt"
@@ -63,50 +65,53 @@ FINAL_DELAY = 5
 class Leaf(BGAsset):
     """Comet background assets"""
     default_color = (255, 0, 0)  # Red
-    max_count = 10
+    max_count = 8
     tick = 0
     tick_betw_leaves = SWAY_DELAY
 
     def __init__(self, player):
         super().__init__()
         self.player = player
-        self.x = self.player.x + random.randint(-MAX_X // 2, MAX_X // 2)
-        self.y = self.player.y - MAX_Y // 2 - 20
+        self.x = self.player.x + random.randint(-MAX_X // 2 - 20, MAX_X // 2 + 20)
+        self.y = self.player.y - MAX_Y // 2 - 30
         self.ticker = 0
         self.dx = math.cos(self.ticker) * SWAY_LENGTH
         self.dy = SWAY_SPEED
+        self.maxImages = len(Leaf.images)
 
-
-    def update_position(self):
+    def update_position(self, dt):
+        """Update leaf position with delta time (dt in seconds)"""
         # If leaf is out of view (past bottom of screen relative to player), remove it
         if abs(self.y - self.player.y) >= MAX_Y or abs(self.x - self.player.x) >= MAX_X:
             return False
 
-        # Update leaf's local position in world space (independent of screen)
-        self.y += self.dy
-        self.x += self.dx
+        # Update leaf's local position in world space using delta time
+        self.y += self.dy * dt
+        self.x += self.dx * dt
 
-        # Animate
-        self.curr_img = (self.curr_img + 1) % len(self.images)
-        self.ticker += SWAY_INTERVAL
+        # Update animation timer and frame
+        self.curr_img += dt * ANIM_SPEED
+
+        # Update swaying motion with delta time
+        self.ticker += SWAY_INTERVAL * dt
         self.dx = math.cos(self.ticker) * SWAY_LENGTH
-        return True
 
+        return True
 
     def render(self, screen):
         screen_x = self.x - self.player.x + MAX_X // 2
         screen_y = self.y - self.player.y + MAX_Y // 2
-        screen.blit(self.images[self.curr_img], (screen_x, screen_y))
-
+        screen.blit(self.images[int(self.curr_img) % self.maxImages], (screen_x, screen_y))
 
     @classmethod
-    def create(cls, player):
+    def create(cls, player, dt):
+        """Create a new leaf if conditions are met, using delta time"""
+        cls.tick += dt
         if cls.count < cls.max_count and cls.tick > cls.tick_betw_leaves:
             cls.count += 1
             cls.tick = 0
             return cls(player)
         return None
-
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):
 
@@ -153,21 +158,22 @@ class Entity(pygame.sprite.Sprite):
         self.y = pos[1]
         self.rect = pygame.Rect(0, 0, size[0], size[1])
         self.rect.center = pos
-        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 4, size[0] // 2, size[1] // 2)
+        self.hitbox = pygame.Rect(self.x + size[0] // 4, self.y + size[1] // 2, size[0] // 2, size[1] // 8 * 3)
         self.y_sort = self.rect.centery
 
-    def input(self):
+    def input(self, dt):
         pass
 
     def move(self):
         pass
 
-    def update(self):
-        self.input()
+    def update(self, dt):
+        self.input(dt)
         self.move()
 
     def collide(self):
         pass
+
 
 class MC(Entity):
     ini = False
@@ -188,6 +194,14 @@ class MC(Entity):
         self.speed = PLAYER_SPEED
         self.hitbox = pygame.Rect(self.x + size[0] * 15 // 32, self.y + size[1] * 15 // 32, size[0] // 8, size[1] // 8)
 
+        if self.facing == LEFT:
+            self.maxFrames = MC.leftFrames
+        if self.facing == RIGHT:
+            self.maxFrames = MC.rightFrames
+        if self.facing == UP:
+            self.maxFrames = MC.upFrames
+        if self.facing == DOWN:
+            self.maxFrames = MC.downFrames
 
     @classmethod
     def init_assets(cls, paths):
@@ -218,9 +232,9 @@ class MC(Entity):
         cls.leftFrames = len(cls.assets[LEFT])
         cls.rightFrames = len(cls.assets[RIGHT])
 
-    def input(self):
+    def input(self, dt):
         # Store previous position
-        if self.game.poke.ran and self.game.textComplete and not self.game.inEvent:
+        if self.game.textComplete and not self.game.inEvent:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
@@ -234,39 +248,43 @@ class MC(Entity):
                 self.speed = max(self.speed - 1, PLAYER_SPEED)
 
             if up and not down:
-                self.y -= self.speed
+                self.y -= self.speed * dt * PLAYER_SPEED
                 if (right or left) and not (left and right):
                     pass
                 elif self.facing == UP:
-                    self.currImage = (self.currImage + 1) % MC.upFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = UP
+                    self.maxFrames = MC.upFrames
                     self.currImage = 0
 
             if down and not up:
-                self.y += self.speed
+                self.y += self.speed * dt * PLAYER_SPEED
                 if (left or right) and not (left and right):
                     pass
                 elif self.facing == DOWN:
-                    self.currImage = (self.currImage + 1) % MC.downFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = DOWN
+                    self.maxFrames = MC.downFrames
                     self.currImage = 0
 
             if left and not right:
-                self.x -= self.speed
+                self.x -= self.speed * dt * PLAYER_SPEED
                 if self.facing == LEFT:
-                    self.currImage = (self.currImage + 1) % MC.leftFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = LEFT
+                    self.maxFrames = MC.leftFrames
                     self.currImage = 0
 
             if right and not left:
-                self.x += self.speed
+                self.x += self.speed * dt * PLAYER_SPEED
                 if self.facing == RIGHT:
-                    self.currImage = (self.currImage + 1) % MC.rightFrames
+                    self.currImage += ANIM_SPEED * dt
                 else:
                     self.facing = RIGHT
+                    self.maxFrames = MC.rightFrames
                     self.currImage = 0
 
     def move(self):
@@ -280,7 +298,7 @@ class MC(Entity):
 
         # Update sprite properties
         self.y_sort = self.rect.centery
-        self.image = MC.assets[self.facing][self.currImage]
+        self.image = MC.assets[self.facing][int(self.currImage) % self.maxFrames]
 
     def collide(self):
         # Check for collisions with all collidable sprites
@@ -293,6 +311,44 @@ class MC(Entity):
                 self.rect.center = (self.x, self.y)
                 self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
                 break
+
+
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, pos, image, groups, z=0):
+        super().__init__(groups)
+        self.image = image
+        self.rect = self.image.get_rect(topleft=pos)
+        self.z = z
+        self.y_sort = self.rect.centery - BLOCK_SIZE // 2
+        self.hitbox = self.rect.copy()
+
+class AnimatedSprite(Sprite):
+    assets = []
+    ini = False
+    length = 0
+
+    def __init__(self, pos, paths, groups, z=0):
+        if not AnimatedSprite.ini:
+            AnimatedSprite.init_assets(paths)
+            AnimatedSprite.ini = True
+        super().__init__(pos, AnimatedSprite.assets[0], groups, z)
+        self.currImage = 0
+
+    @classmethod
+    def init_assets(cls, paths):
+        for path in paths:
+            try:
+                cls.assets.append(pygame.image.load(path))
+            except FileNotFoundError:
+                surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                surface.fill((255, 255, 255))
+                cls.assets.append(surface)
+        cls.length = len(cls.assets)
+
+    def update(self, dt, *args, **kwargs):
+        self.currImage += WATER_SPEED * dt
+        self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
+
 
 
 class Poke(Entity):
@@ -309,6 +365,7 @@ class Poke(Entity):
         self.player = game.player
         self.follow_distance = BLOCK_SIZE * 2
 
+        # Load images
         self.images = []
         for path in image_paths:
             try:
@@ -320,19 +377,28 @@ class Poke(Entity):
         self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
         self.rect = self.image.get_rect(center=pos)
 
-        #Furina takes him away
+        # Movement constants (now in units per second)
+        self.float_speed = FLOAT_SPEED # pixels per second
+        self.float_length = FLOAT_LENGTH  # pixels
+        self.float_interval = FLOAT_INTERVAL # radians per second
+        self.follow_speed = 0.2 # proportion per second
+
+        # Furina takes him away
         self.bye = False
         self.byecry = True
 
-    def update(self):
+    def update(self, dt):
+        # Update facing direction image
         self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
+
         if self.bye:
             if self.byecry:
                 self.game.poke.cry.play()
                 self.byecry = False
             self.player = self.game.furina
+
         if self.ran:
-            # Follow player with some delay
+            # Follow player with some delay (framerate-independent)
             target_x = self.player.x
             target_y = self.player.y
             self.facing = self.player.facing
@@ -340,12 +406,12 @@ class Poke(Entity):
             # Calculate direction vector
             dx = target_x - self.x
             dy = target_y - self.y
-            distance = max(32, (dx**2 + dy**2)**0.5)
+            distance = max(BLOCK_SIZE, (dx**2 + dy**2)**0.5)
 
-            # Normalize and scale by follow distance
+            # Normalize and scale by follow distance and delta time
             if distance > self.follow_distance:
-                self.x += dx * 0.1
-                self.y += dy * 0.1
+                self.x += dx * self.follow_speed * dt * ANIM_SPEED
+                self.y += dy * self.follow_speed * dt * ANIM_SPEED
 
             # Update facing direction
             if abs(dx) > abs(dy):
@@ -353,18 +419,20 @@ class Poke(Entity):
             else:
                 self.facing = DOWN if dy > 0 else UP
 
-            self.rect.center = (self.x, self.y)
-            self.y_sort = self.rect.centery
-
         else:
-            self.x += FLOAT_SPEED
-            self.y = self.player.y + FLOAT_LENGTH * math.sin(self.floatStage)
-            self.rect.center = (self.x, self.y)
-            self.floatStage += FLOAT_INTERVAL
+            # Floating animation (framerate-independent)
+            self.x += self.float_speed * dt * ANIM_SPEED
+            self.y = self.player.y + self.float_length * math.sin(self.floatStage)
+            self.floatStage += self.float_interval * dt
 
+            # Check if we should start following
             if self.x >= self.player.x + BLOCK_SIZE * 1.5:
                 self.ran = True
                 self.cry.play()
+
+        # Update position and sorting
+        self.rect.center = (self.x, self.y)
+        self.y_sort = self.rect.centery
 
 class Furina(Entity):
 
@@ -417,40 +485,37 @@ class Furina(Entity):
         cls.leftFrames = len(cls.assets[LEFT])
         cls.rightFrames = len(cls.assets[RIGHT])
 
-    def move(self):
+    def move(self, dt):
         # Store previous position
         if self.go and self.currentStep < self.maxSteps:
             self.game.poke.bye = True
-            down = self.road[self.currentStep] == DOWN
-            left = self.road[self.currentStep] == LEFT
-            right = self.road[self.currentStep] == RIGHT
-            up = self.road[self.currentStep] == UP
-
+            down = self.road[int(self.currentStep)] == DOWN
+            left = self.road[int(self.currentStep)] == LEFT
+            right = self.road[int(self.currentStep)] == RIGHT
+            up = self.road[int(self.currentStep)] == UP
 
             if left and not right:
-                self.x -= BLOCK_SIZE // FURINA_GO_DELAY
+                self.x -= dt * FURINA_GO_SPEED
                 if self.facing == LEFT:
-                    self.currImage = (self.currImage + 1) % Furina.leftFrames
+                    self.currImage += dt * ANIM_SPEED
                 else:
                     self.facing = LEFT
                     self.currImage = 0
 
             elif right and not left:
-                self.x += BLOCK_SIZE // FURINA_GO_DELAY
+                self.x += dt * FURINA_GO_SPEED
                 if self.facing == RIGHT:
-                    self.currImage = (self.currImage + 1) % Furina.rightFrames
+                    self.currImage += dt * ANIM_SPEED
                 else:
                     self.facing = RIGHT
                     self.currImage = 0
 
             else:
-                self.y = self.y + BLOCK_SIZE // FURINA_GO_DELAY if down else self.y - BLOCK_SIZE // FURINA_GO_DELAY
-                if self.facing == RIGHT:
-                    self.currImage = (self.currImage + 1) % Furina.rightFrames
-                else:
-                    self.currImage = (self.currImage + 1) % Furina.leftFrames
-            self.currentStep = self.currentStep + 1 if self.ticker == FURINA_GO_DELAY else self.currentStep
-            self.ticker = 0 if self.ticker == FURINA_GO_DELAY else self.ticker + 1
+                self.y = self.y + dt * FURINA_GO_SPEED if down else self.y - dt * FURINA_GO_SPEED
+                self.currImage += dt * ANIM_SPEED
+
+            self.currentStep += dt * ANIM_DIST
+
         elif self.go:
             self.game.inEvent = False
             self.game.met = True
@@ -468,7 +533,7 @@ class Furina(Entity):
             self.game.inEvent = True
             self.makeEvent()
 
-    def update(self):
+    def update(self, dt):
         # Update position
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
@@ -478,55 +543,13 @@ class Furina(Entity):
             self.go = True
 
         # Update sprite properties
-        self.move()
+        self.move(dt)
         self.y_sort = self.rect.centery
-        self.image = Furina.assets[self.facing][self.currImage]
+        self.image = Furina.assets[self.facing][int(self.currImage) % Furina.leftFrames]
 
     def makeEvent(self):
         StoryTextBox.init__text(FURINA_EVENT_PATH)
         self.game.buttons[TEXT_BUTTON].reset()
-
-class Sprite(pygame.sprite.Sprite):
-    def __init__(self, pos, image, groups, z=0):
-        super().__init__(groups)
-        self.image = image
-        self.rect = self.image.get_rect(topleft=pos)
-        self.z = z
-        self.y_sort = self.rect.centery - BLOCK_SIZE // 2
-        self.hitbox = self.rect.copy()
-
-class AnimatedSprite(Sprite):
-    assets = []
-    ini = False
-    length = 0
-
-    def __init__(self, pos, paths, groups, z=0):
-        if not AnimatedSprite.ini:
-            AnimatedSprite.init_assets(paths)
-            AnimatedSprite.ini = True
-        super().__init__(pos, AnimatedSprite.assets[0], groups, z)
-        self.currImage = 0
-        self.delay = 0
-
-    @classmethod
-    def init_assets(cls, paths):
-        for path in paths:
-            try:
-                cls.assets.append(pygame.image.load(path))
-            except FileNotFoundError:
-                surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
-                surface.fill((255, 255, 255))
-                cls.assets.append(surface)
-        cls.length = len(cls.assets)
-
-    def update(self, *args, **kwargs):
-        if self.delay > ANIM_DELAY:
-            self.delay = 0
-            self.currImage = (self.currImage + 1) % AnimatedSprite.length
-            self.image = AnimatedSprite.assets[self.currImage]
-        else:
-            self.delay += 1
-
 
 
 class Warp(Sprite):
@@ -609,7 +632,6 @@ class LevelTwo:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
@@ -685,34 +707,34 @@ class LevelTwo:
         Leaf.init_images(LEAF_PATH)
         self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
-    def fade(self):
+    def fade(self, dt):
         if not self.nextStage:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.alpha > FADE_LEVEL:
-                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME, FADE_LEVEL)
+                self.alpha = max(self.alpha - FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, FADE_LEVEL)
 
         else:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
             elif self.alpha >= MAX_ALPHA:
-                self.finalDelay += 1
+                self.finalDelay += dt * ANIM_SPEED
 
-    def update_game_state(self):
+    def update_game_state(self, dt):
         #update player
         keys = pygame.key.get_pressed()
         for entity in self.entities:
             entity.collide()
 
         # Randomly create stars and comets
-        Leaf.tick += 1
+        Leaf.tick += dt * ANIM_SPEED
         if random.randint(0, 100) < 8:
-            leaf = Leaf.create(self.player)
+            leaf = Leaf.create(self.player, dt)
             if leaf:
                 self.leaves.append(leaf)
 
@@ -721,22 +743,22 @@ class LevelTwo:
 
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
+            self.clickDelay = DELAY_AFTER_CLICK
 
-        self.buttons[TEXT_BUTTON].updateString()
+        self.buttons[TEXT_BUTTON].updateString(dt)
         if self.isClicked:
-            self.clickDelay = (self.clickDelay + 1) % DELAY_AFTER_CLICK
-            if self.clickDelay == 0:
+            self.clickDelay -= dt * ANIM_SPEED
+            if self.clickDelay <= 0:
                 self.isClicked = False
 
-    def redraw(self):
+    def redraw(self, dt):
         # Draw buttons
-        if self.ticker > DELAY_AT_START:
-            for i, button in enumerate(self.buttons):
-                if i != TEXT_BUTTON or not self.textComplete:
-                    button.draw(self.screen)
+        for i, button in enumerate(self.buttons):
+            if i != TEXT_BUTTON or not self.textComplete:
+                button.draw(self.screen)
 
         # Update and draw leaf
-        self.leaves = [leaf for leaf in self.leaves if leaf.update(self.screen)]
+        self.leaves = [leaf for leaf in self.leaves if leaf.update(self.screen, dt)]
 
     def handle_events(self):
 
@@ -764,27 +786,34 @@ class LevelTwo:
 
     def run(self):
         self.init_assets(self.start_pos)
+        pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
+        pygame.mixer.music.set_volume(GAME_VOLUME)
+        pygame.mixer.music.play(-1, 10, 5000)
+        StoryTextBox.init__text(TEXT_PATH)
+        StoryTextBox.init_images(TEXT_BOX_PATHS)
+        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
+        Leaf.init_images(LEAF_PATH)
+        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
 
-        clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
         self.running = True
 
         while self.running and not self.stageDone:
-
+            dt = self.clock.tick(MAX_FPS) / 1000.0  # Convert milliseconds to seconds
             if self.ticker < DELAY_AT_START:
-                self.ticker += 1
+                self.ticker = min(self.ticker + dt * ANIM_SPEED, DELAY_AT_START)
             elif self.ticker == DELAY_AT_START:
-                self.ticker += 1
+                self.ticker += dt
                 self.buttons.append(StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self))
-            pygame.time.delay(GAME_DELAY)
 
             if not self.nextStage:
                 self.handle_events()
-                self.update_game_state()
+                self.update_game_state(dt)
                 self.screen.fill("black")
-                self.sprite_group.update()
+                self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
-                self.redraw()
-            self.fade()
+                self.redraw(dt)
+            self.fade(dt)
             pygame.display.flip()
 
 

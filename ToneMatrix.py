@@ -17,7 +17,6 @@ class ToneMatrix:
                 self.seq.append(None)
 
     def song(self):
-
         for i in range(16):
             next = random.randint(-7, 15)
             if next >= 0:
@@ -28,7 +27,6 @@ class ToneMatrix:
 
 
 class Note:
-
     def __init__(self, i):
         self.sound = pygame.mixer.Sound("./music/note" + str(i + 1) + ".wav")
 
