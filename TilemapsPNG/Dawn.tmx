@@ -122,7 +122,7 @@
   </object>
  </objectgroup>
  <objectgroup id="7" name="Warps" locked="1">
-  <object id="2" gid="6366" x="256" y="544" width="64" height="64">
+  <object id="2" gid="6366" x="256" y="576" width="64" height="64">
    <properties>
     <property name="pos" value="home"/>
    </properties>
