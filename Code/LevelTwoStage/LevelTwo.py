@@ -8,6 +8,8 @@ from pytmx.util_pygame import load_pygame
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
+from Code.sprites import *
+from Code.entities import *
 
 
 # Constants
@@ -149,13 +151,15 @@ class AllSprites(pygame.sprite.LayeredUpdates):
         self.offsetX = -(center[0] - MAX_X // 2)
         self.offsetY = -(center[1] - MAX_Y // 2)
 
+
         bg_sprites = sorted([sprite for sprite in self if sprite.z == 0], key=lambda sprite: sprite.y_sort)
         water_sprites = sorted([sprite for sprite in self if sprite.z == 1], key=lambda sprite: sprite.y_sort)
         base_sprites = sorted([sprite for sprite in self if sprite.z == 2], key=lambda sprite: sprite.y_sort)
-        poke_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
         tree_sprites = sorted([sprite for sprite in self if sprite.z == 3], key=lambda sprite: sprite.y_sort)
+        wall_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
 
-        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, poke_sprites):
+
+        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, wall_sprites):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))

@@ -1,9 +1,11 @@
 import pygame
 import random
+import sys
+import os
 from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
@@ -12,7 +14,10 @@ dirs = {"left" : LEFT,
         "up" : UP,
         "down" : DOWN}
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
-TRAINER_PATHS = { "furina" : ["./Player/walkLeft.png", "./Player/walkRight.png", "./Player/walkFront.png", "./Player/walkBack.png"]
+TRAINER_PATHS = { "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnLeft.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnRight.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnFront.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnBack.png')]
                 }
 ANIM_SPEED = 4
 ANIM_DIST = 3

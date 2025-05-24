@@ -8,10 +8,12 @@ from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton
 from Code.Opening.Opening import BGAsset
 from Code.Entities.Trainer import Trainer
+from Code.sprites import *
+from Code.entities import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Home.tmx")
+TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx")
 START_POS = "home"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -35,8 +37,8 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
-TREE_PATH = [os.path.join(BASE_DIR, '../../Assets/Background/Tree.png')]
-LEAF_PATH = [os.path.join(BASE_DIR, '../../Assets/Background/Leaf.png')]
+TREE_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Tree.png')]
+LEAF_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Leaf.png')]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 GAME_VOLUME = 0.3
@@ -136,18 +138,108 @@ class AllSprites(pygame.sprite.LayeredUpdates):
         self.offsetX = -(center[0] - MAX_X // 2)
         self.offsetY = -(center[1] - MAX_Y // 2)
 
+
         bg_sprites = sorted([sprite for sprite in self if sprite.z == 0], key=lambda sprite: sprite.y_sort)
         water_sprites = sorted([sprite for sprite in self if sprite.z == 1], key=lambda sprite: sprite.y_sort)
         base_sprites = sorted([sprite for sprite in self if sprite.z == 2], key=lambda sprite: sprite.y_sort)
         tree_sprites = sorted([sprite for sprite in self if sprite.z == 3], key=lambda sprite: sprite.y_sort)
-        build_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
+        wall_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
 
 
-        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, build_sprites):
+        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, wall_sprites):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
 
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, pos, image, groups, z=0):
+        super().__init__(groups)
+        self.image = image
+        self.rect = self.image.get_rect(topleft=pos)
+        self.z = z
+        self.y_sort = self.rect.centery - BLOCK_SIZE // 2
+        self.hitbox = self.rect.copy()
+
+class AnimatedSprite(Sprite):
+    assets = []
+    ini = False
+    length = 0
+
+    def __init__(self, pos, paths, groups, z=0):
+        if not AnimatedSprite.ini:
+            AnimatedSprite.init_assets(paths)
+            AnimatedSprite.ini = True
+        super().__init__(pos, AnimatedSprite.assets[0], groups, z)
+        self.currImage = 0
+
+    @classmethod
+    def init_assets(cls, paths):
+        for path in paths:
+            try:
+                cls.assets.append(pygame.image.load(path))
+            except FileNotFoundError:
+                surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                surface.fill((255, 255, 255))
+                cls.assets.append(surface)
+        cls.length = len(cls.assets)
+
+    def update(self, dt, *args, **kwargs):
+        self.currImage += WATER_SPEED * dt
+        self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
+
+class Warp(Sprite):
+
+    def __init__(self, pos, stage, image, groups, game, z=1):
+        super().__init__(pos, image, groups, z)
+        self.game = game
+        self.stage = stage
+        self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
+
+
+    def warp(self):
+        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+
+class EventWarp(Warp):
+
+    def __init__(self, pos, stage, image, groups, game, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, z)
+        self.cond = cond
+        self.eventDone = False
+
+
+    def warp(self):
+        stage = STAGES.get(self.stage)(self.game.screen)
+        if self.cond():
+            self.game.nextStage = stage
+        else:
+            self.makeEvent()
+
+    def makeEvent(self):
+        pass
+
+class FurinaWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, cond, z)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(FURINA_PROD_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.poke.cry.play()
+        self.game.player.x = self.rect.x
+        self.game.player.y = self.rect.y
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.x = self.rect.x - BLOCK_SIZE
+                self.game.player.facing = LEFT
+
+        self.game.updateEvent = checker
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, pos, groups, size, z=2):
@@ -174,7 +266,6 @@ class Entity(pygame.sprite.Sprite):
 
     def collide(self):
         pass
-
 
 class MC(Entity):
     ini = False
@@ -313,74 +404,205 @@ class MC(Entity):
                 self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
                 break
 
+class Furina(Entity):
 
-class Sprite(pygame.sprite.Sprite):
-    def __init__(self, pos, image, groups, z=0):
-        super().__init__(groups)
-        self.image = image
-        self.rect = self.image.get_rect(topleft=pos)
-        self.z = z
-        self.y_sort = self.rect.centery - BLOCK_SIZE // 2
-        self.hitbox = self.rect.copy()
-
-class AnimatedSprite(Sprite):
-    assets = []
     ini = False
-    length = 0
+    assets = []
 
-    def __init__(self, pos, paths, groups, z=0):
-        if not AnimatedSprite.ini:
-            AnimatedSprite.init_assets(paths)
-            AnimatedSprite.ini = True
-        super().__init__(pos, AnimatedSprite.assets[0], groups, z)
-        self.currImage = 0
+    def __init__(self, pos, paths, group, game, size, road, z=2):
+        if not Furina.ini:
+            Furina.init_assets(paths)
+            Furina.ini = True
+        super().__init__(pos, group, size, z)
+        self.game = game
+        self.facing = LEFT
+        self.image = Furina.assets[self.facing][self.currImage]
+        self.road = road
+        self.currentStep = 0
+        self.maxSteps = len(self.road)
+        self.box = pygame.Rect(self.rect.x - INTERACTABLE_BOUNDS[0], self.rect.y - INTERACTABLE_BOUNDS[1], self.rect.width + 2 * INTERACTABLE_BOUNDS[0], self.rect.height + 2 * INTERACTABLE_BOUNDS[1])
+
+        #GO event
+        self.eventDone = False
+        self.ticker = 0
+        self.inEvent = False
+        self.go = False
 
     @classmethod
     def init_assets(cls, paths):
         for path in paths:
             try:
-                cls.assets.append(pygame.image.load(path))
+                surface = pygame.image.load(path)
             except FileNotFoundError:
-                surface = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                surface = pygame.Surface(PLAYER_SIZE)
                 surface.fill((255, 255, 255))
-                cls.assets.append(surface)
-        cls.length = len(cls.assets)
 
-    def update(self, dt, *args, **kwargs):
-        self.currImage += ANIM_SPEED * dt
-        self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
+            sheet_width, sheet_height = surface.get_size()
+            columns = sheet_width // FURINA_SIZE[0]
+            rows = sheet_height // FURINA_SIZE[1]
 
+            frames = []
+            for row in range(rows):
+                for col in range(columns):
+                    x = col * FURINA_SIZE[0]
+                    y = row * FURINA_SIZE[1]
+                    rect = pygame.Rect(x, y, FURINA_SIZE[0], FURINA_SIZE[1])
+                    frame = surface.subsurface(rect)
+                    frames.append(frame)
 
+            cls.assets.append(frames)
 
-class Warp(Sprite):
-    def __init__(self, pos, stage_name, image, groups, game, z=1):
-        super().__init__(pos, image, groups, z)
-        self.game = game
-        self.stage_name = stage_name
-        self.hitbox = pygame.Rect(self.rect.x, self.rect.y, self.rect.width, self.rect.height)
+        cls.leftFrames = len(cls.assets[LEFT])
+        cls.rightFrames = len(cls.assets[RIGHT])
 
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage_name)(self.game.screen)
+    def move(self, dt):
+        # Store previous position
+        if self.go and self.currentStep < self.maxSteps:
+            self.game.poke.bye = True
+            down = self.road[int(self.currentStep)] == DOWN
+            left = self.road[int(self.currentStep)] == LEFT
+            right = self.road[int(self.currentStep)] == RIGHT
+            up = self.road[int(self.currentStep)] == UP
 
+            if left and not right:
+                self.x -= dt * FURINA_GO_SPEED
+                if self.facing == LEFT:
+                    self.currImage += dt * ANIM_SPEED
+                else:
+                    self.facing = LEFT
+                    self.currImage = 0
 
-class EventWarp(Warp):
+            elif right and not left:
+                self.x += dt * FURINA_GO_SPEED
+                if self.facing == RIGHT:
+                    self.currImage += dt * ANIM_SPEED
+                else:
+                    self.facing = RIGHT
+                    self.currImage = 0
 
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-        self.cond = cond
-        self.eventDone = False
+            else:
+                self.y = self.y + dt * FURINA_GO_SPEED if down else self.y - dt * FURINA_GO_SPEED
+                self.currImage += dt * ANIM_SPEED
 
+            self.currentStep += dt * ANIM_DIST
 
-    def warp(self):
-        stage = STAGES.get(self.stage_name)(self.game.screen)
-        if self.cond():
-            self.game.nextStage = stage
+        elif self.go:
+            self.game.inEvent = False
+            self.game.met = True
+            self.kill()
+            self.game.poke.kill()
         else:
+            pass
+
+
+    def collide(self):
+        keys = pygame.key.get_pressed()
+        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_SPACE] and not self.eventDone:
+            self.eventDone = True
+            self.inEvent = True
+            self.game.inEvent = True
             self.makeEvent()
 
-    def makeEvent(self):
-        pass
+    def update(self, dt):
+        # Update position
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
 
+        # Check for collisions
+        if self.inEvent and self.game.textComplete:
+            self.go = True
+
+        # Update sprite properties
+        self.move(dt)
+        self.y_sort = self.rect.centery
+        self.image = Furina.assets[self.facing][int(self.currImage) % Furina.leftFrames]
+
+    def makeEvent(self):
+        StoryTextBox.init__text(FURINA_EVENT_PATH)
+        self.game.buttons[TEXT_BUTTON].reset()
+
+class Poke(Entity):
+    def __init__(self, pos, image_paths, group, size, game, z=4):
+        super().__init__(pos, group, size, z)
+        self.ran = False
+        self.floatStage = 0
+        self.inc = True
+        self.game = game
+
+        self.cry = pygame.mixer.Sound(POKEMON_CRY)
+        self.cry.set_volume(GAME_VOLUME)
+
+        self.player = game.player
+        self.follow_distance = BLOCK_SIZE * 2
+
+        # Load images
+        self.images = []
+        for path in image_paths:
+            try:
+                image = pygame.image.load(path)
+            except FileNotFoundError:
+                image = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+                image.fill((255, 0, 0))  # Red as error indicator
+            self.images.append(image)
+        self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
+        self.rect = self.image.get_rect(center=pos)
+
+        # Movement constants (now in units per second)
+        self.float_speed = FLOAT_SPEED # pixels per second
+        self.float_length = FLOAT_LENGTH  # pixels
+        self.float_interval = FLOAT_INTERVAL # radians per second
+        self.follow_speed = 0.2 # proportion per second
+
+        # Furina takes him away
+        self.bye = False
+        self.byecry = True
+
+    def update(self, dt):
+        # Update facing direction image
+        self.image = self.images[1 if self.player.x > self.rect.x + BLOCK_SIZE * 3 else 0]
+
+        if self.bye:
+            if self.byecry:
+                self.game.poke.cry.play()
+                self.byecry = False
+            self.player = self.game.furina
+
+        if self.ran:
+            # Follow player with some delay (framerate-independent)
+            target_x = self.player.x
+            target_y = self.player.y
+            self.facing = self.player.facing
+
+            # Calculate direction vector
+            dx = target_x - self.x
+            dy = target_y - self.y
+            distance = max(BLOCK_SIZE, (dx**2 + dy**2)**0.5)
+
+            # Normalize and scale by follow distance and delta time
+            if distance > self.follow_distance:
+                self.x += dx * self.follow_speed * dt * ANIM_SPEED
+                self.y += dy * self.follow_speed * dt * ANIM_SPEED
+
+            # Update facing direction
+            if abs(dx) > abs(dy):
+                self.facing = RIGHT if dx > 0 else LEFT
+            else:
+                self.facing = DOWN if dy > 0 else UP
+
+        else:
+            # Floating animation (framerate-independent)
+            self.x += self.float_speed * dt * ANIM_SPEED
+            self.y = self.player.y + self.float_length * math.sin(self.floatStage)
+            self.floatStage += self.float_interval * dt
+
+            # Check if we should start following
+            if self.x >= self.player.x + BLOCK_SIZE * 1.5:
+                self.ran = True
+                self.cry.play()
+
+        # Update position and sorting
+        self.rect.center = (self.x, self.y)
+        self.y_sort = self.rect.centery
 
 class Lake:
     tmx = load_pygame(TMX_PATH)

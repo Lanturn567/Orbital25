@@ -591,7 +591,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Players" visible="0" locked="1">
+ <objectgroup id="5" name="Player" visible="0" locked="1">
   <object id="2" name="Lake" gid="2305" x="512" y="2144" width="32" height="64">
    <properties>
     <property name="pos" value="lake"/>
