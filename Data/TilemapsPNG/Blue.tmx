@@ -100,7 +100,7 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="Warps" locked="1">
-  <object id="2" gid="8490" x="298" y="576" width="64" height="64">
+  <object id="2" gid="8490" x="298" y="608" width="64" height="64">
    <properties>
     <property name="pos" value="home"/>
     <property name="size" value="big"/>

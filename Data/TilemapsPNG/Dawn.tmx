@@ -122,14 +122,14 @@
   </object>
  </objectgroup>
  <objectgroup id="7" name="Warps" locked="1">
-  <object id="2" gid="6366" x="256" y="576" width="64" height="64">
+  <object id="2" gid="6366" x="256" y="608" width="64" height="64">
    <properties>
     <property name="pos" value="home"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="8" name="Trainers">
-  <object id="5" gid="6367" x="480" y="232" width="32" height="64">
+  <object id="5" name="Lanturn" type="lanturn" gid="6367" x="480" y="232" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
