@@ -944,7 +944,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="5" name="Players" visible="0" locked="1">
+ <objectgroup id="5" name="Player" visible="0" locked="1">
   <object id="3" gid="2306" x="2880" y="2592" width="32" height="64">
    <properties>
     <property name="pos" value="begin"/>
