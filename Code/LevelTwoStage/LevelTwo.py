@@ -668,7 +668,7 @@ class LevelTwo:
             AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group, self.collide), z=0)
 
         # Players
-        for obj in LevelTwo.tmx.get_layer_by_name("Players"):
+        for obj in LevelTwo.tmx.get_layer_by_name("Player"):
             if obj.properties["pos"] == start_pos:
                 self.player = MC((obj.x, obj.y + 16), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
 
@@ -679,9 +679,21 @@ class LevelTwo:
 
         # Trees
         #tree_image = pygame.image.load(TREE_PATH[0])
-        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trees").tiles():
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("LowerTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("UpperTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trunk").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
 
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -694,7 +706,7 @@ class LevelTwo:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Buildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
 
 
         # Warps
