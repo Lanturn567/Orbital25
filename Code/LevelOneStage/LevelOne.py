@@ -8,9 +8,9 @@ from Code import LevelTwoStage
 MAX_X, MAX_Y = 740, 493
 BACKGROUND_FRAMES = 5
 BGPATHS = ["../../Assets/BGL1/BgL1-", ".png"]
-FRAME_DELAY, GAME_DELAY, FADE_DELAY = 15, 100, 2
-DELAY_AFTER_CLICK = 8
-BLOCKS_PER_FADE = 12
+FRAME_DELAY, GAME_DELAY, FADE_DELAY = 1.5, 1.0, 0.1  # Now in seconds
+DELAY_AFTER_CLICK = 0.8  # Now in seconds
+BLOCKS_PER_FADE = 15
 COLOR_CHANGE_PER_FADE = 7
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 VOL_BUTTON_PATHS = ["../../Assets/UI/Buttons/NoMute.png", "../../Assets/UI/Buttons/Mute.png"]
@@ -24,15 +24,16 @@ TEXT_PATH = os.path.join(BASE_DIR, "LevelOneText.txt")
 TEXT_BOX_DIMENSIONS = (580, 90)
 TEXT_BUTTON = 1
 ARROW_DIMENSIONS = (16, 16)
-ALPHA_CHANGE = 20
+ALPHA_CHANGE = 100  # Alpha per second
 MAX_ALPHA = 255
-FINAL_DELAY = 20
+FINAL_DELAY = 0.5  # Now in seconds
 START_POS = "begin"
 
 
 class TextBox(Opening.Button):
     text = []
     length = 0
+    CHARACTERS_PER_SECOND = 15  # Typing speed in characters per second
 
     #initialize class before instantiate
     @classmethod
@@ -43,7 +44,7 @@ class TextBox(Opening.Button):
                 cls.text.append(line.strip())
         cls.length = len(cls.text)
         cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)
-        cls.clickSound.set_volume(GAME_VOLUME)
+        cls.clickSound.set_volume(GAME_VOLUME / 3)
 
     def __init__(self, x, y, game):
         super().__init__(x, y, TEXT_BOX_DIMENSIONS[0], TEXT_BOX_DIMENSIONS[1], 0, self.textBoxClick)
@@ -52,8 +53,7 @@ class TextBox(Opening.Button):
         self.currLine = 0
         self.currLineLength = len(TextBox.text[self.currLine])
         self.currChar = 0
-        self.tick = 0
-
+        self.time_accumulator = 0.0
 
     #Override no enlarge and shrink on click
     def draw(self, surface):
@@ -67,7 +67,6 @@ class TextBox(Opening.Button):
         # Render the text (text, antialias, color)
         text_surface = font.render(self.currString, True, (255, 255, 255))  # White text
         surface.blit(text_surface, text_surface.get_rect(center=(MAX_X // 2 - 15, self.rect.y + TEXT_BOX_DIMENSIONS[1] // 2)))
-    # Center of the screen
 
     def textBoxClick(self):
         def nextBox():
@@ -77,18 +76,17 @@ class TextBox(Opening.Button):
             TextBox.clickSound.play()
             if self.currLine < TextBox.length - 1:
                 self.currLine += 1
-                self.currChar = 0  # Reset character position
-                self.tick = 0
-                self.currLineLength = len(TextBox.text[self.currLine])  # Reset line length
+                self.currChar = 0
+                self.time_accumulator = 0.0
+                self.currLineLength = len(TextBox.text[self.currLine])
             else:
                 self.game.textComplete = True
-
 
         def skipBox():
             self.game.isClicked = True
             self.currString = TextBox.text[self.currLine]
             self.currChar = self.currLineLength
-            self.tick = 0
+            self.time_accumulator = 0.0
 
         if self.game.isClicked:
             return
@@ -101,11 +99,13 @@ class TextBox(Opening.Button):
     def updateString(self, dt):
         if self.currChar >= self.currLineLength:
             self.game.boxFinished = True
-        elif self.tick >= self.currChar:
-            self.currString += TextBox.text[self.currLine][self.currChar]
-            self.currChar += 1
         else:
-            self.tick += dt * 16
+            self.time_accumulator += dt
+            expected_chars = int(self.time_accumulator * self.CHARACTERS_PER_SECOND)
+
+            while self.currChar < expected_chars and self.currChar < self.currLineLength:
+                self.currString += TextBox.text[self.currLine][self.currChar]
+                self.currChar += 1
 
 
 class LevelOneVolumeButton(Opening.Button):
@@ -133,18 +133,16 @@ class LevelOne:
         self.screen = screen
         self.running = True
         self.nextStage = False
-
         self.boxFinished = False
-
         self.init_assets()
 
         self.isClicked = False
-        self.clickDelay = 0
+        self.clickDelay = 0.0
 
         self.fadeCount = 0
         self.currentPNG = 0
-        self.PNGdelay = 0
-        self.fadeDelay = 0
+        self.PNGdelay = 0.0
+        self.fadeDelay = 0.0
 
         #BUTTON_POS
         self.buttons = [LevelOneVolumeButton(MAX_X - 50, MAX_Y - 50, self),
@@ -154,8 +152,7 @@ class LevelOne:
         self.rect = pygame.display.get_surface().get_rect()
         self.fadeOutSurface = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
         self.alpha = 0
-        self.finalDelay = 0
-
+        self.finalDelay = 0.0
 
     def init_assets(self):
         for i in range(BACKGROUND_FRAMES):
@@ -168,7 +165,6 @@ class LevelOne:
         LevelOneVolumeButton.init_images(VOL_BUTTON_PATHS)
         TextBox.init_images(TEXT_BOX_PATHS)
         TextBox.init__text(TEXT_PATH)
-
 
     def handle_events(self):
         """Handle all pygame events"""
@@ -188,7 +184,6 @@ class LevelOne:
                 if button.handle_event(event):
                     break  # If a button was clicked, don't process other buttons
 
-
     def update_game_state(self, dt):
         if self.textComplete:
             return
@@ -201,18 +196,17 @@ class LevelOne:
 
         if self.isClicked:
             self.clickDelay += dt
-            if self.clickDelay >= DELAY_AFTER_CLICK * 0.1:
-                self.clickDelay = 0
+            if self.clickDelay >= DELAY_AFTER_CLICK:
+                self.clickDelay = 0.0
                 self.isClicked = False
-
 
     def redraw(self, dt):
         self.screen.blit(LevelOne.images[self.currentPNG], (0, 0))
 
         self.PNGdelay += dt
-        if self.PNGdelay >= FRAME_DELAY / 5:
+        if self.PNGdelay >= FRAME_DELAY:
             self.currentPNG = (self.currentPNG + 1) % BACKGROUND_FRAMES
-            self.PNGdelay = 0
+            self.PNGdelay = 0.0
 
         if self.fadeCount > TIMESFADE:
             pass
@@ -223,7 +217,7 @@ class LevelOne:
             self.fadeDelay += dt
             if self.fadeDelay >= 0.1:
                 self.fadeCount += 1
-                self.fadeDelay = 0
+                self.fadeDelay = 0.0
 
         for i, button in enumerate(self.buttons):
             if i is not TEXT_BUTTON or not self.textComplete:
@@ -233,14 +227,14 @@ class LevelOne:
         self.screen.blit(self.fadeOutSurface, self.rect)
 
         if self.textComplete:
-            self.alpha += ALPHA_CHANGE * dt * 8  # Scale alpha increment with dt
+            self.alpha += ALPHA_CHANGE * dt  # Now properly scaled per second
 
         pygame.display.flip()
 
         if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
             self.nextStage = True
         elif self.alpha >= MAX_ALPHA:
-            self.finalDelay += dt * 12
+            self.finalDelay += dt
 
     def run(self):
         from Code.LevelTwoStage.LevelTwo import LevelTwo
@@ -274,4 +268,3 @@ if __name__ == "__main__":
     pygame.display.set_caption("Level 1")
     game = LevelOne(screen)
     nextStage = game.run()
-
