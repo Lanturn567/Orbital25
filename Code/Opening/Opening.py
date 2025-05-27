@@ -15,8 +15,8 @@ ANIM_SPEED = 8
 ASSET_SIZE = 96
 GAME_DELAY = 100
 PHASE_CHANGE_DELAY, TRANSITION_DELAY = 2, 8 * GAME_DELAY
-BLOCKS_PER_FADE = 30
-COLOR_CHANGE_PER_FADE = 15
+BLOCKS_PER_FADE = 4
+COLOR_CHANGE_PER_FADE = 3
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 STARTING_PHASE, LOADING_PHASE, END_PHASE, FADE_OUT = 0, 1, 2, 3
 COMET_PATHS = ["../../Assets/Opening/comet1.png"]
@@ -447,9 +447,9 @@ class Opening:
             # Blit the surface to the screen
             self.screen.blit(fade_surface, (0, 0))
 
-            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE
+            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE * 0.2
         elif self.currPhase == FADE_OUT:
-            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE
+            self.fadeCount += dt * TIMESFADE * BLOCKS_PER_FADE * 0.2
 
 
         pygame.display.flip()
