@@ -17,8 +17,8 @@ DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 4
-MAX_SPEED = BLOCK_SIZE // 4 * 3
+PLAYER_SPEED = BLOCK_SIZE // 2
+MAX_SPEED = BLOCK_SIZE
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 60
 LEVEL_TWO_MUSIC_PATH = "../../Audio/LevelTwoBGM.mp3"
@@ -108,7 +108,7 @@ class MC(Entity):
         self.old_x = self.x
         self.old_y = self.y
         self.speed = PLAYER_SPEED
-        self.hitbox = pygame.Rect(self.x + size[0] * 15 // 32, self.y + size[1] * 15 // 32, size[0] // 8, size[1] // 8)
+        self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
 
         if self.facing == LEFT:
             self.maxFrames = MC.leftFrames
@@ -220,7 +220,7 @@ class MC(Entity):
         # Check for collisions with all collidable sprites
         for sprite in self.collidable:
             if sprite.hitbox.colliderect(self.hitbox):
-                if isinstance(sprite, Warp):
+                if isinstance(sprite, BaseWarp):
                     sprite.warp()
                 # Move back to previous position if collision occurs
                 self.x, self.y = self.old_x, self.old_y

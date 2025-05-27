@@ -16,8 +16,8 @@ DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 4
-MAX_SPEED = BLOCK_SIZE // 4 * 3
+PLAYER_SPEED = BLOCK_SIZE // 2
+MAX_SPEED = BLOCK_SIZE
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 60
 LEVEL_TWO_MUSIC_PATH = "../../Audio/LevelTwoBGM.mp3"
@@ -103,14 +103,16 @@ class AnimatedSprite(Sprite):
     length = 0
 
     def __init__(self, pos, paths, groups, z=0):
-        if not AnimatedSprite.ini:
-            AnimatedSprite.init_assets(paths)
-            AnimatedSprite.ini = True
-        super().__init__(pos, AnimatedSprite.assets[0], groups, z)
+        cls = self.__class__
+        if not cls.ini:
+            cls.init_assets(paths)
+            cls.ini = True
+        super().__init__(pos, cls.assets[0], groups, z)
         self.currImage = 0
 
     @classmethod
     def init_assets(cls, paths):
+        cls.assets = []
         for path in paths:
             try:
                 cls.assets.append(pygame.image.load(path))
@@ -121,10 +123,41 @@ class AnimatedSprite(Sprite):
         cls.length = len(cls.assets)
 
     def update(self, dt, *args, **kwargs):
+        cls = self.__class__
         self.currImage += WATER_SPEED * dt
-        self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
+        self.image = cls.assets[int(self.currImage) % cls.length]
 
-class Warp(Sprite):
+class AnimatedSpriteFromSheet(Sprite):
+    assets = []
+    ini = False
+    length = 0
+
+    def __init__(self, pos, sheet, frame_rects, groups, z=0):
+        cls = self.__class__
+        if not cls.ini:
+            cls.init_assets(sheet, frame_rects)
+            cls.ini = True
+        super().__init__(pos, cls.assets[0], groups, z)
+        self.image = cls.assets[0]
+        self.rect = self.image.get_rect(topleft=pos)
+        self.z = z
+        self.currImage = 0
+
+    @classmethod
+    def init_assets(cls, sheet, frame_rects):
+        cls.assets = []
+        for rect in frame_rects:
+            frame_surface = pygame.Surface((rect[2], rect[3]), pygame.SRCALPHA)
+            frame_surface.blit(sheet, (0, 0), rect)
+            cls.assets.append(frame_surface)
+        cls.length = len(cls.assets)
+
+    def update(self, dt, *args, **kwargs):
+        cls = self.__class__
+        self.currImage += WATER_SPEED * dt
+        self.image = cls.assets[int(self.currImage) % cls.length]
+
+class BaseWarp(Sprite):
 
     def __init__(self, pos, stage, image, groups, game, z=1):
         super().__init__(pos, image, groups, z)
@@ -136,7 +169,7 @@ class Warp(Sprite):
     def warp(self):
         self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
 
-class EventWarp(Warp):
+class EventWarp(BaseWarp):
 
     def __init__(self, pos, stage, image, groups, game, cond, z=1):
         super().__init__(pos, stage, image, groups, game, z)
