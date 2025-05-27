@@ -4,6 +4,7 @@ import sys
 import os
 from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
+from Code.Entities.Database import *
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCK_SIZE = 32
@@ -14,25 +15,49 @@ dirs = {"left" : LEFT,
         "up" : UP,
         "down" : DOWN}
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
-TRAINER_PATHS = { "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnLeft.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnRight.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnFront.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/walkLanturnBack.png')]
-                }
+TRAINER_PATHS = { "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnLeft.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnRight.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnFront.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnBack.png')],
+                  "blond" : [os.path.join(BASE_DIR, '../../Assets/Players/blond.png')],
+                  "child" : [os.path.join(BASE_DIR, '../../Assets/Players/child.png')],
+                  "guide" : [os.path.join(BASE_DIR, '../../Assets/Players/fireman.png')],
+                  "garden" : [os.path.join(BASE_DIR, '../../Assets/Players/grassman.png')],
+                  "man" : [os.path.join(BASE_DIR, '../../Assets/Players/man.png')],
+                  "purple" : [os.path.join(BASE_DIR, '../../Assets/Players/purplewoman.png')],
+                  "trainer" : [os.path.join(BASE_DIR, '../../Assets/Players/trainer.png')],
+                  "villager" : [os.path.join(BASE_DIR, '../../Assets/Players/villager.png')],
+                  "water" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')],
+                  "woman" : [os.path.join(BASE_DIR, '../../Assets/Players/woman.png')],
+                  "fisher" : [os.path.join(BASE_DIR, '../../Assets/Players/fisher.png')],
+                  "bellman" : [os.path.join(BASE_DIR, '../../Assets/Players/bellman.png')],
+                  "prof" : [os.path.join(BASE_DIR, '../../Assets/Players/prof.png')],
+                  "old" : [os.path.join(BASE_DIR, '../../Assets/Players/old.png')],
+                  "white" : [os.path.join(BASE_DIR, '../../Assets/Players/whitewoman.png')],
+                  "suit" : [os.path.join(BASE_DIR, '../../Assets/Players/suit.png')],
+                  "breeder" : [os.path.join(BASE_DIR, '../../Assets/Players/breederwoman.png')],
+                  "fighter" : [os.path.join(BASE_DIR, '../../Assets/Players/fighterwoman.png')],
+                  "elec" : [os.path.join(BASE_DIR, '../../Assets/Players/elecwoman.png')],
+                  "backpack" : [os.path.join(BASE_DIR, '../../Assets/Players/backpackwoman.png')],
+                  "lucy" : [os.path.join(BASE_DIR, '../../Assets/Players/lucy.png')],
+                  "office" : [os.path.join(BASE_DIR, '../../Assets/Players/office.png')],
+                  "waitress" : [os.path.join(BASE_DIR, '../../Assets/Players/waitress.png')],
+                  "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')],
+                  }
 ANIM_SPEED = 4
 ANIM_DIST = 3
 AFTER_EVENT_DELAY = 1
-TRAINER_EVENT_PATH = ["Home1.txt"]
+TRAINER_EVENT_PATH = [os.path.join(BASE_DIR, '../../Code/Stages/Home/Home1.txt')]
 
 
 class Trainer(Entity):
 
     ini = False
-    assets = []
+    assets = {}
 
-    def __init__(self, pos, groups, game, size, facing, type="furina", road=None, dis=0, text=TRAINER_EVENT_PATH, z=2):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         if not Trainer.ini:
-            Trainer.init_assets(TRAINER_PATHS["furina"])
+            Trainer.init_assets(TRAINER_PATHS)
             Trainer.ini = True
         super().__init__(pos, groups, size, z)
         self.game = game
@@ -46,7 +71,8 @@ class Trainer(Entity):
             for i in range(dis):
                 self.road.append(dir)
 
-        self.image = Trainer.assets[self.facing][self.currImage]
+        self.images = Trainer.assets[type]
+        self.image = self.images[self.facing][self.currImage]
         self.currentStep = 0
         self.maxSteps = len(self.road)
         self.box = pygame.Rect(self.x, self.y, self.rect.width + INTERACTABLE_BOUNDS[0], self.rect.height + INTERACTABLE_BOUNDS[1])
@@ -63,43 +89,68 @@ class Trainer(Entity):
 
         self.TRAINER_GO_SPEED = random.randint(2, 4) * BLOCK_SIZE
 
+        #info from database
+        self.name = name
+        self.info = database[self.name]
+        if not self.info:
+            self.info = database["Default"]
+
         #GO event
-        self.text = text
+        self.text = text if text else self.info["talk"]
         self.currText = 0
-        self.maxTalks = len(text)
+        self.maxTalks = len(self.text) if self.text[0].endswith(".txt") else 1
         self.ticker = 0
         self.inEvent = False
         self.delayAfterEvent = 0
 
 
     @classmethod
-    def init_assets(cls, paths):
-        for path in paths:
-            try:
-                surface = pygame.image.load(path)
-            except FileNotFoundError:
-                surface = pygame.Surface(PLAYER_SIZE)
-                surface.fill((255, 255, 255))
+    def init_assets(cls, database):
+        for key in database:
+            paths = database[key]
+            curr = []
+            #or 4 spritesheets (4x1)
+            if len(paths) > 1:
+                for path in paths:
+                    try:
+                        surface = pygame.image.load(path)
+                    except FileNotFoundError:
+                        surface = pygame.Surface(PLAYER_SIZE)
+                        surface.fill((255, 255, 255))
 
-            sheet_width, sheet_height = surface.get_size()
-            columns = sheet_width // PLAYER_SIZE[0]
-            rows = sheet_height // PLAYER_SIZE[1]
+                    sheet_width, sheet_height = surface.get_size()
+                    columns = sheet_width // PLAYER_SIZE[0]
+                    rows = sheet_height // PLAYER_SIZE[1]
 
-            frames = []
-            for row in range(rows):
-                for col in range(columns):
-                    x = col * PLAYER_SIZE[0]
-                    y = row * PLAYER_SIZE[1]
-                    rect = pygame.Rect(x, y, PLAYER_SIZE[0], PLAYER_SIZE[1])
-                    frame = surface.subsurface(rect)
-                    frames.append(frame)
+                    frames = []
+                    for row in range(rows):
+                        for col in range(columns):
+                            x = col * PLAYER_SIZE[0]
+                            y = row * PLAYER_SIZE[1]
+                            rect = pygame.Rect(x, y, PLAYER_SIZE[0], PLAYER_SIZE[1])
+                            frame = surface.subsurface(rect)
+                            frames.append(frame)
+                    curr.append(frames)
+            #Either 16 sprites in 1 spritesheet (4x4)
+            else:
+                try:
+                    surface = pygame.image.load(paths[0])
+                except FileNotFoundError:
+                    surface = pygame.Surface(PLAYER_SIZE)
+                    surface.fill((255, 255, 255))
 
-            cls.assets.append(frames)
+                down = [surface.subsurface(pygame.Rect(16 + 64 * x, 0, PLAYER_SIZE[0], PLAYER_SIZE[1])) for x in [0, 1, 2, 3]]
+                left = [surface.subsurface(pygame.Rect(16 + 64 * x, 64, PLAYER_SIZE[0], PLAYER_SIZE[1])) for x in [0, 1, 2, 3]]
+                right = [surface.subsurface(pygame.Rect(16 + 64 * x, 128, PLAYER_SIZE[0], PLAYER_SIZE[1])) for x in [0, 1, 2, 3]]
+                up = [surface.subsurface(pygame.Rect(16 + 64 * x, 64 * 3, PLAYER_SIZE[0], PLAYER_SIZE[1])) for x in [0, 1, 2, 3]]
+                curr = [left, right, down, up]
 
-        cls.leftFrames = len(cls.assets[LEFT])
-        cls.rightFrames = len(cls.assets[RIGHT])
-        cls.downFrames = len(cls.assets[DOWN])
-        cls.upFrames = len(cls.assets[UP])
+            cls.assets[key] = curr
+
+        cls.leftFrames = 4
+        cls.rightFrames = 4
+        cls.downFrames = 4
+        cls.upFrames = 4
 
 
     def move(self, dt):
@@ -177,7 +228,7 @@ class Trainer(Entity):
         if not self.inEvent and self.game.textComplete:
             self.move(dt)
             self.y_sort = self.rect.centery
-            self.image = Trainer.assets[self.facing][int(self.currImage) % self.maxFrames]
+            self.image = self.images[self.facing][int(self.currImage) % self.maxFrames]
         elif self.inEvent and self.game.textComplete:
             self.inEvent = False
             self.game.inEvent = False
@@ -185,6 +236,7 @@ class Trainer(Entity):
 
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.text[self.currText])
+        StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
