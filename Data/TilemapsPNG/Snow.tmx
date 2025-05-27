@@ -340,7 +340,7 @@
 0,0,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,726,727,0,0,726,727,726,727,726,727,0,0
 </data>
  </layer>
- <layer id="3" name="LowerTrees" width="140" height="80" locked="1">
+ <layer id="3" name="LowerTrees" width="140" height="80">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,0,0,
@@ -367,9 +367,9 @@
 0,0,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,366,367,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,
 0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,366,367,0,0,582,583,582,583,582,583,582,583,0,0,0,0,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,402,403,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
 0,0,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,402,403,0,0,618,619,618,619,618,619,618,619,0,0,0,0,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,
-0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
+0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,655,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
 0,0,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,
-0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
+0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,655,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
 0,0,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,
 0,0,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,582,583,582,583,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,582,583,0,0,
 0,0,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,618,619,618,619,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,618,619,0,0,
@@ -617,133 +617,133 @@
   </object>
  </objectgroup>
  <objectgroup id="10" name="Trainers" locked="1">
-  <object id="5" name="Woman12" type="woman" gid="5729" x="3296" y="2336" width="32" height="64">
+  <object id="5" name="Ivy" type="fisher" gid="5729" x="3296" y="2336" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="6" name="Man9" type="man" gid="5729" x="3424" y="2112" width="32" height="64">
+  <object id="6" name="Bart" type="office" gid="5729" x="3424" y="2112" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="8"/>
    </properties>
   </object>
-  <object id="7" name="Woman11" type="woman" gid="5729" x="2976" y="1536" width="32" height="64">
+  <object id="7" name="Weah" type="breeder" gid="5729" x="2976" y="1536" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="8" name="Woman10" type="woman" gid="5729" x="3136" y="1184" width="32" height="64">
+  <object id="8" name="Zen" type="lucy" gid="5729" x="3136" y="1184" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" name="Woman9" type="woman" gid="5729" x="3136.17" y="864" width="32" height="64">
+  <object id="9" name="Min" type="purple" gid="5729" x="3136.17" y="864" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="10" name="Woman8" type="woman" gid="5729" x="4256" y="896" width="32" height="64">
+  <object id="10" name="Yae" type="child" gid="5729" x="4256" y="896" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="11" name="Man8" type="man" gid="5729" x="3712" y="1376" width="32" height="64">
+  <object id="11" name="Camberton" type="man" gid="5729" x="3712" y="1376" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="2"/>
    </properties>
   </object>
-  <object id="12" name="Man7" type="man" gid="5729" x="4192" y="1696" width="32" height="64">
+  <object id="12" name="Dell" type="garden" gid="5729" x="4192" y="1696" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="3"/>
    </properties>
   </object>
-  <object id="13" name="Woman7" type="woman" gid="5729" x="3200" y="320" width="32" height="64">
+  <object id="13" name="Icy" type="backpack" gid="5729" x="3200" y="320" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="6"/>
    </properties>
   </object>
-  <object id="14" name="Woman6" type="woman" gid="5729" x="4288" y="160" width="32" height="64">
+  <object id="14" name="Cloud" type="elec" gid="5729" x="4288" y="160" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="15" name="Man6" type="man" gid="5729" x="416" y="160" width="32" height="64">
+  <object id="15" name="Manchester" type="villager" gid="5729" x="416" y="160" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="6"/>
    </properties>
   </object>
-  <object id="16" name="Man5" type="man" gid="5729" x="1952" y="608" width="32" height="64">
+  <object id="16" name="Jonathan" type="old" gid="5729" x="1952" y="608" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="17" name="Woman5" type="woman" gid="5729" x="704" y="640" width="32" height="64">
+  <object id="17" name="Cindy" type="woman" gid="5729" x="704" y="640" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="8"/>
    </properties>
   </object>
-  <object id="18" name="Man4" type="man" gid="5729" x="384" y="1248" width="32" height="64">
+  <object id="18" name="Lance" type="office" gid="5729" x="384" y="1248" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="20" name="Man3" type="man" gid="5729" x="1824" y="1280" width="32" height="64">
+  <object id="20" name="Aidan" type="waiter" gid="5729" x="1824" y="1280" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="3"/>
    </properties>
   </object>
-  <object id="21" name="Woman13" type="woman" gid="5729" x="1216" y="2176" width="32" height="64">
+  <object id="21" name="Pom" type="lucy" gid="5729" x="1216" y="2176" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="5"/>
    </properties>
   </object>
-  <object id="22" name="Woman4" type="woman" gid="5729" x="352" y="2432" width="32" height="64">
+  <object id="22" name="Misty" type="backpack" gid="5729" x="352" y="2432" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="23" name="Man2" type="man" gid="5729" x="2240" y="2432" width="32" height="64">
+  <object id="23" name="Brock" type="man" gid="5729" x="2240" y="2432" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="24" name="Woman3" type="woman" gid="5729" x="544" y="1536" width="32" height="64">
+  <object id="24" name="Molly" type="woman" gid="5729" x="544" y="1536" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="7"/>
    </properties>
   </object>
-  <object id="25" name="Man1" type="man" gid="5729" x="766.467" y="1920" width="32" height="64">
+  <object id="25" name="Rock" type="bellman" gid="5729" x="766.467" y="1920" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="4"/>
    </properties>
   </object>
-  <object id="26" name="Woman2" type="woman" gid="5729" x="1184" y="896" width="32" height="64">
+  <object id="26" name="Pebble" type="waitress" gid="5729" x="1184" y="896" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="4"/>
    </properties>
   </object>
-  <object id="27" name="Woman1" type="woman" gid="5729" x="1824" y="1952" width="32" height="64">
+  <object id="27" name="Snow" type="breeder" gid="5729" x="1824" y="1952" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>

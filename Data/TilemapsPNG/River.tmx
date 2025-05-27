@@ -568,25 +568,25 @@
   </object>
  </objectgroup>
  <objectgroup id="14" name="Trainers">
-  <object id="5" name="Woman2" type="woman" gid="3329" x="352.92" y="193.12" width="32" height="64">
+  <object id="5" name="Mandy" type="purple" gid="3329" x="352.92" y="193.12" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="6"/>
    </properties>
   </object>
-  <object id="6" name="Fisher" type="fisher" gid="3329" x="992" y="864" width="32" height="64">
+  <object id="6" name="Fish" type="fisher" gid="3329" x="992" y="864" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="7" name="Woman1" type="woman" gid="3329" x="735" y="1120" width="32" height="64">
+  <object id="7" name="Ilima" type="blond" gid="3329" x="735" y="1120" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="8" name="Man1" type="man" gid="3329" x="1440" y="1440" width="32" height="64">
+  <object id="8" name="Trick" type="man" gid="3329" x="1440" y="1440" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="0"/>

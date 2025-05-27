@@ -640,55 +640,55 @@
   </object>
  </objectgroup>
  <objectgroup id="7" name="Trainers" locked="1">
-  <object id="5" name="Guide" type="guide" gid="2305" x="640" y="992" width="32" height="64">
+  <object id="5" name="Home" type="guide" gid="2305" x="640" y="992" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="6" name="Man4" type="man" gid="2305" x="480" y="1920" width="32" height="64">
+  <object id="6" name="Gon" type="man" gid="2305" x="480" y="1920" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="7" name="Man3" type="man" gid="2305" x="1568" y="1920" width="32" height="64">
+  <object id="7" name="Castor" type="man" gid="2305" x="1568" y="1920" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="8" name="Woman4" type="woman" gid="2305" x="2080" y="1216" width="32" height="64">
+  <object id="8" name="Pollux" type="woman" gid="2305" x="2080" y="1216" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="6"/>
    </properties>
   </object>
-  <object id="9" name="Woman3" type="woman" gid="2305" x="1536" y="1056" width="32" height="64">
+  <object id="9" name="Dendonka" type="woman" gid="2305" x="1536" y="1056" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="4"/>
    </properties>
   </object>
-  <object id="10" name="Woman2" type="woman" gid="2305" x="2144" y="2176" width="32" height="64">
+  <object id="10" name="Sally" type="woman" gid="2305" x="2144" y="2176" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="2"/>
    </properties>
   </object>
-  <object id="11" name="Man2" type="man" gid="2305" x="1248" y="512" width="32" height="64">
+  <object id="11" name="Bob" type="man" gid="2305" x="1248" y="512" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="7"/>
    </properties>
   </object>
-  <object id="12" name="Woman1" type="woman" gid="2305" x="1664" y="576" width="32" height="64">
+  <object id="12" name="Sarah" type="woman" gid="2305" x="1664" y="576" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="5"/>
    </properties>
   </object>
-  <object id="13" name="Man1" type="man" gid="2305" x="768" y="512" width="32" height="64">
+  <object id="13" name="Ander" type="man" gid="2305" x="768" y="512" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>

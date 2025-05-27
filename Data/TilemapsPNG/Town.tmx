@@ -563,61 +563,61 @@
   </object>
  </objectgroup>
  <objectgroup id="12" name="Trainers">
-  <object id="7" name="Woman6" type="woman" gid="21089" x="768" y="352" width="32" height="64">
+  <object id="7" name="Trinity" type="waitress" gid="21089" x="768" y="352" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="7"/>
    </properties>
   </object>
-  <object id="8" name="Woman5" type="woman" gid="21089" x="1216" y="256" width="32" height="64">
+  <object id="8" name="Umbra" type="blond" gid="21089" x="1216" y="256" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" name="Man4" type="man" gid="21089" x="1376" y="640" width="32" height="64">
+  <object id="9" name="Peter" type="village" gid="21089" x="1376" y="640" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="10" name="Woman4" type="woman" gid="21089" x="704" y="736" width="32" height="64">
+  <object id="10" name="Polly" type="white" gid="21089" x="704" y="736" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="4"/>
    </properties>
   </object>
-  <object id="11" name="Woman3" type="woman" gid="21089" x="224" y="640" width="32" height="64">
+  <object id="11" name="Sabrina" type="purple" gid="21089" x="224" y="640" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="12" name="Man3" type="man" gid="21089" x="736" y="1184" width="32" height="64">
+  <object id="12" name="Yuancheng" type="garden" gid="21089" x="736" y="1184" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="13" name="Man2" type="man" gid="21089" x="1088" y="1184" width="32" height="64">
+  <object id="13" name="Yuanchi" type="garden" gid="21089" x="1088" y="1184" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="14" name="Woman2" type="woman" gid="21089" x="224" y="1120" width="32" height="64">
+  <object id="14" name="Belle" type="child" gid="21089" x="224" y="1120" width="32" height="64">
    <properties>
     <property name="dir" value="right"/>
     <property name="dis" type="int" value="2"/>
    </properties>
   </object>
-  <object id="15" name="Man1" type="man" gid="21089" x="352" y="1344" width="32" height="64">
+  <object id="15" name="Andy" type="old" gid="21089" x="352" y="1344" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="16" name="Woman1" type="woman" gid="21089" x="1088" y="1440" width="32" height="64">
+  <object id="16" name="Dawn" type="lucy" gid="21089" x="1088" y="1440" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="5"/>

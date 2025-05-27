@@ -463,37 +463,37 @@
   </object>
  </objectgroup>
  <objectgroup id="11" name="Trainers" locked="1">
-  <object id="5" name="Lost" type="lost" gid="2305" x="96" y="1408" width="32" height="64">
+  <object id="5" name="Dahlia" type="child" gid="2305" x="96" y="1408" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="6" name="Man3" type="man" gid="2305" x="480" y="1152" width="32" height="64">
+  <object id="6" name="Harold" type="man" gid="2305" x="480" y="1152" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="7" name="Woman2" type="woman" gid="2305" x="864" y="864" width="32" height="64">
+  <object id="7" name="Elena" type="woman" gid="2305" x="864" y="864" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="8" name="Woman1" type="woman" gid="2305" x="1184" y="608" width="32" height="64">
+  <object id="8" name="Doma" type="blond" gid="2305" x="1184" y="608" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="9" name="Man2" type="man" gid="2305" x="606.674" y="382.701" width="32" height="64">
+  <object id="9" name="Nimble" type="bell" gid="2305" x="606.674" y="382.701" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="2"/>
    </properties>
   </object>
-  <object id="10" name="Man1" type="man" gid="2305" x="1376" y="544" width="32" height="64">
+  <object id="10" name="Jordan" type="suit" gid="2305" x="1376" y="544" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="0"/>
