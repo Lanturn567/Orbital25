@@ -2,7 +2,7 @@ import pygame
 import random
 import sys
 import os
-from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON
+from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON, ANIM_SPEED
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.Entities.Database import *
 
@@ -15,15 +15,15 @@ dirs = {"left" : LEFT,
         "up" : UP,
         "down" : DOWN}
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
-TRAINER_PATHS = { "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnLeft.png'),
+TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnLeft.png'),
                               os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnRight.png'),
                               os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnFront.png'),
                               os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnBack.png')],
                   "blond" : [os.path.join(BASE_DIR, '../../Assets/Players/blond.png')],
-                  "child" : [os.path.join(BASE_DIR, '../../Assets/Players/child.png')],
+                  "child" : [os.path.join(BASE_DIR, '../../Assets/Players/girl.png')],
                   "guide" : [os.path.join(BASE_DIR, '../../Assets/Players/fireman.png')],
                   "garden" : [os.path.join(BASE_DIR, '../../Assets/Players/grassman.png')],
-                  "man" : [os.path.join(BASE_DIR, '../../Assets/Players/man.png')],
+                  "man" : [os.path.join(BASE_DIR, '../../Assets/Players/trainer.png')],
                   "purple" : [os.path.join(BASE_DIR, '../../Assets/Players/purplewoman.png')],
                   "trainer" : [os.path.join(BASE_DIR, '../../Assets/Players/trainer.png')],
                   "villager" : [os.path.join(BASE_DIR, '../../Assets/Players/villager.png')],
@@ -42,7 +42,7 @@ TRAINER_PATHS = { "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/walkL
                   "lucy" : [os.path.join(BASE_DIR, '../../Assets/Players/lucy.png')],
                   "office" : [os.path.join(BASE_DIR, '../../Assets/Players/office.png')],
                   "waitress" : [os.path.join(BASE_DIR, '../../Assets/Players/waitress.png')],
-                  "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')],
+                  "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')]
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3
@@ -109,6 +109,7 @@ class Trainer(Entity):
         for key in database:
             paths = database[key]
             curr = []
+            print(key)
             #or 4 spritesheets (4x1)
             if len(paths) > 1:
                 for path in paths:
