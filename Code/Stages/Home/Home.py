@@ -58,7 +58,9 @@ FINAL_DELAY = 5
 STAGES = {}
 
 # Initialize pygame
-
+pygame.init()
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
+pygame.display.set_caption("Home")
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):
 
@@ -305,9 +307,6 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    pygame.init()
-    screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
-    pygame.display.set_caption("Home")
     game = Home(screen, START_POS)
     nextStage = game.run()
     while True:
