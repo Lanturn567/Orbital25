@@ -5,9 +5,11 @@ import os
 from pygame import SCALED
 from pytmx.util_pygame import load_pygame
 from Code.Entities.Trainer import *
+from Code.support import *
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton
 from Code.sprites import *
 from Code.entities import *
+from Code.Entities.Pokemon import Pokemon
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -59,7 +61,8 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
+# screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) #Andre
+screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
 pygame.display.set_caption("Home")
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):

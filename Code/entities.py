@@ -9,6 +9,8 @@ from pytmx.util_pygame import load_pygame
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
+from Code.Menu import *
+from Code.Entities.Pokemon import *
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -108,7 +110,18 @@ class MC(Entity):
         self.old_x = self.x
         self.old_y = self.y
         self.speed = PLAYER_SPEED
+        self.blocked = False
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
+        #player Pokemon
+        self.player_pokemon = {
+            0: Pokemon('Charmadillo', 30),
+            1: Pokemon('Friolera', 29),
+            2: Pokemon('Plumette', 30),
+            3: Pokemon('Ivieron', 29),
+            4: Pokemon('Sparchu', 30),
+            5: Pokemon('Cindrill', 29),
+            6: Pokemon('Cindrill', 100)
+        }
 
         if self.facing == LEFT:
             self.maxFrames = MC.leftFrames
@@ -150,7 +163,7 @@ class MC(Entity):
 
     def input(self, dt):
         # Store previous position
-        if self.game.textComplete and not self.game.inEvent:
+        if self.game.textComplete and not self.game.inEvent and not self.blocked:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
@@ -227,6 +240,9 @@ class MC(Entity):
                 self.rect.center = (self.x, self.y)
                 self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
                 break
+
+    def toggleblock(self):
+        self.blocked = not self.blocked
 
 class Furina(Entity):
 
