@@ -3,6 +3,8 @@ import sys
 import math
 import random
 import os
+
+from pygame import SCALED
 from pytmx.util_pygame import load_pygame
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton
@@ -14,7 +16,7 @@ from Code.entities import *
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx")
-START_POS = "home"
+START_POS = "mountain"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
@@ -61,7 +63,7 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y))
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
 pygame.display.set_caption("Lake")
 
 
@@ -225,7 +227,7 @@ class Lake:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in Lake.tmx.get_layer_by_name("Buildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
 
         # Warps
         for obj in Lake.tmx.get_layer_by_name("Warps"):
@@ -235,10 +237,11 @@ class Lake:
         #def __init__(self, pos, paths, group, game, size, road, z=2):
         # Trainers
         for obj in Lake.tmx.get_layer_by_name("Trainers"):
-            facing = obj.properties["dir"]
-            type = obj.type
-            dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if not obj.type == "furina":
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
 
 

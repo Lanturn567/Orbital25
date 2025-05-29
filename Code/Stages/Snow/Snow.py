@@ -17,7 +17,7 @@ PLAYER_SPEED = BLOCK_SIZE // 2
 MAX_SPEED = BLOCK_SIZE
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Snow.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
@@ -26,6 +26,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
+PINK = os.path.join(BASE_DIR, '../../../Assets/Background/Pink.png')
 
 GAME_VOLUME = 0.3
 ANIM_SPEED = 8
@@ -46,10 +47,89 @@ FINAL_DELAY = 5
 
 STAGES = {}
 
+# Add these constants near the top of your file
+BLIZZARD_PARTICLE_COUNT = 500
+BLIZZARD_PARTICLE_SPEED = 200  # pixels per second
+BLIZZARD_PARTICLE_SIZE_RANGE = (3, 5)
+BLIZZARD_WIND_CHANGE_INTERVAL = 3.0  # seconds
+BLIZZARD_ALPHA = 255  # Semi-transparent particles
+
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y))
 pygame.display.set_caption("Snow")
+
+# Add this class to handle blizzard particles
+class BlizzardParticle:
+    def __init__(self, screen_width, screen_height):
+        self.x = random.randint(0, screen_width)
+        self.y = random.randint(-screen_height, 0)
+        self.size = random.uniform(*BLIZZARD_PARTICLE_SIZE_RANGE)
+        self.speed = random.uniform(BLIZZARD_PARTICLE_SPEED * 0.5, BLIZZARD_PARTICLE_SPEED * 1.5)
+        self.alpha = random.randint(BLIZZARD_ALPHA - 50, BLIZZARD_ALPHA + 50)
+
+    def update(self, dt, wind_direction):
+        # Move particle based on wind direction (slightly randomized)
+        angle_variation = random.uniform(-0.2, 0.2)
+        effective_angle = wind_direction + angle_variation
+
+        self.x += math.cos(effective_angle) * self.speed * dt
+        self.y += math.sin(effective_angle) * self.speed * dt
+
+        # Wrap around screen edges
+        if self.x > MAX_X:
+            self.x = 0
+        elif self.x < 0:
+            self.x = MAX_X
+
+        if self.y > MAX_Y:
+            self.y = 0
+        elif self.y < 0:
+            self.y = MAX_Y
+
+    def draw(self, surface):
+        color = (255, 255, 255, min(255, self.alpha))
+        pygame.draw.circle(surface, color, (int(self.x), int(self.y)), int(self.size))
+
+class BlizzardEffect:
+    def __init__(self, screen_width, screen_height):
+        self.particles = []
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.wind_direction = math.pi / 4  # 45 degrees (NE direction)
+        self.wind_change_timer = 0
+
+        # Create initial particles
+        for _ in range(BLIZZARD_PARTICLE_COUNT):
+            self.particles.append(BlizzardParticle(screen_width, screen_height))
+
+        # Create a surface for drawing particles with per-pixel alpha
+        self.particle_surface = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+
+    def update(self, dt):
+        # Occasionally change wind direction
+        self.wind_change_timer += dt
+        if self.wind_change_timer >= BLIZZARD_WIND_CHANGE_INTERVAL:
+            self.wind_change_timer = 0
+            # Change wind direction by up to 45 degrees in either direction
+            self.wind_direction += random.uniform(-math.pi/4, math.pi/4)
+            # Keep angle between 0 and 2pi
+            self.wind_direction %= 2 * math.pi
+
+        # Update all particles
+        for particle in self.particles:
+            particle.update(dt, self.wind_direction)
+
+    def draw(self, surface):
+        # Clear the particle surface
+        self.particle_surface.fill((0, 0, 0, 0))
+
+        # Draw all particles to the intermediate surface
+        for particle in self.particles:
+            particle.draw(self.particle_surface)
+
+        # Blit the particle surface onto the main surface
+        surface.blit(self.particle_surface, (0, 0))
 
 
 class SnowWarp(BaseWarp):
@@ -61,6 +141,49 @@ class SnowWarp(BaseWarp):
         self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
 
 
+class ToUpperLayer(BaseWarp):
+
+    def __init__(self, pos, stage, image, groups, game, z=1):
+        super().__init__(pos, stage, image, groups, game, z)
+
+    def warp(self):
+        self.game.player.collidable = self.game.collideUpper
+
+        for sprite in self.game.bridges:
+            sprite.z = 2
+
+        for sprite in self.game.lowerTrees:
+            sprite.z = 1
+
+        for sprite in self.game.upperTrees:
+            sprite.z = 1
+
+        for sprite in self.game.trunks:
+            sprite.z = 0
+
+
+class ToLowerLayer(BaseWarp):
+
+    def __init__(self, pos, stage, image, groups, game, z=1):
+        super().__init__(pos, stage, image, groups, game, z)
+
+    def warp(self):
+        self.game.player.collidable = self.game.collide
+
+        for sprite in self.game.bridges:
+            sprite.z = 4
+
+        for sprite in self.game.lowerTrees:
+            sprite.z = 3
+
+        for sprite in self.game.upperTrees:
+            sprite.z = 3
+
+        for sprite in self.game.trunks:
+            sprite.z = 2
+
+
+
 class Snow:
     tmx = load_pygame(TMX_PATH)
 
@@ -70,6 +193,11 @@ class Snow:
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
+        self.bridges = pygame.sprite.Group()
+        self.lowerTrees = pygame.sprite.Group()
+        self.upperTrees = pygame.sprite.Group()
+        self.trunks = pygame.sprite.Group()
+        self.collideUpper = pygame.sprite.Group()
         self.buttons = []
         self.alpha = 255
         self.rect = self.screen.get_rect()
@@ -90,6 +218,8 @@ class Snow:
         self.stageDone = False
         self.finalDelay = 0
 
+        self.blizzard = BlizzardEffect(MAX_X, MAX_Y)
+
 
     def init_assets(self, start_pos):
         from Code.Stages.Town.Town import Town
@@ -107,6 +237,11 @@ class Snow:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=1)
 
+        # 1warer tiles
+        for x, y, surf in Snow.tmx.get_layer_by_name("UpperWall").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collideUpper), z=1)
+
         # Players
         #if player is on bridge, change layer to 5 else 3
         for obj in Snow.tmx.get_layer_by_name("Player"):
@@ -121,24 +256,31 @@ class Snow:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in Snow.tmx.get_layer_by_name("LowerTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide, self.lowerTrees), z=3)
 
         for x, y, surf in Snow.tmx.get_layer_by_name("UpperTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=3)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.upperTrees), z=3)
 
         for x, y, surf in Snow.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide, self.trunks), z=2)
 
         for x, y, surf in Snow.tmx.get_layer_by_name("Bridge").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.bridges), z=4)
+
+        for x, y, surf in Snow.tmx.get_layer_by_name("BridgeWall").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=pygame.transform.scale_by(pygame.image.load(WARP_PATH), 0.5), groups=(self.sprite_group, self.collideUpper), z=4)
+
+        for x, y, surf in Snow.tmx.get_layer_by_name("FloorWall").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collideUpper, self.collide), z=3)
 
         # Warps
         for obj in Snow.tmx.get_layer_by_name("Warps"):
             SnowWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
-
 
         #def __init__(self, pos, paths, group, game, size, road, z=2):
         # Trainers
@@ -146,8 +288,13 @@ class Snow:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
+        for obj in Snow.tmx.get_layer_by_name("IncreaseZ"):
+            ToUpperLayer((obj.x + 16, obj.y), None, pygame.image.load(WARP_PATH), (self.sprite_group, self.collide), game=self, z=2)
+
+        for obj in Snow.tmx.get_layer_by_name("LowerZ"):
+            ToLowerLayer((obj.x + 16, obj.y), None, pygame.image.load(WARP_PATH), (self.sprite_group, self.collideUpper), game=self, z=2)
 
 
     def fade(self, dt):
@@ -173,6 +320,8 @@ class Snow:
         keys = pygame.key.get_pressed()
         for entity in self.entities:
             entity.collide()
+
+        self.blizzard.update(dt)
 
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
@@ -242,9 +391,11 @@ class Snow:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
-                self.screen.fill("black")
+                self.screen.fill("white")
                 self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
+                # Draw blizzard on top of everything except UI elements
+                self.blizzard.draw(self.screen)
                 self.redraw()
             self.fade(dt)
             pygame.display.flip()

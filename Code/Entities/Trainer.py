@@ -30,7 +30,7 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "water" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')],
                   "woman" : [os.path.join(BASE_DIR, '../../Assets/Players/woman.png')],
                   "fisher" : [os.path.join(BASE_DIR, '../../Assets/Players/fisher.png')],
-                  "bellman" : [os.path.join(BASE_DIR, '../../Assets/Players/bellman.png')],
+                  "bell" : [os.path.join(BASE_DIR, '../../Assets/Players/bellman.png')],
                   "prof" : [os.path.join(BASE_DIR, '../../Assets/Players/prof.png')],
                   "old" : [os.path.join(BASE_DIR, '../../Assets/Players/old.png')],
                   "white" : [os.path.join(BASE_DIR, '../../Assets/Players/whitewoman.png')],
@@ -42,7 +42,10 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "lucy" : [os.path.join(BASE_DIR, '../../Assets/Players/lucy.png')],
                   "office" : [os.path.join(BASE_DIR, '../../Assets/Players/office.png')],
                   "waitress" : [os.path.join(BASE_DIR, '../../Assets/Players/waitress.png')],
-                  "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')]
+                  "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')],
+                  "nurse" : [os.path.join(BASE_DIR, '../../Assets/Players/waitress.png')],
+                  "mart" : [os.path.join(BASE_DIR, '../../Assets/Players/suit.png')],
+                  "gym1" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')]
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3
@@ -109,7 +112,6 @@ class Trainer(Entity):
         for key in database:
             paths = database[key]
             curr = []
-            print(key)
             #or 4 spritesheets (4x1)
             if len(paths) > 1:
                 for path in paths:

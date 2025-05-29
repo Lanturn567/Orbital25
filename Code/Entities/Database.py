@@ -108,11 +108,11 @@ database = {
                  "dead" : True
                  },
     "Benson" : { "team" : [],
-               "talk" : ["Benson: My new experiments have ended in a blazing success. HEHEHEHAW"],
+               "talk" : ["Benson: My new experiments have ended in a blazing success. HEHEHEHAW."],
                "dead" : True
                },
     "Wilma" : { "team" : [],
-               "talk" : ["Wilma: My eye tickles"],
+               "talk" : ["Wilma: My eye tickles."],
                "dead" : True
                },
     "Wanda" : { "team" : [],
@@ -123,7 +123,7 @@ database = {
                "talk" : ["Jon: Huff. Pyuff. Hyuff."],
                "dead" : True
                },
-    "Marty1" : { "team" : [],
+    "Marty" : { "team" : [],
               "talk" : ["Marty: Good morning young miss. Would you care for purchasing some goods?"],
               "dead" : True
               },
@@ -156,7 +156,9 @@ database = {
                 "dead" : True
                 },
     "Dahlia" : { "team" : [],
-                 "talk" : ["Dahlia: WAAAAAAAAHHHHHHH!!!!!", "Dahlia: MY POKEMON RAN AWAYYYYYYY...", "Dahlia: Wail. Sob."],
+                 "talk" : ["Dahlia: WAAAAAAAAHHHHHHH!!!!!", "Dahlia: MY POKEMON RAN AWAYYYYYYY...", "Dahlia: Wail. Sob.", "Dahlia: Oh? You'll help me find my Pokemon...?", "Dahlia: YAY! Thank you nice woman!", "Dahlia: My Pokemon looks like a pink furry with A CUTE HAT.", "Dahlia: Its not like the others though. Its SPECIAL!"],
+                 "found" : ["Dahlia: THANK YOU FOR FINDING MY POKEMON!", "Dahlia: IT AND I ARE SO HWAPPY!!"],
+                 "talked" : ["Dahlia: PWEASE FIND MY POKEMON...", "Dahlia: ITS FUZZY AND HAS A CUTE HAT!"],
                  "dead" : True
                  },
     "Trick" : { "team" : [],
@@ -164,7 +166,7 @@ database = {
                  "dead" : True
                  },
     "Ilima" : { "team" : [],
-                 "talk" : ["Ilima: That thing's been there for quite a while already. It's quite problematic.", "Ilima: I've called for help quite a while ago, but it may take quite some time before anything happens."],
+                 "talk" : ["Ilima: That thing's been there for quite a while already. It's quite problematic.", "Ilima: I've called for help quite a while ago...", "Ilima: But it may take quite some time before anything happens."],
                  "dead" : True
                  },
     "Mandy" : { "team" : [],
@@ -208,7 +210,7 @@ database = {
                "dead" : True
                },
     "Lance" : { "team" : [],
-               "talk" : ["Lance: My team of dragons will fry you!", "Lance: I was once feared all across the land... But a 5k salary is too much to turn down."],
+               "talk" : ["Lance: My team of dragons will fry you!", "Lance: I was once feared all across the land...", "Lance: But a 5k salary is too much to turn down."],
                "dead" : True
                },
     "Cindy" : { "team" : [],
@@ -220,7 +222,7 @@ database = {
                "dead" : True
                },
     "Manchester" : { "team" : [],
-               "talk" : ["Manchester: Hello my good miss. As you can see, a huge blizzard is currently tearing through this area.", "Manchester: I do beg you to be cautious. Snow is falling at a rapid rate indeed."],
+               "talk" : ["Manchester: Blessed morning to you my good miss.", "Manchester: As you can see, a huge blizzard is tearing through this area.", "Manchester: I do beg you to be cautious. Snow is falling at a rapid rate indeed."],
                "dead" : True
                },
     "Cloud" : { "team" : [],
@@ -240,7 +242,7 @@ database = {
                "dead" : True
                },
     "Yae" : { "team" : [],
-               "talk" : ["Yae: Yuki Oishii"],
+               "talk" : ["Yae: Yuki Oishii!!"],
                "dead" : True
                },
     "Min" : { "team" : [],
@@ -256,7 +258,7 @@ database = {
                "dead" : True
                },
     "Bart" : { "team" : [],
-               "talk" : ["Bart: I'm late for work gotta go fast..."],
+               "talk" : ["Bart: I'm late for work. Gotta go fast..."],
                "dead" : True
                },
     "Ivy" : { "team" : [],
@@ -276,16 +278,16 @@ database = {
                "dead" : True
                },
     "Yuanchi" : { "team" : [],
-               "talk" : ["Yuanchi: Meow"],
+               "talk" : ["Yuanchi: Meow!"],
                "dead" : True
                },
     "Yuancheng" : { "team" : [],
-                  "talk" : ["Yuancheng: Woof"],
+                  "talk" : ["Yuancheng: Woof!"],
                   "dead" : True
                   },
 
     "Sabrina" : { "team" : [],
-                  "talk" : ["Sabrina: I've been training my psychic powers for 20 years now. I can make my balls float."],
+                  "talk" : ["Sabrina: I've been training my psychic powers for 20 years.", "Sabrina: I can make my balls float now!"],
                   "dead" : True
                   },
     "Polly" : { "team" : [],
@@ -322,7 +324,7 @@ database = {
                 },
 
     "Sebastian" : { "team" : [],
-                "talk" : ["Sebastian: So you have made it all the way to me. Impressive.", "Sebastian: Unfortunately for you, however, your journey ends here. Fall under the might of a thousand waves!"],
+                "talk" : ["Sebastian: So you have made it all the way to me. Impressive.", "Sebastian: Unfortunately for you, however, your journey ends here.", "Sebastian: Fall under the might of a thousand waves!"],
                 "dead" : True
                 },
     "Reminisque" : { "team" : [],
@@ -346,7 +348,7 @@ database = {
                  "dead" : True
                  },
     "Waterfall" : { "team" : [],
-                 "talk" : ["Guide: Welcome! Welcome! As you can see, this gym entails a scaling of a mountain!", "Guide: The gym leader here is a master of the Water type. Ascend this peak and put him in his place! You can do it champ!"],
+                 "talk" : ["Guide: Welcome! Welcome! As you can see, this gym entails the scaling of a mountain!", "Guide: The gym leader here is a master of the Water type.", "Guide: Ascend this peak and put him in his place! You can do it champ!"],
                  "dead" : True
                  },
     "Sun" : { "team" : [],
@@ -360,5 +362,21 @@ database = {
     "Kim" : { "team" : [],
                     "talk" : ["Kim: My fish are cheerfully flopping about!"],
                     "dead" : True
-                    }
+                    },
+    "Peter" : { "team" : [],
+                      "talk" : ["Peter: Boy, I sure hope my bugs have plenty to eat today!"],
+                      "dead" : True
+                      },
+    "LanturnDawn" : { "team" : [],
+                      "talk" : [],
+                      "dead" : True
+              },
+    "fake" : { "team" : [],
+               "talk" : ["That's not a Pokemon..."],
+               "dead" : True
+             },
+    "real" : { "team" : [],
+               "talk" : ["Its a lost Pokemon! You shank it with your foot!", "Hmph! It scurries back to its owner."],
+               "dead" : True
+            }
 }

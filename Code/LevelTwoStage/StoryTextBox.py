@@ -23,10 +23,16 @@ class StoryTextBox(Opening.Button):
     @classmethod
     def init__text(cls, path):
         next = []
-        with open(path, "r") as file:
-            lines = file.readlines()
-            for line in lines:
-                next.append(line.strip())
+        #either pass in str or list
+        if isinstance(path, str):
+            with open(path, "r") as file:
+                lines = file.readlines()
+                for line in lines:
+                    next.append(line.strip())
+        #list
+        else:
+            next = path
+
         cls.text = next
         cls.length = len(cls.text)
         cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)

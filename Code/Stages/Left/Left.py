@@ -1,5 +1,7 @@
 import sys
 import os
+
+from pygame import SCALED
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
@@ -9,7 +11,9 @@ from Code.entities import *
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Left.tmx")
-START_POS = "home"
+WATERFALLPNG = "../../../Data/TilemapsPNG/PLAT Nature.png"
+WATER_FRAMES = 8
+START_POS = "river"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
@@ -17,7 +21,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Left.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
@@ -48,9 +52,13 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y))
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
 pygame.display.set_caption("Left")
 
+class Water(AnimatedSpriteFromSheet):
+    def update(self, dt, *args, **kwargs):
+        self.currImage += WATER_SPEED * dt
+        self.image = Water.assets[int(self.currImage) % Water.length]
 
 class LeftWarp(BaseWarp):
 
@@ -105,9 +113,12 @@ class Left:
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
 
         # 1warer tiles
+        frame_rects = [(x * BLOCK_SIZE, 54 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE) for x in range(WATER_FRAMES)]
+        sheet = pygame.image.load(WATERFALLPNG)
         for x, y, surf in Left.tmx.get_layer_by_name("Water").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=1)
+            Water(pos, sheet=sheet, frame_rects=frame_rects, groups=(self.sprite_group, self.collide), z=1)
+
 
         # Island tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Island").tiles():
@@ -144,7 +155,8 @@ class Left:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            name = obj.name
+            Trainer((obj.x + 16, obj.y), name=name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
 
     def fade(self, dt):

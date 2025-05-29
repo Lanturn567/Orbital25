@@ -1,10 +1,13 @@
 import sys
 import os
+
+from pygame import SCALED
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Entities.Item import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +20,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Right.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
@@ -25,6 +28,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
+LOST_TEXT = os.path.join(BASE_DIR, "Heartless.txt")
 
 
 GAME_VOLUME = 0.3
@@ -48,7 +52,7 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y))
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
 pygame.display.set_caption("Right")
 
 
@@ -59,6 +63,82 @@ class RightWarp(BaseWarp):
 
     def warp(self):
         self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+
+
+class RightEventWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, cond, z)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(LOST_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.player.x = self.rect.x
+        self.game.player.y = self.rect.y
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def warp(self):
+        stage = STAGES.get(self.stage)(self.game.screen)
+        if self.cond():
+            self.game.nextStage = stage
+        else:
+            self.makeEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.x = self.rect.x - BLOCK_SIZE
+                self.game.player.facing = LEFT
+
+        self.game.updateEvent = checker
+
+
+class Lost(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.found = self.info["found"]
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.talkedTo and not self.game.found else self.talked if not self.game.found else self.found)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.talkedTo = True
+
+
+class Real(Item):
+    def __init__(self, pos, groups, game, size, name, type="real", z=3):
+        super().__init__(pos, groups, game, size, name, type, z)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.found = True
+        self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
+
+class Fake(Item):
+    def __init__(self, pos, groups, game, size, name, type="fake", z=3):
+        super().__init__(pos, groups, game, size, name, type, z)
+
+    def update(self, dt):
+        self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        if not self.inEvent and self.game.textComplete:
+            self.image = self.images[DOWN][0]
+        elif self.inEvent and self.game.textComplete:
+            self.inEvent = False
+            self.game.inEvent = False
+            self.delayAfterEvent = 0
+
+    def collide(self):
+        keys = pygame.key.get_pressed()
+        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_SPACE] and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+            self.inEvent = True
+            self.game.inEvent = True
+            self.makeEvent()
 
 
 class Right:
@@ -89,6 +169,8 @@ class Right:
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
+
+        self.found = False
 
 
     def init_assets(self, start_pos):
@@ -137,7 +219,7 @@ class Right:
         # 1warer tiles
         for x, y, surf in Right.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
 
         # Players
         for obj in Right.tmx.get_layer_by_name("Player"):
@@ -146,14 +228,28 @@ class Right:
 
         # Warps
         for obj in Right.tmx.get_layer_by_name("Warps"):
-            RightWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            if obj.properties["pos"] == "home":
+                RightWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            else:
+                RightEventWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.found, z=1)
+
+        # Warps
+        for obj in Right.tmx.get_layer_by_name("Items"):
+            if obj.type == "fake":
+                Fake((obj.x, obj.y), name=obj.name, type="fake", groups=(self.sprite_group, self.collide, self.entities), game=self, size=(BLOCK_SIZE, BLOCK_SIZE), z=3)
+            else:
+                Real((obj.x, obj.y), name=obj.name, type="real", groups=(self.sprite_group, self.collide, self.entities), game=self, size=(BLOCK_SIZE, BLOCK_SIZE), z=3)
 
         # Trainers
         for obj in Right.tmx.get_layer_by_name("Trainers"):
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+            if obj.name == "Dahlia":
+                Lost((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
 
     def fade(self, dt):

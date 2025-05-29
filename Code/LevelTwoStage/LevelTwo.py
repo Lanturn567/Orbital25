@@ -23,7 +23,7 @@ PLAYER_SIZE = (32, 64)
 PLAYER_SPEED = BLOCK_SIZE // 4
 MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
-MAX_FPS = 60
+MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../Audio/LevelTwoBGM.mp3")
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 3
@@ -53,7 +53,7 @@ INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 WATER_SPEED = 1
 GAME_VOLUME = 0.3
-ANIM_SPEED = 8
+ANIM_SPEED = 6
 ANIM_DIST = 4
 SWAY_SPEED = BLOCK_SIZE
 SWAY_INTERVAL = 2
@@ -76,6 +76,10 @@ WARP_PATH = os.path.join(BASE_DIR, "../../Assets/Background/Warp.png")
 LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
+
+pygame.init()
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
+pygame.display.set_caption("Level 2")
 
 class Leaf(BGAsset):
     """Comet background assets"""
@@ -687,7 +691,7 @@ class LevelTwo:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("UpperTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=3)
 
         # Trees
         #tree_image = pygame.image.load(TREE_PATH[0])
@@ -706,7 +710,7 @@ class LevelTwo:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Buildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
 
         # Warps
@@ -855,10 +859,6 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    # Initialize pygame
-    pygame.init()
-    screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
-    pygame.display.set_caption("Level 2")
     game = LevelTwo(screen, START_POS)
     nextStage = game.run()
     while True:

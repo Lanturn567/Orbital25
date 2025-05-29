@@ -1,5 +1,7 @@
 import sys
 import os
+
+from pygame import SCALED
 #change dt in update sprites grp, mc move, input
 #change dt in animsprites, animdelay to animspeed
 
@@ -51,7 +53,7 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y))
+screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
 pygame.display.set_caption("Blue")
 
 

@@ -17,7 +17,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE * 2 // 3
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Dawn.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
@@ -91,6 +91,22 @@ class Dawn:
         self.stageDone = False
         self.finalDelay = 0
 
+        # Flashing background setup
+        # Flashing background setup: pastel rainbow colors
+        self.flash_colors = [
+            (255, 179, 186),  # pastel red/pink
+            (255, 223, 186),  # pastel orange
+            (255, 255, 186),  # pastel yellow
+            (186, 255, 201),  # pastel green
+            (186, 225, 255),  # pastel blue
+            (201, 186, 255),  # pastel purple
+        ]
+     # seconds between flashes
+        self.current_flash_index = 0
+        self.flash_timer = 0
+        self.flash_interval = 0.5  # seconds between flashes
+
+
 
     def init_assets(self, start_pos):
         from Code.Stages.Home.Home import Home
@@ -138,7 +154,7 @@ class Dawn:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, text=TEXT_EVENTS_PATHS, facing=facing, z=3)
+            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, text=TEXT_EVENTS_PATHS, facing=facing, z=3)
 
     def fade(self, dt):
         if not self.nextStage:
@@ -232,7 +248,12 @@ class Dawn:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
-                self.screen.fill("black")
+                # Flashing background
+                self.flash_timer += dt
+                if self.flash_timer >= self.flash_interval:
+                    self.flash_timer = 0
+                    self.current_flash_index = (self.current_flash_index + 1) % len(self.flash_colors)
+                self.screen.fill(self.flash_colors[self.current_flash_index])
                 self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
                 self.redraw()
