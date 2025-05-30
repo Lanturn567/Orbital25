@@ -58,6 +58,13 @@ LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
+RAIN_COLOR = (173, 216, 230)  # Light blue
+RAIN_WIDTH = 2
+RAIN_HEIGHT = 10
+RAIN_COUNT = 70
+RAIN_SPEED = 200
+
+
 STAGES = {}
 
 
@@ -66,6 +73,27 @@ pygame.init()
 # screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) #Andre
 screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
 pygame.display.set_caption("Lake")
+
+
+class RainDrop:
+    def __init__(self, player):
+        self.player = player
+        self.x = self.player.x + random.randint(-MAX_X // 2, MAX_X // 2)
+        self.y = self.player.y + random.randint(-MAX_Y // 2, MAX_Y // 2)
+        self.length = random.randint(8, 12)
+        self.speed = random.uniform(180, 250)
+
+    def update_position(self, dt):
+        self.y += self.speed * dt
+        if self.y - self.player.y > MAX_Y // 2:
+            return False
+        return True
+
+    def render(self, screen):
+        screen_x = int(self.x - self.player.x + MAX_X // 2)
+        screen_y = int(self.y - self.player.y + MAX_Y // 2)
+        pygame.draw.line(screen, RAIN_COLOR, (screen_x, screen_y), (screen_x, screen_y + self.length), RAIN_WIDTH)
+
 
 
 class Leaf(BGAsset):
@@ -169,6 +197,8 @@ class Lake:
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
+
+        self.raindrops = []
 
 
     def init_assets(self, start_pos):
@@ -277,6 +307,14 @@ class Lake:
             if leaf:
                 self.leaves.append(leaf)
 
+        # Create new raindrops
+        if len(self.raindrops) < RAIN_COUNT:
+            self.raindrops.append(RainDrop(self.player))
+
+        # Update raindrop positions
+        self.raindrops = [r for r in self.raindrops if r.update_position(dt)]
+
+
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
 
@@ -291,6 +329,11 @@ class Lake:
                 self.isClicked = False
 
     def redraw(self, dt):
+        # Draw rain behind everything else
+        for raindrop in self.raindrops:
+            raindrop.render(self.screen)
+
+
         # Draw buttons
         for i, button in enumerate(self.buttons):
             if i != TEXT_BUTTON or not self.textComplete:

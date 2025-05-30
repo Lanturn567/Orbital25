@@ -35,7 +35,6 @@ INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 
-
 GAME_VOLUME = 0.3
 ANIM_SPEED = 8
 FLOAT_SPEED = BLOCK_SIZE // 3
@@ -291,8 +290,7 @@ class Home:
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
-            self.menu.open_sound.play()
+        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
             self.menu_open = not self.menu_open
             self.player.toggleblock()
 
