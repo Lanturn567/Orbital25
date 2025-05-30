@@ -3,6 +3,12 @@ from Code.support import *
 from Code.game_data import *
 from Code.game_data import POKEMON_DATA
 import pygame
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MENU_OPEN_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_open.mp3")
+MENU_CLICK_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_click.mp3")
+MENU_SELECT_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_select.mp3")
 
 
 class Menu:
@@ -11,6 +17,14 @@ class Menu:
         self.fonts = fonts
         self.pokemon = pokemon
         self.frame_index = 0
+
+        # sounds
+        self.open_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
+        self.open_sound.set_volume(0.3)
+        self.click_sound = pygame.mixer.Sound(MENU_CLICK_SOUND_PATH)
+        self.click_sound.set_volume(0.2)
+        self.select_sound = pygame.mixer.Sound(MENU_SELECT_SOUND_PATH)
+        self.select_sound.set_volume(0.25)
 
         # tint surface
         self.tint_surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -48,9 +62,12 @@ class Menu:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
             self.index -= 1
+            self.click_sound.play()
         if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
             self.index += 1
+            self.click_sound.play()
         if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
+            self.select_sound.play()
             if self.selected_index != None:
                 selected_pokemon = self.pokemon[self.selected_index]
                 current_pokemon = self.pokemon[self.index]
