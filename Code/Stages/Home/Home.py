@@ -121,7 +121,7 @@ class Home:
         from Code.Stages.Lake.Lake import Lake
         from Code.Stages.House.House import House
         from Code.Stages.Gym.Gym import Gym
-        from Code.Misc.Party import Party
+        from Code.Stages.Party.Party import Party
         from Code.Stages.Dawn.Dawn import Dawn
         from Code.Stages.Blue.Blue import Blue
         from Code.Stages.Mart.Mart import Mart
