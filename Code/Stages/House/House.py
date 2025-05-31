@@ -60,6 +60,16 @@ class HouseWarp(BaseWarp):
     def warp(self):
         self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
 
+class Mom(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.talkedTo = True
 
 class House:
     tmx = load_pygame(TMX_PATH)
@@ -136,8 +146,10 @@ class House:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
-
+            if obj.name == "Mom":
+                Mom((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
 
     def fade(self, dt):

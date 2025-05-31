@@ -36,7 +36,7 @@ database = {
                 "dead" : True
                 },
     "Home" : { "team" : [],
-                "talk" : ["Guide: So you're the new challenger eh?", "Guide: This gym ain't for no slouch, better make sure you're prepared before you go in!"],
+                "talk" : ["Guide: So you're a challenger eh?", "Guide: This gym ain't for no slouch, better make sure you're prepared!"],
                 "dead" : True
                 },
     "Ane" : { "team" : [],
@@ -378,5 +378,109 @@ database = {
     "real" : { "team" : [],
                "talk" : ["Its a lost Pokemon! You shank it with your foot!", "Hmph! It scurries back to its owner."],
                "dead" : True
-            }
+            },
+    "Bodyguard" : { "team" : [],
+               "talk" : ["Bodyguard: Sorry. No going past unless you have at least one badge."],
+               "dead" : True
+               },
+    "Holmes" : { "team" : [],
+               "talk" : ["Holmes: I sense a plot at work..."],
+               "dead" : True
+               },
+    "Watson" : { "team" : [],
+               "talk" : ["Watson: I don't sense anything."],
+               "dead" : True
+               },
+    "Bellman" : { "team" : [],
+               "talk" : ["Bellman: The gym leader's so cool!"],
+               "dead" : True
+               },
+    "Ford" : { "team" : [],
+               "talk" : ["Ford: I bet I could give him a run for his money in my prime..."],
+               "dead" : True
+               },
+    "Adler" : { "team" : [],
+               "talk" : ["Adler: 100 down already..."],
+               "dead" : True
+               },
+    "Queen" : { "team" : [],
+               "talk" : ["Queen: Almost time for me to show my hand."],
+               "dead" : True
+               },
+    "King" : { "team" : [],
+               "talk" : ["King: Munch..."],
+               "dead" : True
+               },
+    "Bond" : { "team" : [],
+               "talk" : ["Bond: Martini shaken, not stirred..."],
+               "dead" : True
+               },
+    "Margaret" : { "team" : [],
+               "talk" : ["Margaret: He's SO cool!!"],
+               "dead" : True
+               },
+    "Elesa" : { "team" : [],
+               "talk" : ["Elesa: See that stud down there?", "Elesa: He's this town's gym leader, currently undefeated for 100 battles.", "Elesa: Will he ever be beaten?"],
+               "dead" : True
+               },
+    "Spectator" : { "team" : [],
+                   "talk" : ["Woohoo!!!"],
+                   "dead" : True
+                   },
+    "Manson" : { "team" : [],
+                    "talk" : ["Manson: I've worked here for twenty years already,", "Manson: And i've never seen anyone but you give off such an aura..."],
+                    "dead" : True
+                    },
+
+    "Lek" : { "team" : [],
+                    "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, choose one of these Pokémon to be your first partner.", "Lek: Treat it with care, and it will become your greatest friend."],
+                    "talked" : ["Lek: That's a great Pokemon you have chosen!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the City!"],
+                    "dead" : True
+                    },
+    "Shank" : { "team" : [],
+                    "talk" : ["Shank: I love Pokemon!"],
+                    "dead" : True
+                    },
+    "Mom" : { "team" : [],
+                "talk" : ["Mom: Welcome back dear. How has your day been?", "Mom: Oh I met the Pokemon Professor the other day,", "Mom: And he asked me to invite you to his lab!", "Mom: I think you should oblige. It'll be so exciting!", "Mom: His lab is outside the city, take the North-West exit!", "Mom: Stay safe now! And have fun!"],
+                "talked" : ["Mom: Remember, it's the North-West exit. Have fun!"],
+                "dead" : True
+                },
+    "Party" : { "team" : [],
+                "talk" : ["Partygoer: Best night ever, you gotta join in!"],
+                "dead" : True
+                },
+    "Partyguard" : { "team" : [],
+                "talk" : ["Bodyguard: Stay safe now!"],
+                "dead" : True
+                },
+    "Woo" : { "team" : [],
+                "talk" : ["Woo: We're the Trio de Danga, WOOO!!"],
+                "dead" : True
+                },
+    "Wii" : { "team" : [],
+                "talk" : ["Wii: We're the Trio de Danga, WIII!!"],
+                "dead" : True
+                },
+    "W" : { "team" : [],
+                "talk" : ["W: WII WII WOO!!!", "W: Why hello there. I'm W, the leader of the Trio de Danga.", "W: My brother's the gym leader!", "W: If you want to, I could put in a word.", "W: After all, you're plenty strong!"],
+                "dead" : True
+                },
+    "Bisque" : { "team" : [],
+                "talk" : ["Bisque: The band thats playing are the Trio de Danga!", "Bisque: They're the most popular band in the whole world!"],
+                "dead" : True
+                },
+    "Lina" : { "team" : [],
+                "talk" : ["Lina: The music is so soothing and electric!"],
+                "dead" : True
+                },
+    "Ski" : { "team" : [],
+                "talk" : ["Ski: I'm at the front! What a view!"],
+                "dead" : True
+                },
+    "Otov" : { "team" : [],
+               "talk" : ["Otov: Otov is pleased."],
+               "dead" : True
+               },
+
 }

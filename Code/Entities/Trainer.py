@@ -45,7 +45,11 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "kid" : [os.path.join(BASE_DIR, '../../Assets/Players/kid.png')],
                   "nurse" : [os.path.join(BASE_DIR, '../../Assets/Players/waitress.png')],
                   "mart" : [os.path.join(BASE_DIR, '../../Assets/Players/suit.png')],
-                  "gym1" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')]
+                  "gym1" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')],
+                  "punk" : [os.path.join(BASE_DIR, '../../Assets/Players/punk.png')],
+                  "moon" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "madam" : [os.path.join(BASE_DIR, '../../Assets/Players/madam.png')],
+                  "skiier" : [os.path.join(BASE_DIR, '../../Assets/Players/skiier.png')],
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3

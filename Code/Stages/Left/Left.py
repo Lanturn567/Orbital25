@@ -101,10 +101,12 @@ class Left:
 
 
     def init_assets(self, start_pos):
+        from Code.Stages.Lab.Lab import Lab
         from Code.Stages.Home.Home import Home
         from Code.Stages.River.River import River
         global STAGES
         STAGES = {
+            "lab": lambda screen: Lab(screen, LOCATION),
             "home": lambda screen: Home(screen, LOCATION),
             "river": lambda screen: River(screen, LOCATION),
         }
@@ -141,6 +143,21 @@ class Left:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=1)
 
+        # 1warer tiles
+        for x, y, surf in Left.tmx.get_layer_by_name("UpperBuildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=4)
+
+        # 1warer tiles
+        for x, y, surf in Left.tmx.get_layer_by_name("Buildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        # Flowers
+        for x, y, surf in Left.tmx.get_layer_by_name("Doors").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+
         # Players
         for obj in Left.tmx.get_layer_by_name("Player"):
             if obj.properties["pos"] == start_pos:
@@ -149,7 +166,10 @@ class Left:
 
         # Warps
         for obj in Left.tmx.get_layer_by_name("Warps"):
-            LeftWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            image=pygame.image.load(WARP_PATH)
+            if obj.properties["size"] == "small":
+                image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
+            LeftWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=1)
 
         # Trainers
         for obj in Left.tmx.get_layer_by_name("Trainers"):

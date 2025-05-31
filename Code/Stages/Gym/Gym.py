@@ -61,7 +61,7 @@ STAGES = {}
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1)
-pygame.display.set_caption("House")
+pygame.display.set_caption("Gym")
 
 
 class Spotlight:
