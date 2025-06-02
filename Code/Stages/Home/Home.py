@@ -61,9 +61,28 @@ STAGES = {}
 
 # Initialize pygame
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) #Andre
-# screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
+# screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) #Andre
+screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
 pygame.display.set_caption("Home")
+
+# pokemon frames
+pokemon_frames = {
+    'icons': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/Pokemon/icons')),
+    'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokemon')),
+    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/UI/ui'))
+}
+
+# fonts
+def get_font_path(*parts):
+    return os.path.join(BASE_DIR, '..', '..', '..', 'Assets', 'Fonts', *parts)
+
+# Load fonts using absolute paths
+fonts = {
+    'dialog': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'regular': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
+    'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
+}
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):
 
@@ -84,6 +103,7 @@ class HomeWarp(BaseWarp):
 
     def warp(self):
         self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        super().warp()
 
 
 class Home:
@@ -196,6 +216,10 @@ class Home:
             name = obj.name
             Trainer((obj.x + 16, obj.y), dis=dis, name=name, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
+        # Pokemon menu
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu_open = False
+
     def fade(self, dt):
         if not self.nextStage:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
@@ -264,6 +288,16 @@ class Home:
         if self.updateEvent:
             self.updateEvent()
 
+    def input(self):
+        keys = pygame.key.get_pressed()
+
+        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+            self.menu.open_sound.play()
+            self.menu_open = not self.menu_open
+            self.player.toggleblock()
+
+        self.prev_keys = keys
+
     def run(self):
         self.init_assets(self.start_pos)
         pygame.mixer.music.load(HOME_MUSIC_PATH)
@@ -288,10 +322,14 @@ class Home:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
+                self.input()
                 self.screen.fill("black")
                 self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
                 self.redraw()
+
+            if self.menu_open: self.menu.update(dt)
+
             self.fade(dt)
             pygame.display.flip()
 

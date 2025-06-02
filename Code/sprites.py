@@ -11,6 +11,7 @@ from Code.Opening.Opening import BGAsset
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 START_POS = "begin"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -60,7 +61,7 @@ TEXT_PATH = "LevelTwoText.txt"
 TEXT_BOX_PATHS = ["../../UI/TextBox.png", "../../UI/TextBoxArrow.png"]
 DELAY_AT_START = 55
 WARP_PATH = "../../Assets/Background/Warp.png"
-LOCATION = "lake"
+WARP_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Warp.wav")
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
@@ -158,6 +159,8 @@ class AnimatedSpriteFromSheet(Sprite):
         self.image = cls.assets[int(self.currImage) % cls.length]
 
 class BaseWarp(Sprite):
+    pygame.mixer.init()
+    warpSound = pygame.mixer.Sound(WARP_SOUND_PATH)
 
     def __init__(self, pos, stage, image, groups, game, z=1):
         super().__init__(pos, image, groups, z)
@@ -167,7 +170,8 @@ class BaseWarp(Sprite):
 
 
     def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        #self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        BaseWarp.warpSound.play()
 
 class EventWarp(BaseWarp):
 
@@ -178,11 +182,15 @@ class EventWarp(BaseWarp):
 
 
     def warp(self):
+        """
+
         stage = STAGES.get(self.stage)(self.game.screen)
         if self.cond():
             self.game.nextStage = stage
         else:
             self.makeEvent()
+        """
+        super().warp()
 
     def makeEvent(self):
         pass
