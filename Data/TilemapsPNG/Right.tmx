@@ -517,8 +517,8 @@
    <ellipse/>
   </object>
  </objectgroup>
- <objectgroup id="10" name="Warps" locked="1">
-  <object id="3" gid="2305" x="1440" y="427" width="64" height="64">
+ <objectgroup id="10" name="Warps">
+  <object id="3" gid="2305" x="1440" y="421.303" width="64" height="64">
    <properties>
     <property name="pos" value="town"/>
    </properties>

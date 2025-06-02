@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="18" height="18" tilewidth="33" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="4">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="18" height="18" tilewidth="33" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="4">
  <tileset firstgid="1" source="PLAT nature.tsx"/>
  <tileset firstgid="2305" source="Floor.tsx"/>
  <tileset firstgid="2817" source="Furniture2.tsx"/>
  <tileset firstgid="8490" source="Objects.tsx"/>
- <layer id="2" name="Ground" width="18" height="18" locked="1">
+ <layer id="2" name="Ground" width="18" height="18">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -23,7 +23,7 @@
 0,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,0,
 0,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,0,
 0,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,2359,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+0,0,0,0,0,0,0,0,0,2359,2359,0,0,0,0,0,0,0
 </data>
  </layer>
  <layer id="3" name="Wall" width="18" height="18" locked="1">
@@ -92,6 +92,28 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <layer id="7" name="Exit" width="18" height="18">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,257,258,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,293,294,0,0,0,0,0,0,0
+</data>
+ </layer>
  <objectgroup id="5" name="Player" locked="1">
   <object id="1" gid="8490" x="312" y="448" width="32" height="64">
    <properties>
@@ -99,7 +121,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="6" name="Warps" locked="1">
+ <objectgroup id="6" name="Warps" visible="0" locked="1">
   <object id="2" gid="8490" x="298" y="608" width="64" height="64">
    <properties>
     <property name="pos" value="home"/>

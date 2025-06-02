@@ -624,18 +624,18 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="10" name="Warps" visible="0">
-  <object id="4" gid="21089" x="1492.64" y="351.363" width="64" height="64">
+ <objectgroup id="10" name="Warps">
+  <object id="4" gid="21089" x="1504.95" y="326.753" width="64" height="64">
    <properties>
     <property name="pos" value="snow"/>
    </properties>
   </object>
-  <object id="5" gid="21089" x="44" y="338" width="64" height="64">
+  <object id="5" gid="21089" x="30.3276" y="322.505" width="64" height="64">
    <properties>
     <property name="pos" value="waterfall"/>
    </properties>
   </object>
-  <object id="6" gid="21089" x="41" y="1488" width="64" height="64">
+  <object id="6" gid="21089" x="32.7966" y="1473.87" width="64" height="64">
    <properties>
     <property name="pos" value="right"/>
    </properties>

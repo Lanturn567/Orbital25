@@ -856,8 +856,8 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="9" name="Warps" visible="0" locked="1">
-  <object id="3" gid="5729" x="64" y="242" width="64" height="64">
+ <objectgroup id="9" name="Warps">
+  <object id="3" gid="5729" x="63.4083" y="226.615" width="64" height="64">
    <properties>
     <property name="pos" value="town"/>
    </properties>
@@ -869,12 +869,12 @@
   </object>
  </objectgroup>
  <objectgroup id="11" name="LowerZ">
-  <object id="35" x="625.839" y="2317.48" width="93.9152" height="47.4686"/>
-  <object id="38" x="2770.62" y="1416.78" width="93.126" height="50.0726"/>
+  <object id="35" x="625.839" y="2308.23" width="93.9152" height="56.7177"/>
+  <object id="38" x="2769.46" y="1408.11" width="93.126" height="62.7901"/>
  </objectgroup>
  <objectgroup id="12" name="IncreaseZ">
-  <object id="34" x="625.049" y="2129.02" width="93.9152" height="49.6579"/>
-  <object id="39" x="2769.32" y="1247.73" width="93.126" height="47.8431"/>
+  <object id="34" x="625.049" y="2121.51" width="93.9152" height="57.1728"/>
+  <object id="39" x="2769.32" y="1234.43" width="93.126" height="61.1387"/>
  </objectgroup>
  <objectgroup id="10" name="Trainers" locked="1">
   <object id="5" name="Ivy" type="fisher" gid="5729" x="3296" y="2367" width="32" height="64">
