@@ -12,7 +12,18 @@ MENU_SELECT_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_select.mp3")
 
 
 class Menu:
+    _instance = None
+
+    def __new__(cls, pokemon, fonts, pokemon_frames):
+        if cls._instance is None:
+            cls._instance = super(Menu, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, pokemon, fonts, pokemon_frames):
+        if hasattr(self, '_initialized') and self._initialized:
+            return  # Skip re-initialization
+
+        self._initialized = True
         self.display_surface = pygame.display.get_surface()
         self.fonts = fonts
         self.pokemon = pokemon
