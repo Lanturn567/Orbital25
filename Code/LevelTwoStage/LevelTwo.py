@@ -10,6 +10,7 @@ from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
 from Code.sprites import *
 from Code.entities import *
+from Code.support import *
 
 
 # Constants
@@ -20,10 +21,10 @@ DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 4
+PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
-MAX_FPS = 0
+MAX_FPS = 60
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../Audio/LevelTwoBGM.mp3")
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 3
@@ -77,9 +78,54 @@ LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
 
+RAIN_COLOR = (173, 216, 230)  # Light blue
+RAIN_WIDTH = 3
+RAIN_HEIGHT = 10
+RAIN_COUNT = 100
+RAIN_SPEED = 250
+
 pygame.init()
-screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
+# screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1) # Andre
+screen = pygame.display.set_mode((MAX_X, MAX_Y)) # Rhysmond
 pygame.display.set_caption("Level 2")
+
+pokemon_frames = {
+    'icons': import_folder_dict(os.path.join(BASE_DIR, '../../Assets/Pokemon/icons')),
+    'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../Assets/Pokemon/pokemon')),
+    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../Assets/UI/ui'))
+}
+
+# fonts
+def get_font_path(*parts):
+    return os.path.join(BASE_DIR, '..', '..', 'Assets', 'Fonts', *parts)
+
+# Load fonts using absolute paths
+fonts = {
+    'dialog': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'regular': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
+    'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
+}
+
+class RainDrop:
+    def __init__(self, player):
+        self.player = player
+        self.x = self.player.x + random.randint(-MAX_X // 2, MAX_X // 2)
+        self.y = self.player.y + random.randint(-MAX_Y // 2, MAX_Y // 2)
+        self.length = random.randint(8, 12)
+        self.speed = random.uniform(180, 250)
+
+    def update_position(self, dt):
+        self.y += self.speed * dt
+        if self.y - self.player.y > MAX_Y // 2:
+            return False
+        return True
+
+    def render(self, screen):
+        screen_x = int(self.x - self.player.x + MAX_X // 2)
+        screen_y = int(self.y - self.player.y + MAX_Y // 2)
+        pygame.draw.line(screen, RAIN_COLOR, (screen_x, screen_y), (screen_x, screen_y + self.length), RAIN_WIDTH)
+
 
 class Leaf(BGAsset):
     """Comet background assets"""
@@ -137,6 +183,7 @@ class LevelTwoVolumeButton(LevelOneVolumeButton):
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
         StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+        BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
         self.game.poke.cry.set_volume(0 if self.playing else GAME_VOLUME)
         self.playing = not self.playing
         self.update_image()
@@ -301,7 +348,18 @@ class MC(Entity):
         self.old_x = self.x
         self.old_y = self.y
         self.speed = PLAYER_SPEED
+        self.blocked = False
         self.hitbox = pygame.Rect(self.x + size[0] * 15 // 32, self.y + size[1] * 15 // 32, size[0] // 8, size[1] // 8)
+        #player Pokemon
+        self.player_pokemon = {
+            0: Pokemon('Charmadillo', 30),
+            1: Pokemon('Friolera', 29),
+            2: Pokemon('Plumette', 30),
+            3: Pokemon('Ivieron', 29),
+            4: Pokemon('Sparchu', 30),
+            5: Pokemon('Cindrill', 29),
+            6: Pokemon('Cindrill', 100)
+        }
 
         if self.facing == LEFT:
             self.maxFrames = MC.leftFrames
@@ -343,7 +401,7 @@ class MC(Entity):
 
     def input(self, dt):
         # Store previous position
-        if self.game.textComplete and not self.game.inEvent:
+        if self.game.textComplete and not self.game.inEvent and not self.blocked:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
@@ -420,7 +478,8 @@ class MC(Entity):
                 self.rect.center = (self.x, self.y)
                 self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
                 break
-
+    def toggleblock(self):
+        self.blocked = not self.blocked
 class Furina(Entity):
 
     ini = False
@@ -651,6 +710,7 @@ class LevelTwo:
         self.stageDone = False
         self.finalDelay = 0
 
+        self.raindrops = []
 
     def init_assets(self, start_pos):
         from Code.Stages.Home.Home import Home
@@ -725,6 +785,10 @@ class LevelTwo:
                 if obj.name == "Furina":
                     self.furina = Furina((obj.x + FURINA_SIZE[0] // 4, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=3)
 
+        # Pokemon menu
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu_open = False
+
         pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
         pygame.mixer.music.set_volume(GAME_VOLUME)
         pygame.mixer.music.play(-1, 10, 5000)
@@ -765,6 +829,13 @@ class LevelTwo:
             if leaf:
                 self.leaves.append(leaf)
 
+        # Create new raindrops
+        if len(self.raindrops) < RAIN_COUNT:
+            self.raindrops.append(RainDrop(self.player))
+
+        # Update raindrop positions
+        self.raindrops = [r for r in self.raindrops if r.update_position(dt)]
+
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
 
@@ -779,6 +850,9 @@ class LevelTwo:
                 self.isClicked = False
 
     def redraw(self, dt):
+        for raindrop in self.raindrops:
+            raindrop.render(self.screen)
+
         # Draw buttons
         for i, button in enumerate(self.buttons):
             if i != TEXT_BUTTON or not self.textComplete:
@@ -811,6 +885,16 @@ class LevelTwo:
         if self.updateEvent:
             self.updateEvent()
 
+    def input(self):
+        keys = pygame.key.get_pressed()
+
+        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+            self.menu.open_sound.play()
+            self.menu_open = not self.menu_open
+            self.player.toggleblock()
+
+        self.prev_keys = keys
+
     def run(self):
         self.init_assets(self.start_pos)
         pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
@@ -836,10 +920,14 @@ class LevelTwo:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
+                self.input()
                 self.screen.fill("black")
                 self.sprite_group.update(dt)
                 self.sprite_group.draw(self.player.rect.center)
                 self.redraw(dt)
+
+            if self.menu_open: self.menu.update(dt)
+
             self.fade(dt)
             pygame.display.flip()
 

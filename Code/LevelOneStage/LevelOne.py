@@ -1,24 +1,24 @@
 import pygame
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from Code.Opening import Opening
 from Code import LevelTwoStage
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MAX_X, MAX_Y = 740, 493
 BACKGROUND_FRAMES = 5
-BGPATHS = ["../../Assets/BGL1/BgL1-", ".png"]
+BGPATHS = [os.path.join(BASE_DIR, "../../Assets/BGL1/BgL1-"), ".png"]
 FRAME_DELAY, GAME_DELAY, FADE_DELAY = 1.5, 1.0, 0.1  # Now in seconds
 DELAY_AFTER_CLICK = 0.8  # Now in seconds
 BLOCKS_PER_FADE = 15
 COLOR_CHANGE_PER_FADE = 7
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
-VOL_BUTTON_PATHS = ["../../Assets/UI/Buttons/NoMute.png", "../../Assets/UI/Buttons/Mute.png"]
+VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../Assets/UI/Buttons/NoMute.png"), os.path.join(BASE_DIR, "../../Assets/UI/Buttons/Mute.png")]
 VOL_BUTTON_DIMENSIONS = (32, 32)
-INTROPATH = "../../Audio/LevelOneIntro.mp3"
+INTROPATH = os.path.join(BASE_DIR, "../../Audio/LevelOneIntro.mp3")
 GAME_VOLUME = 0.3
-TEXT_BOX_PATHS = ["../../Assets/UI/TextBox.png", "../../Assets/UI/TextBoxArrow.png"]
-TEXT_BOX_CLICK_PATH = "../../Audio/TextBoxClick.wav"
+TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../Assets/UI/TextBox.png"), os.path.join(BASE_DIR, "../../Assets/UI/TextBoxArrow.png")]
+TEXT_BOX_CLICK_PATH = os.path.join(BASE_DIR, "../../Audio/TextBoxClick.wav")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEXT_PATH = os.path.join(BASE_DIR, "LevelOneText.txt")
 TEXT_BOX_DIMENSIONS = (580, 90)
@@ -28,6 +28,8 @@ ALPHA_CHANGE = 100  # Alpha per second
 MAX_ALPHA = 255
 FINAL_DELAY = 0.5  # Now in seconds
 START_POS = "begin"
+FONT_NAME = None
+FONT_SIZE = 26
 
 
 class TextBox(Opening.Button):
@@ -63,7 +65,7 @@ class TextBox(Opening.Button):
             arrow = self.images[self.image_idx + 1]
             surface.blit(arrow, (self.rect.x + TEXT_BOX_DIMENSIONS[0] - 45, self.rect.y + 20, ARROW_DIMENSIONS[0], ARROW_DIMENSIONS[1]))
         # Define a font (name, size)
-        font = pygame.font.SysFont("aquakana", 20, italic=True, bold=True)
+        font = pygame.font.SysFont(FONT_NAME, FONT_SIZE, italic=True, bold=True)
         # Render the text (text, antialias, color)
         text_surface = font.render(self.currString, True, (255, 255, 255))  # White text
         surface.blit(text_surface, text_surface.get_rect(center=(MAX_X // 2 - 15, self.rect.y + TEXT_BOX_DIMENSIONS[1] // 2)))
@@ -264,7 +266,7 @@ class LevelOne:
 if __name__ == "__main__":
     # Initialize pygame
     pygame.init()
-    screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
+    screen = pygame.display.set_mode((MAX_X, MAX_Y))
     pygame.display.set_caption("Level 1")
     game = LevelOne(screen)
     nextStage = game.run()

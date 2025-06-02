@@ -1,6 +1,10 @@
 import random
 import pygame
 import Audio
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class ToneMatrix:
 
@@ -29,6 +33,6 @@ class ToneMatrix:
 
 class Note:
     def __init__(self, i):
-        self.sound = pygame.mixer.Sound("../../Audio/note" + str(i + 1) + ".wav")
+        self.sound = pygame.mixer.Sound(os.path.join(BASE_DIR, "../../Audio/note" + str(i + 1) + ".wav"))
 
 

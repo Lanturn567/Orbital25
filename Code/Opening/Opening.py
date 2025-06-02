@@ -19,12 +19,13 @@ BLOCKS_PER_FADE = 4
 COLOR_CHANGE_PER_FADE = 3
 TIMESFADE = (MAX_Y // BLOCKS_PER_FADE) + 1
 STARTING_PHASE, LOADING_PHASE, END_PHASE, FADE_OUT = 0, 1, 2, 3
-COMET_PATHS = ["../../Assets/Opening/comet1.png"]
-STAR_PATHS = ["../../Assets/Opening/star1.png"]
-VOL_BUTTON_PATHS = ["../../Assets/UI/Buttons/NoMute.png", "../../Assets/UI/Buttons/Mute.png"]
-MAIN_BUTTON_PATHS = ["../../Assets/UI/Buttons/Start.png", "../../Assets/UI/Buttons/Quit.png",
-                     "../../Assets/UI/Buttons/NewGame.png", "../../Assets/UI/Buttons/LoadGame.png",
-                     "../../Assets/UI/Buttons/Back.png"]
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+COMET_PATHS = [os.path.join(BASE_DIR, "../../Assets/Opening/comet1.png")]
+STAR_PATHS = [os.path.join(BASE_DIR, "../../Assets/Opening/star1.png")]
+VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../Assets/UI/Buttons/NoMute.png"), os.path.join(BASE_DIR, "../../Assets/UI/Buttons/Mute.png")]
+MAIN_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../Assets/UI/Buttons/Start.png"), os.path.join(BASE_DIR, "../../Assets/UI/Buttons/Quit.png"),
+                     os.path.join(BASE_DIR, "../../Assets/UI/Buttons/NewGame.png"), os.path.join(BASE_DIR, "../../Assets/UI/Buttons/LoadGame.png"),
+                     os.path.join(BASE_DIR, "../../Assets/UI/Buttons/Back.png")]
 
 
 class BGAsset:
@@ -202,7 +203,7 @@ class Title:
     @classmethod
     def init_images(cls):
         for i in range(Title.numFrames):
-            cls.images.append(pygame.image.load("../../Assets/Title/Title" + str(i + 1) + ".png"))
+            cls.images.append(pygame.image.load(os.path.join(BASE_DIR, "../../Assets/Title/Title" + str(i + 1) + ".png")))
 
     def __init__(self):
         self.count = 0
@@ -220,11 +221,11 @@ class Opening:
     """Main game opening screen"""
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=pygame.SCALED, vsync=1)
+        self.screen = pygame.display.set_mode((MAX_X, MAX_Y))
         pygame.display.set_caption("First Game")
 
         try:
-            self.bg = pygame.image.load('../../Assets/Opening/bg.jpg')
+            self.bg = pygame.image.load(os.path.join(BASE_DIR, '../../Assets/Opening/bg.jpg'))
         except pygame.error:
             self.bg = pygame.Surface((MAX_X, MAX_Y))
             self.bg.fill((0, 0, 30))

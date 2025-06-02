@@ -13,8 +13,9 @@ TEXT_BOX_CLICK_PATH = os.path.join(BASE_DIR, "../../Audio/TextBoxClick.wav")
 TEXT_BOX_DIMENSIONS = (580, 90)
 TEXT_BUTTON = 1
 ARROW_DIMENSIONS = (16, 16)
-FONT_SIZE = 20
+FONT_SIZE = 28
 CHARACTERS_PER_SECOND = 30  # Speed of text display (characters per second)
+FONT_NAME = None
 
 class StoryTextBox(Opening.Button):
     text = []
@@ -47,7 +48,7 @@ class StoryTextBox(Opening.Button):
         self.currChar = 0
         self.text_padding = 30
         self.line_padding = 5
-        self.font = pygame.font.SysFont("aquakana", FONT_SIZE, italic=True, bold=True)
+        self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE, italic=True, bold=True)
         self.max_line_width = TEXT_BOX_DIMENSIONS[0] - (2 * self.text_padding)
         self.wrapped_lines = []
         self.line_height = self.font.get_height()
