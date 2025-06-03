@@ -41,6 +41,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 TREE_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Tree.png')]
 LEAF_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Leaf.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 GAME_VOLUME = 0.3
@@ -195,6 +196,7 @@ class Lake:
         self.screen = screen
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
+        self.collideLand = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
         self.leaves = []
         self.buttons = []
@@ -219,6 +221,10 @@ class Lake:
 
         self.raindrops = []
 
+        self.water = False
+        self.daniel = None
+        self.madeADaniel = False
+
 
     def init_assets(self, start_pos):
         from Code.Stages.Home.Home import Home
@@ -231,7 +237,7 @@ class Lake:
         # Ground tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=1)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collideLand), z=1)
 
         # 1warer tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Water").tiles():
@@ -268,7 +274,13 @@ class Lake:
 
         for x, y, surf in Lake.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
+
+        for x, y, surf in Lake.tmx.get_layer_by_name("Surfable").tiles():
+            image = pygame.image.load(WARP_PATH)
+            pos = (x * BLOCK_SIZE + 8, y * BLOCK_SIZE)
+            image = pygame.transform.scale_by(image, 0.75)
+            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
         for x, y, surf in Lake.tmx.get_layer_by_name("Base").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -282,7 +294,6 @@ class Lake:
         # Warps
         for obj in Lake.tmx.get_layer_by_name("Warps"):
             LakeWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
-
 
         #def __init__(self, pos, paths, group, game, size, road, z=2):
         # Trainers
@@ -320,6 +331,21 @@ class Lake:
         keys = pygame.key.get_pressed()
         for entity in self.entities:
             entity.collide()
+
+        if self.water and not self.madeADaniel:
+            self.player.z = 5
+            self.madeADaniel = True
+            self.player.collidable = self.collideLand
+            self.daniel = Daniel(
+                pos=(self.player.x, self.player.y + BLOCK_SIZE * 1.5),  # Start below player
+                image_paths=POKEMON_PATHS,
+                group=self.sprite_group,
+                size=(BLOCK_SIZE, BLOCK_SIZE),
+                game=self,
+                z=4
+            )
+        elif not self.water:
+            self.player.collidable = self.collide
 
         # Randomly create stars and comets
         Leaf.tick += dt * ANIM_SPEED

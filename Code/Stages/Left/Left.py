@@ -22,6 +22,7 @@ MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Left.mp3")
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
@@ -67,6 +68,11 @@ pokemon_frames = {
 def get_font_path(*parts):
     return os.path.join(BASE_DIR, '..', '..', '..', 'Assets', 'Fonts', *parts)
 
+
+# fonts
+def get_font_path(*parts):
+    return os.path.join(BASE_DIR, '..', '..', '..', 'Assets', 'Fonts', *parts)
+
 # Load fonts using absolute paths
 fonts = {
     'dialog': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
@@ -99,6 +105,7 @@ class Left:
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
+        self.collideLand = pygame.sprite.Group()
         self.buttons = []
         self.alpha = 255
         self.rect = self.screen.get_rect()
@@ -114,10 +121,13 @@ class Left:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
+
+        self.water = False
+        self.daniel = None
+        self.madeADaniel = False
 
 
     def init_assets(self, start_pos):
@@ -133,7 +143,7 @@ class Left:
         # Ground tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=0)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collideLand),  z=0)
 
         # 1warer tiles
         frame_rects = [(x * BLOCK_SIZE, 54 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE) for x in range(WATER_FRAMES)]
@@ -145,7 +155,7 @@ class Left:
         # Island tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Island").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collideLand), z=2)
 
         #Trees tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Trees").tiles():
@@ -155,7 +165,7 @@ class Left:
         # 1warer tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Rock").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide, self.collideLand), z=2)
 
         # 1warer tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Flowers").tiles():
@@ -176,6 +186,35 @@ class Left:
         for x, y, surf in Left.tmx.get_layer_by_name("Doors").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+
+        # Flowers
+        for x, y, surf in Left.tmx.get_layer_by_name("Base").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=1)
+
+        for x, y, surf in Left.tmx.get_layer_by_name("UpSurfable").tiles():
+            image = pygame.image.load(WARP_PATH)
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE + BLOCK_SIZE // 4)
+            image = pygame.transform.scale_by(surf, 1)
+            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+
+        for x, y, surf in Left.tmx.get_layer_by_name("DownSurfable").tiles():
+            image = pygame.image.load(WARP_PATH)
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE - BLOCK_SIZE // 2)
+            image = pygame.transform.scale_by(surf, 1)
+            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+
+        for x, y, surf in Left.tmx.get_layer_by_name("LeftSurfable").tiles():
+            image = pygame.image.load(WARP_PATH)
+            pos = (x * BLOCK_SIZE + 16, y * BLOCK_SIZE)
+            image = pygame.transform.scale_by(surf, 1)
+            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+
+        for x, y, surf in Left.tmx.get_layer_by_name("RightSurfable").tiles():
+            image = pygame.image.load(WARP_PATH)
+            pos = (x * BLOCK_SIZE - 16, y * BLOCK_SIZE)
+            image = pygame.transform.scale_by(surf, 1)
+            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
         # Players
         for obj in Left.tmx.get_layer_by_name("Player"):
@@ -225,6 +264,22 @@ class Left:
         for entity in self.entities:
             entity.collide()
 
+        if self.water and not self.madeADaniel:
+            self.player.z = 5
+            self.madeADaniel = True
+            self.player.collidable = self.collideLand
+            self.daniel = Daniel(
+                pos=(self.player.x, self.player.y + BLOCK_SIZE * 1.5),  # Start below player
+                image_paths=POKEMON_PATHS,
+                group=self.sprite_group,
+                size=(BLOCK_SIZE, BLOCK_SIZE),
+                game=self,
+                z=4
+            )
+        elif not self.water:
+            self.player.collidable = self.collide
+
+
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
 
@@ -237,6 +292,7 @@ class Left:
             self.clickDelay -= dt * ANIM_SPEED
             if self.clickDelay <= 0:
                 self.isClicked = False
+
 
     def redraw(self):
         # Draw buttons
