@@ -52,18 +52,18 @@ FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 4
 FLOAT_LENGTH = BLOCK_SIZE
 DIST_FROM_PLAYER = BLOCK_SIZE * 15
-POKEMON_CRY = "./Audio/Poke.wav"
 POKEMON_SIZE = (64, 64)
 DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
-TEXT_PATH = "LevelTwoText.txt"
-TEXT_BOX_PATHS = ["../../UI/TextBox.png", "../../UI/TextBoxArrow.png"]
 DELAY_AT_START = 55
-WARP_PATH = "../../Assets/Background/Warp.png"
 WARP_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Warp.wav")
 MAX_ALPHA = 255
 FINAL_DELAY = 5
+
+SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/Surf.txt")
+NO_SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/NoSurf.txt")
+
 
 class AllSprites(pygame.sprite.LayeredUpdates):
     def __init__(self):
@@ -82,9 +82,11 @@ class AllSprites(pygame.sprite.LayeredUpdates):
         base_sprites = sorted([sprite for sprite in self if sprite.z == 2], key=lambda sprite: sprite.y_sort)
         tree_sprites = sorted([sprite for sprite in self if sprite.z == 3], key=lambda sprite: sprite.y_sort)
         wall_sprites = sorted([sprite for sprite in self if sprite.z == 4], key=lambda sprite: sprite.y_sort)
+        tall_sprites = sorted([sprite for sprite in self if sprite.z == 5], key=lambda sprite: sprite.y_sort)
 
 
-        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, wall_sprites):
+
+        for lis in (bg_sprites, water_sprites, base_sprites, tree_sprites, wall_sprites, tall_sprites):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
@@ -218,3 +220,53 @@ class FurinaWarp(EventWarp):
                 self.game.player.facing = LEFT
 
         self.game.updateEvent = checker
+
+
+class Event(Sprite):
+
+    def __init__(self, pos, image, groups, game, z=0):
+        super().__init__(pos, image, groups, z)
+        self.game = game
+
+    def event(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            #do something
+            print("im eventing")
+            #reset storytextbox
+            #change game state
+
+
+class Waterside(Event):
+    tolerance = BLOCK_SIZE
+
+    def event(self):
+        if self.test():
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.game.water and self.game.player.moveWater():
+                    StoryTextBox.init__text(NO_SURF_TEXT_PATH)
+                    self.game.buttons[TEXT_BUTTON].reset()
+                    #change game state
+                    self.game.inEvent = True
+                    self.game.water = False
+
+            elif keys[pygame.K_SPACE] and not self.game.water and self.game.player.moveWater():
+                StoryTextBox.init__text(SURF_TEXT_PATH)
+                self.game.buttons[TEXT_BUTTON].reset()
+                #change game state
+                self.game.inEvent = True
+                self.game.water = True
+
+    def test(self):
+        if self.game.player.facing == LEFT and self.game.player.x > self.rect.x and abs(self.game.player.y - self.rect.y) < Waterside.tolerance:
+            return True
+        elif self.game.player.facing == RIGHT and self.game.player.x < self.rect.x + Waterside.tolerance and abs(self.game.player.y - self.rect.y) < Waterside.tolerance:
+            return True
+        elif self.game.player.facing == UP and self.game.player.y > self.rect.y and abs(self.game.player.x- self.rect.x) < Waterside.tolerance:
+            return True
+        elif self.game.player.facing == DOWN and self.game.player.y < self.rect.y + Waterside.tolerance and abs(self.game.player.x - self.rect.x) < Waterside.tolerance:
+            return True
+        else:
+            return False
+
+

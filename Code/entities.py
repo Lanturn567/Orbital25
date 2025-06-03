@@ -54,7 +54,7 @@ FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 4
 FLOAT_LENGTH = BLOCK_SIZE
 DIST_FROM_PLAYER = BLOCK_SIZE * 15
-POKEMON_CRY = "../../Audio/Poke.wav"
+POKEMON_CRY = os.path.join(BASE_DIR, '../Audio/Poke.wav')
 POKEMON_SIZE = (64, 64)
 DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
@@ -92,6 +92,7 @@ class Entity(pygame.sprite.Sprite):
 
     def collide(self):
         pass
+
 
 class MC(Entity):
     ini = False
@@ -231,18 +232,58 @@ class MC(Entity):
 
     def collide(self):
         # Check for collisions with all collidable sprites
+        moved = False
         for sprite in self.collidable:
             if sprite.hitbox.colliderect(self.hitbox):
                 if isinstance(sprite, BaseWarp):
                     sprite.warp()
+                elif isinstance(sprite, Waterside):
+                    sprite.event()
                 # Move back to previous position if collision occurs
-                self.x, self.y = self.old_x, self.old_y
-                self.rect.center = (self.x, self.y)
-                self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
-                break
+                elif not moved:
+                    moved = True
+                    self.x, self.y = self.old_x, self.old_y
+                    self.rect.center = (self.x, self.y)
+                    self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
 
     def toggleblock(self):
         self.blocked = not self.blocked
+
+    def moveWater(self):
+        checkCollide = self.game.collide if self.collidable == self.game.collideLand else self.game.collideLand if self.collidable == self.game.collide else None
+        if checkCollide:
+            if self.facing == LEFT:
+                self.x -= BLOCK_SIZE * 2
+            elif self.facing == RIGHT:
+                self.x += BLOCK_SIZE * 2
+            elif self.facing == UP:
+                self.y -= BLOCK_SIZE * 2
+            elif self.facing == DOWN:
+                self.y += BLOCK_SIZE * 2
+
+            self.rect.center = (self.x, self.y)
+            self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
+            for sprite in checkCollide:
+                if sprite.hitbox.colliderect(self.hitbox):
+                    if self.facing == LEFT:
+                        self.x += BLOCK_SIZE * 2
+                    elif self.facing == RIGHT:
+                        self.x -= BLOCK_SIZE * 2
+                    elif self.facing == UP:
+                        self.y += BLOCK_SIZE * 2
+                    elif self.facing == DOWN:
+                        self.y -= BLOCK_SIZE * 2
+
+                    self.rect.center = (self.x, self.y)
+                    self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
+                    print(sprite)
+                    return False
+            self.image = MC.assets[self.facing][0]
+            self.currImage = 0
+            return True
+        return False
+
+
 
 class Furina(Entity):
 
@@ -361,6 +402,7 @@ class Furina(Entity):
         StoryTextBox.init__text(FURINA_EVENT_PATH)
         self.game.buttons[TEXT_BUTTON].reset()
 
+
 class Poke(Entity):
     def __init__(self, pos, image_paths, group, size, game, z=4):
         super().__init__(pos, group, size, z)
@@ -443,3 +485,129 @@ class Poke(Entity):
         # Update position and sorting
         self.rect.center = (self.x, self.y)
         self.y_sort = self.rect.centery
+
+
+class Daniel(Entity):
+    def __init__(self, pos, image_paths, group, size, game, z=4):
+        super().__init__(pos, group, size, z)
+        self.game = game
+        self.player = game.player
+        self.img_index = 0
+
+        # Scaling properties
+        self.scale = 0.0
+        self.target_scale = 8.0
+        self.scaling_speed = 4.0  # Scale units per second
+        self.scaling_complete = False
+
+        # Load images
+        self.original_images = []
+        for path in image_paths:
+            try:
+                image = pygame.image.load(path).convert_alpha()
+            except FileNotFoundError:
+                image = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE), pygame.SRCALPHA)
+                image.fill((255, 0, 0, 128))  # Semi-transparent red as error indicator
+            self.original_images.append(image)
+
+        # Position relative to player (always below)
+        self.relative_y_offset = BLOCK_SIZE // 2 # Position below player
+
+        # Sound effects
+        self.cry = pygame.mixer.Sound(POKEMON_CRY)
+        self.cry.set_volume(GAME_VOLUME)
+
+        # Initialize image and rect
+        self.update_image()
+        self.rect = self.image.get_rect(center=self.get_target_position())
+
+        self.startShrink = True
+
+    def get_target_position(self):
+        """Calculate position directly below player"""
+        return (self.player.x, self.player.y + self.relative_y_offset)
+
+    def update_image(self):
+        """Update scaled image based on current scale"""
+        if not self.original_images:
+            return
+
+        # Choose image based on player's facing direction
+        self.img_index = 1 if self.player.facing == RIGHT else 0 if self.player.facing == LEFT else self.img_index
+
+        # Scale the image
+        original_img = self.original_images[self.img_index]
+        new_width = int(original_img.get_width() * self.scale)
+        new_height = int(original_img.get_height() * self.scale)
+        self.image = pygame.transform.scale(original_img, (new_width, new_height))
+
+    def update_scale(self, dt):
+        """Handle the scaling animation"""
+        if not self.scaling_complete:
+            self.scale = min(self.scale + self.scaling_speed * dt, self.target_scale)
+            if self.scale >= self.target_scale:
+                self.scaling_complete = True
+                self.cry.play()  # Play sound when fully grown
+                self.game.inEvent = False
+            self.update_image()
+
+    def shrink_to_nothing(self, dt):
+        """Animate the Pokemon shrinking to nothing"""
+        if self.startShrink:
+            self.scale = 1.0
+            self.startShrink = False
+        if self.scale > 0:
+            self.scale = max(0, self.scale - self.scaling_speed * dt / 8)
+            self.update_image()
+
+            # Update position to stay below player while shrinking
+            target_pos = self.get_target_position()
+            self.x = target_pos[0]
+            self.y = target_pos[1]
+
+            # Update rect and sorting
+            self.rect = self.image.get_rect(center=(self.x, self.y))
+            self.y_sort = self.rect.centery
+            return False  # Still shrinking
+        else:
+            self.kill()  # Remove sprite when fully shrunk
+            self.cry.play()  # Play sound when fully shrunk
+            self.game.inEvent = False
+            self.game.madeADaniel = False
+            self.game.player.z = 3
+            return True   # Shrinking complete
+
+    # Example usage in update method:
+    def update(self, dt):
+        if self.scaling_complete and not self.game.water:
+            self.shrink_to_nothing(dt)
+        else:
+            # Update scaling animation
+            self.update_scale(dt)
+
+            # Always move to position below player
+            target_pos = self.get_target_position()
+            self.x = target_pos[0]
+            self.y = target_pos[1]
+
+            # Update facing direction to match player
+            self.facing = self.player.facing
+
+            # Update image based on player's facing direction
+            if hasattr(self.player, 'facing'):
+                if self.player.facing == LEFT:
+                    self.image = pygame.transform.scale(self.original_images[0],
+                                                        (int(BLOCK_SIZE * self.scale),
+                                                         int(BLOCK_SIZE * self.scale)))
+                elif self.player.facing == RIGHT:
+                    self.image = pygame.transform.scale(self.original_images[1],
+                                                        (int(BLOCK_SIZE * self.scale),
+                                                         int(BLOCK_SIZE * self.scale)))
+                else:
+                    self.image = pygame.transform.scale(self.image,
+                                                        (int(BLOCK_SIZE * self.scale),
+                                                         int(BLOCK_SIZE * self.scale)))
+            # Update rect and sorting
+            self.rect = self.image.get_rect(center=(self.x, self.y))
+            self.y_sort = self.rect.centery
+
