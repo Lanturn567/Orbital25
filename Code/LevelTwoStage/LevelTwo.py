@@ -21,10 +21,10 @@ DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 3
+PLAYER_SPEED = BLOCK_SIZE // 12 * 5
 MAX_SPEED = BLOCK_SIZE // 4 * 3
 MAX_X, MAX_Y = 740, 493
-MAX_FPS = 60
+MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../Audio/LevelTwoBGM.mp3")
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 3
@@ -757,7 +757,7 @@ class LevelTwo:
         #tree_image = pygame.image.load(TREE_PATH[0])
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
 
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
