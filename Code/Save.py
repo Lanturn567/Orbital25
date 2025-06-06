@@ -6,11 +6,11 @@ from collections import defaultdict
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 save = {
-    "events": {"Mom" : True,
-               "Prof" : True,
-               "Daniel" : True,
-               "Found" : True,
-               "GymOne" : True,
+    "events": {"Mom" : False,
+               "Prof" : False,
+               "Daniel" : False,
+               "Found" : False,
+               "GymOne" : False,
                "RivalTown" : False,
                "event7" : False,
                "event8" : False,

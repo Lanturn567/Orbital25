@@ -94,8 +94,8 @@ fonts = {
 
 class HomeEventWarp(EventWarp):
     #dir in ["left", "right", "up", "down"]
-    def __init__(self, pos, stage, image, groups, game, cond, dir, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
         self.dir = dir
 
     def makeEvent(self):
@@ -107,16 +107,6 @@ class HomeEventWarp(EventWarp):
             self.game.player.y = self.rect.y
         self.game.inEvent = True
         self.afterEvent()
-
-    def warp(self):
-        if self.cond():
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = True
-            SaveSystem.write(self.game.save)
-            super().warp()
-        else:
-            self.makeEvent()
 
     def afterEvent(self):
         def checker():
@@ -139,11 +129,12 @@ class HomeEventWarp(EventWarp):
 
 
 
-class HomeEventWarpPhaseTwo(HomeEventWarp):
+class HomeEventWarpPhaseTwo(EventWarp):
     #dir in ["left", "right", "up", "down"]
-    def __init__(self, pos, stage, image, groups, game, cond, dir, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, dir, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
         self.val = 0
+        self.dir = dir
 
     def makeEvent(self):
         StoryTextBox.init__text(LOST_TEXT if self.val == 0 else PROF_TEXT)
@@ -158,10 +149,6 @@ class HomeEventWarpPhaseTwo(HomeEventWarp):
     def warp(self):
         self.val = self.cond()
         if self.val == 2:
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = True
-            SaveSystem.write(self.game.save)
             super().warp()
         else:
             self.makeEvent()
@@ -256,10 +243,10 @@ class Home:
                 image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
             if obj.properties["pos"] in ["left"]:
                 dir = obj.properties["dir"]
-                HomeEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, cond=self.save.seenMom)
+                HomeEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.seenMom)
             elif obj.properties["pos"] in ["right", "party", "gym", "lake"]:
                 dir = obj.properties["dir"]
-                HomeEventWarpPhaseTwo((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, cond=self.save.homeTest)
+                HomeEventWarpPhaseTwo((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.homeTest)
             else:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=2)
 

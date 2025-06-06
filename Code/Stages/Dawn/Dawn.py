@@ -36,7 +36,7 @@ DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH1 = os.path.join(BASE_DIR, "Dawn.txt")
-TEXT_EVENTS_PATHS = ["DawnEvent1.txt", "DawnEvent2.txt"]
+TEXT_EVENTS_PATHS = [os.path.join(BASE_DIR, "DawnEvent1.txt"), os.path.join(BASE_DIR, "DawnEvent2.txt")]
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),

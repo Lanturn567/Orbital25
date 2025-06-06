@@ -82,8 +82,8 @@ fonts = {
 
 class RightEventWarp(EventWarp):
 
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
 
     def makeEvent(self):
         StoryTextBox.init__text(LOST_TEXT)
@@ -91,16 +91,6 @@ class RightEventWarp(EventWarp):
         self.game.player.x = self.rect.x
         self.game.inEvent = True
         self.afterEvent()
-
-    def warp(self):
-        if self.cond():
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = True
-            SaveSystem.write(self.game.save)
-            super().warp()
-        else:
-            self.makeEvent()
 
     def afterEvent(self):
         def checker():
@@ -247,7 +237,7 @@ class Right:
             if obj.properties["pos"] == "home":
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
             else:
-                RightEventWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=self.save.getFound, z=1)
+                RightEventWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, cond=self.save.getFound, z=1)
 
         # Warps
         for obj in Right.tmx.get_layer_by_name("Items"):

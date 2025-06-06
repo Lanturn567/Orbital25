@@ -182,25 +182,16 @@ class BaseWarp(Sprite):
 
 class EventWarp(BaseWarp):
 
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, z)
         self.cond = cond
         self.eventDone = False
 
-
     def warp(self):
-        """
-
-        stage = STAGES.get(self.stage)(self.game.screen)
         if self.cond():
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = self.game.save.getStage()(self.game.screen, LOCATION, self.game.save)
-            SaveSystem.write(self.game.save)
+            super().warp()
         else:
             self.makeEvent()
-        """
-        super().warp()
 
     def makeEvent(self):
         pass

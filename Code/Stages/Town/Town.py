@@ -163,8 +163,8 @@ class RivalTown(Trainer):
 
 class TownEventWarp(EventWarp):
 
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
 
     def makeEvent(self):
         StoryTextBox.init__text(LOST_TEXT)
@@ -172,16 +172,6 @@ class TownEventWarp(EventWarp):
         self.game.player.x = self.rect.x
         self.game.inEvent = True
         self.afterEvent()
-
-    def warp(self):
-        if self.cond():
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = True
-            SaveSystem.write(self.game.save)
-            super().warp()
-        else:
-            self.makeEvent()
 
     def afterEvent(self):
         def checker():
@@ -288,7 +278,7 @@ class Town:
         for obj in Town.tmx.get_layer_by_name("Warps"):
             image=pygame.image.load(WARP_PATH)
             if obj.properties["pos"] in ["snow"]:
-                TownEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, cond=self.save.beatGymOne)
+                TownEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymOne)
             else:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
@@ -300,7 +290,7 @@ class Town:
                 self.rival = RivalTown((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                                        groups=(self.sprite_group, self.collide, self.entities),
                                        game=self, size=PLAYER_SIZE, facing=facing, z=3)
-            else:
+            elif obj.name != "RivalTown":
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                         groups=(self.sprite_group, self.collide, self.entities),
                         game=self, size=PLAYER_SIZE, facing=facing, z=3)
