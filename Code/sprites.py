@@ -8,6 +8,7 @@ from pytmx.util_pygame import load_pygame
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
+from Code.Save import *
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -164,15 +165,19 @@ class BaseWarp(Sprite):
     pygame.mixer.init()
     warpSound = pygame.mixer.Sound(WARP_SOUND_PATH)
 
-    def __init__(self, pos, stage, image, groups, game, z=1):
+    def __init__(self, pos, stage, image, groups, game, loc, z=1):
         super().__init__(pos, image, groups, z)
         self.game = game
         self.stage = stage
+        self.loc = loc
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
 
     def warp(self):
-        #self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        self.game.save.updateStage(self.stage.title())
+        self.game.save.updatePos(self.loc)
+        self.game.nextStage = True
+        SaveSystem.write(self.game.save)
         BaseWarp.warpSound.play()
 
 class EventWarp(BaseWarp):
@@ -188,7 +193,10 @@ class EventWarp(BaseWarp):
 
         stage = STAGES.get(self.stage)(self.game.screen)
         if self.cond():
-            self.game.nextStage = stage
+            self.game.save.updateStage(self.stage.title())
+            self.game.save.updatePos(LOCATION)
+            self.game.nextStage = self.game.save.getStage()(self.game.screen, LOCATION, self.game.save)
+            SaveSystem.write(self.game.save)
         else:
             self.makeEvent()
         """
