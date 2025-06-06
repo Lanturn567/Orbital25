@@ -217,6 +217,9 @@ class MC(Entity):
                     self.maxFrames = MC.rightFrames
                     self.currImage = 0
 
+            if not left and not right and not up and not down:
+                self.currImage = 0
+
     def move(self):
 
         # Update position
@@ -488,6 +491,11 @@ class Poke(Entity):
 
 
 class Daniel(Entity):
+    # Sound effects
+    pygame.mixer.init()
+    cry = pygame.mixer.Sound(POKEMON_CRY)
+    cry.set_volume(GAME_VOLUME)
+
     def __init__(self, pos, image_paths, group, size, game, z=4):
         super().__init__(pos, group, size, z)
         self.game = game
@@ -512,10 +520,6 @@ class Daniel(Entity):
 
         # Position relative to player (always below)
         self.relative_y_offset = BLOCK_SIZE // 2 # Position below player
-
-        # Sound effects
-        self.cry = pygame.mixer.Sound(POKEMON_CRY)
-        self.cry.set_volume(GAME_VOLUME)
 
         # Initialize image and rect
         self.update_image()
@@ -547,7 +551,7 @@ class Daniel(Entity):
             self.scale = min(self.scale + self.scaling_speed * dt, self.target_scale)
             if self.scale >= self.target_scale:
                 self.scaling_complete = True
-                self.cry.play()  # Play sound when fully grown
+                Daniel.cry.play()  # Play sound when fully grown
                 self.game.inEvent = False
             self.update_image()
 

@@ -30,12 +30,12 @@ class Menu:
         self.frame_index = 0
 
         # sounds
-        self.open_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
-        self.open_sound.set_volume(0.3)
-        self.click_sound = pygame.mixer.Sound(MENU_CLICK_SOUND_PATH)
-        self.click_sound.set_volume(0.2)
-        self.select_sound = pygame.mixer.Sound(MENU_SELECT_SOUND_PATH)
-        self.select_sound.set_volume(0.25)
+        Menu.open_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
+        Menu.open_sound.set_volume(0.3)
+        Menu.click_sound = pygame.mixer.Sound(MENU_CLICK_SOUND_PATH)
+        Menu.click_sound.set_volume(0.2)
+        Menu.select_sound = pygame.mixer.Sound(MENU_SELECT_SOUND_PATH)
+        Menu.select_sound.set_volume(0.25)
 
         # tint surface
         self.tint_surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -73,12 +73,12 @@ class Menu:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
             self.index -= 1
-            self.click_sound.play()
+            Menu.click_sound.play()
         if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
             self.index += 1
-            self.click_sound.play()
+            Menu.click_sound.play()
         if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
-            self.select_sound.play()
+            Menu.select_sound.play()
             if self.selected_index != None:
                 selected_pokemon = self.pokemon[self.selected_index]
                 current_pokemon = self.pokemon[self.index]

@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 from Code.Opening import Opening
+from Code.Save import *
 from Code import LevelTwoStage
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEXT_PATH = os.path.join(BASE_DIR, "LevelOneText.txt")
 TEXT_BOX_DIMENSIONS = (580, 90)
 TEXT_BUTTON = 1
+VOLUME_BUTTON = 0
 ARROW_DIMENSIONS = (16, 16)
 ALPHA_CHANGE = 100  # Alpha per second
 MAX_ALPHA = 255
@@ -118,9 +120,17 @@ class LevelOneVolumeButton(Opening.Button):
         self.playing = True
         self.update_image()
 
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            TextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
         TextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+        self.game.save.updateMuted()
         self.playing = not self.playing
         self.update_image()
 
@@ -131,8 +141,9 @@ class LevelOne:
     images = []
     songs = []
 
-    def __init__(self, screen):
+    def __init__(self, screen, start_pos, save):
         self.screen = screen
+        self.save = save
         self.running = True
         self.nextStage = False
         self.boxFinished = False
@@ -149,6 +160,8 @@ class LevelOne:
         #BUTTON_POS
         self.buttons = [LevelOneVolumeButton(MAX_X - 50, MAX_Y - 50, self),
                         TextBox(65, MAX_Y - 140, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
+
 
         self.textComplete = False
         self.rect = pygame.display.get_surface().get_rect()
@@ -261,12 +274,32 @@ class LevelOne:
             pygame.quit()
             sys.exit()
         else:
-            return LevelTwo(self.screen, START_POS)
+            self.save.updateStage("LevelTwo")
+            self.save.updatePos(START_POS)
+            SaveSystem.write(self.save)
+            return self.save.getStage()(self.screen, START_POS, self.save)
+
+
+def checkExit(nextStage):
+    if nextStage is not None:
+        return nextStage.run()
+    else:
+        pygame.quit()
+        sys.exit()
+
+
 
 if __name__ == "__main__":
     # Initialize pygame
     pygame.init()
     screen = pygame.display.set_mode((MAX_X, MAX_Y))
     pygame.display.set_caption("Level 1")
-    game = LevelOne(screen)
+    save = Save("test")
+    save.updateStage("LevelOne")
+    SaveSystem.write(save)
+    game = LevelOne(screen, save)
     nextStage = game.run()
+
+    while True:
+        nextStage = checkExit(nextStage)
+        #same here

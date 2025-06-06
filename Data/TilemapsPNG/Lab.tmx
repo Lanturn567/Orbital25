@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="8">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="11">
  <tileset firstgid="1" source="PLAT nature.tsx"/>
  <tileset firstgid="2305" source="Floor.tsx"/>
  <tileset firstgid="2817" source="Furniture2.tsx"/>
@@ -214,7 +214,7 @@
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="2" name="Manson" type="prof" gid="8502" x="749.882" y="384.941" width="32" height="64">
+  <object id="2" name="Manson" type="prof" gid="8502" x="768.028" y="383.731" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
     <property name="dis" type="int" value="0"/>
@@ -223,6 +223,12 @@
   <object id="3" name="Shank" type="prof" gid="8502" x="94.5882" y="383.765" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
+    <property name="dis" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="10" name="DawnLab" type="lanturn" gid="8490" x="576.149" y="673.747" width="32" height="64">
+   <properties>
+    <property name="dir" value="up"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>

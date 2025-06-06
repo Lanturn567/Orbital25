@@ -1,10 +1,13 @@
 import sys
 import os
+
+from pygame.draw_py import clip_line
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +46,7 @@ WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
 LOCATION = "lab"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
+DAWN_ROAD = []
 
 STAGES = {}
 
@@ -70,33 +74,133 @@ fonts = {
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
 
-class LabWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
-
 class Prof(Trainer):
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
         self.talked = self.info["talked"]
         self.talkedTo = False
+        self.dawnGo = False
+        if self.game.save.seenProf():
+            self.talkedTo = True
 
     def makeEvent(self):
         StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
+        obj = self.game.dawn
+        self.dawn = None
+        if not self.talkedTo:
+            facing = obj.properties["dir"]
+            type = obj.type
+            dis = obj.properties["dis"]
+            self.dawn = DawnLab((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.game.sprite_group, self.game.collide, self.game.entities), game=self.game, size=PLAYER_SIZE, facing=facing, z=3)
         self.talkedTo = True
+
+    def update(self, dt):
+        # Update position
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
+        if not self.inEvent and not self.game.inEvent:
+            self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        elif self.game.inEvent:
+            self.delayAfterEvent = 0
+        # Check for collisions
+        if not self.inEvent and self.game.textComplete:
+            self.move(dt)
+            self.y_sort = self.rect.centery
+            self.image = self.images[self.facing][int(self.currImage) % self.maxFrames]
+        elif self.inEvent and self.game.textComplete and not self.dawnGo and self.dawn:
+            self.dawn.go = True
+            self.delayAfterEvent = 0
+            self.dawnGo = True
+            self.inEvent = False
+        elif self.inEvent and self.game.textComplete:
+            self.inEvent = False
+            self.game.inEvent = False
+            self.delayAfterEvent = 0
+
+class DawnLab(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=DAWN_ROAD, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+        self.go = False
+        self.walked = False
+
+    def move(self, dt):
+        # Store previous position
+        if self.go and not self.walked:
+            if self.rect.centery > self.game.player.rect.centery:
+                self.facing = UP
+                self.y = self.y - dt * FURINA_GO_SPEED
+                self.currImage += dt * ANIM_SPEED
+
+            elif self.rect.centerx > self.game.player.rect.centerx + BLOCK_SIZE:
+                self.x -= dt * FURINA_GO_SPEED
+                if self.facing == LEFT:
+                    self.currImage += dt * ANIM_SPEED
+                else:
+                    self.facing = LEFT
+                    self.currImage = 0
+            else:
+                self.walked = True
+            self.box.center = (self.x, self.y)
+
+        elif self.go and not self.talkedTo:
+            self.currImage = 0
+            self.makeEvent()
+
+        elif self.box.colliderect(self.game.player.hitbox):
+            if self.game.player.x > self.x and abs(self.game.player.y - self.y) < BLOCK_SIZE // 2:
+                self.facing = RIGHT
+            elif self.game.player.x < self.x and abs(self.game.player.y - self.y) < BLOCK_SIZE // 2:
+                self.facing = LEFT
+            elif self.game.player.y < self.y:
+                self.facing = UP
+            elif self.game.player.y >= self.y:
+                self.facing = DOWN
+            self.currImage = 0
+
+        else:
+            pass
+
+    def update(self, dt):
+        # Update position
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
+        if not self.inEvent and not self.game.inEvent:
+            self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        elif self.game.inEvent:
+            self.delayAfterEvent = 0
+        # Check for collisions
+        if not self.inEvent and self.game.textComplete:
+            self.move(dt)
+            self.y_sort = self.rect.centery
+            self.image = self.images[self.facing][int(self.currImage) % self.maxFrames]
+        elif self.inEvent and self.game.textComplete:
+            self.inEvent = False
+            self.game.inEvent = False
+            self.delayAfterEvent = 0
+
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.inEvent = True
+        self.game.inEvent = True
+        self.game.save.updateEvent("Prof")
+        self.road = []
+        self.maxFrames = 1
+        self.maxSteps = 0
+        self.talkedTo = True
+
 
 class Lab:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -115,18 +219,13 @@ class Lab:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Left.Left import Left
-        global STAGES
-        STAGES = {
-            "left": lambda screen: Left(screen, LOCATION),
-        }
+
         # Ground tiles
         for x, y, surf in Lab.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -169,7 +268,7 @@ class Lab:
 
         # Warps
         for obj in Lab.tmx.get_layer_by_name("Warps"):
-            LabWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Lab.tmx.get_layer_by_name("Trainers"):
@@ -178,6 +277,8 @@ class Lab:
             dis = obj.properties["dis"]
             if obj.name == "Lek":
                 Prof((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            elif obj.name == "DawnLab":
+                self.dawn = obj
             else:
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
@@ -206,8 +307,13 @@ class Lab:
     def update_game_state(self, dt):
         #update player
         keys = pygame.key.get_pressed()
+        closest = None
+        closestDist = float("inf")
         for entity in self.entities:
-            entity.collide()
+            dist = abs(self.player.rect.centerx - entity.rect.centerx) + abs(self.player.rect.centery - entity.rect.centery)
+            closest = entity if dist < closestDist else closest
+            closestDist = dist if dist < closestDist else closestDist
+        closest.collide()
 
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return
@@ -272,6 +378,8 @@ class Lab:
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
+
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -299,7 +407,7 @@ class Lab:
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -313,7 +421,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Lab(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Lab(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

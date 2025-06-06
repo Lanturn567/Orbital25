@@ -5,6 +5,7 @@ from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/River.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
+FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
@@ -70,22 +72,14 @@ fonts = {
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
 
-class RiverWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
 
 class River:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -111,13 +105,7 @@ class River:
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Left.Left import Left
-        from Code.Stages.City.City import City
-        global STAGES
-        STAGES = {
-            "left": lambda screen: Left(screen, LOCATION),
-            "City": lambda screen: City(screen, LOCATION),
-        }
+
         # Ground tiles
         for x, y, surf in River.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -161,10 +149,14 @@ class River:
             if obj.properties["pos"] == start_pos:
                 self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
 
+        # 1warer tiles
+        for x, y, surf in River.tmx.get_layer_by_name("UnderBridge").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group), z=1)
 
         # Warps
         for obj in River.tmx.get_layer_by_name("Warps"):
-            RiverWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in River.tmx.get_layer_by_name("Trainers"):
@@ -188,7 +180,7 @@ class River:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -264,6 +256,7 @@ class River:
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -280,18 +273,19 @@ class River:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw()
 
+
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw()
             if self.menu_open: self.menu.update(dt)
 
             self.fade(dt)
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -305,7 +299,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = River(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = River(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

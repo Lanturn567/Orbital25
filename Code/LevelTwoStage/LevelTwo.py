@@ -9,6 +9,7 @@ from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
 from Code.sprites import *
+from Code.Save import *
 from Code.entities import *
 from Code.support import *
 
@@ -28,6 +29,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../Audio/LevelTwoBGM.mp3")
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 3
+FADE_IN_CHANGE_PER_FRAME = 15
 WATER_PATHS = [os.path.join(BASE_DIR, '../../Assets/Water/0.png'),
                os.path.join(BASE_DIR, '../../Assets/Water/1.png'),
                os.path.join(BASE_DIR, '../../Assets/Water/2.png'),
@@ -180,10 +182,26 @@ class Leaf(BGAsset):
 
 class LevelTwoVolumeButton(LevelOneVolumeButton):
 
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            self.game.poke.cry.set_volume(0 if self.playing else GAME_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
         StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
         BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        self.game.save.updateMuted()
         self.game.poke.cry.set_volume(0 if self.playing else GAME_VOLUME)
         self.playing = not self.playing
         self.update_image()
@@ -259,9 +277,12 @@ class Warp(Sprite):
         self.stage = stage
         self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
 
-
     def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        self.game.save.updateStage(self.stage.title())
+        self.game.save.updatePos(LOCATION)
+        SaveSystem.write(self.game.save)
+        self.game.nextStage = True
+
 
 class EventWarp(Warp):
 
@@ -272,14 +293,17 @@ class EventWarp(Warp):
 
 
     def warp(self):
-        stage = STAGES.get(self.stage)(self.game.screen)
         if self.cond():
-            self.game.nextStage = stage
+            self.game.save.updateStage(self.stage.title())
+            self.game.save.updatePos(LOCATION)
+            self.game.nextStage = True
+            SaveSystem.write(self.game.save)
         else:
             self.makeEvent()
 
     def makeEvent(self):
         pass
+
 
 class FurinaWarp(EventWarp):
 
@@ -453,6 +477,8 @@ class MC(Entity):
                     self.facing = RIGHT
                     self.maxFrames = MC.rightFrames
                     self.currImage = 0
+            if not left and not right and not up and not down:
+                self.currImage = 0
 
     def move(self):
 
@@ -480,6 +506,8 @@ class MC(Entity):
                 break
     def toggleblock(self):
         self.blocked = not self.blocked
+
+
 class Furina(Entity):
 
     ini = False
@@ -570,7 +598,6 @@ class Furina(Entity):
         else:
             pass
 
-
     def collide(self):
         keys = pygame.key.get_pressed()
         if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_SPACE] and not self.eventDone:
@@ -596,6 +623,7 @@ class Furina(Entity):
     def makeEvent(self):
         StoryTextBox.init__text(FURINA_EVENT_PATH)
         self.game.buttons[TEXT_BUTTON].reset()
+
 
 class Poke(Entity):
     def __init__(self, pos, image_paths, group, size, game, z=4):
@@ -682,10 +710,11 @@ class Poke(Entity):
 
 class LevelTwo:
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         LevelTwo.tmx = load_pygame(TMX_PATH)
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -713,14 +742,6 @@ class LevelTwo:
         self.raindrops = []
 
     def init_assets(self, start_pos):
-        from Code.Stages.Home.Home import Home
-        from Code.Misc.Mountain import Mountain
-        global STAGES
-        STAGES = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
-
         # Ground tiles
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -797,6 +818,8 @@ class LevelTwo:
         LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
         Leaf.init_images(LEAF_PATH)
         self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
+
 
     def fade(self, dt):
         if not self.nextStage:
@@ -809,7 +832,7 @@ class LevelTwo:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -897,15 +920,6 @@ class LevelTwo:
 
     def run(self):
         self.init_assets(self.start_pos)
-        pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
-        pygame.mixer.music.set_volume(GAME_VOLUME)
-        pygame.mixer.music.play(-1, 10, 5000)
-        StoryTextBox.init__text(TEXT_PATH)
-        StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
-        Leaf.init_images(LEAF_PATH)
-        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
-
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -921,19 +935,18 @@ class LevelTwo:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw(dt)
 
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw(dt)
             if self.menu_open: self.menu.update(dt)
-
             self.fade(dt)
+
             pygame.display.flip()
 
-
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -947,7 +960,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = LevelTwo(screen, START_POS)
+    save = Save("test")
+    save.updateStage("LevelTwo")
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = LevelTwo(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

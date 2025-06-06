@@ -20,6 +20,7 @@ FONT_NAME = None
 class StoryTextBox(Opening.Button):
     text = []
     length = 0
+    madeSound = False
 
     @classmethod
     def init__text(cls, path):
@@ -36,8 +37,10 @@ class StoryTextBox(Opening.Button):
 
         cls.text = next
         cls.length = len(cls.text)
-        cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)
-        cls.clickSound.set_volume(GAME_VOLUME)
+        if not cls.madeSound:
+            cls.clickSound = pygame.mixer.Sound(TEXT_BOX_CLICK_PATH)
+            cls.clickSound.set_volume(GAME_VOLUME)
+            cls.madeSound = True
 
     def __init__(self, x, y, game):
         super().__init__(x, y, TEXT_BOX_DIMENSIONS[0], TEXT_BOX_DIMENSIONS[1], 0, self.textBoxClick)

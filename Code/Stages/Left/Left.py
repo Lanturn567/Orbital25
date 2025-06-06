@@ -7,6 +7,7 @@ from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,6 +26,7 @@ LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Left.mp3")
 POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
+FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
@@ -45,6 +47,7 @@ VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.pn
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 DELAY_AT_START = 10
 WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
+PINK = os.path.join(BASE_DIR, '../../../Assets/Background/Pink.png')
 LOCATION = "left"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
@@ -86,22 +89,14 @@ class Water(AnimatedSpriteFromSheet):
         self.currImage += WATER_SPEED * dt
         self.image = Water.assets[int(self.currImage) % Water.length]
 
-class LeftWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
 
 class Left:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -131,15 +126,6 @@ class Left:
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Lab.Lab import Lab
-        from Code.Stages.Home.Home import Home
-        from Code.Stages.River.River import River
-        global STAGES
-        STAGES = {
-            "lab": lambda screen: Lab(screen, LOCATION),
-            "home": lambda screen: Home(screen, LOCATION),
-            "river": lambda screen: River(screen, LOCATION),
-        }
         # Ground tiles
         for x, y, surf in Left.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -192,29 +178,30 @@ class Left:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=1)
 
-        for x, y, surf in Left.tmx.get_layer_by_name("UpSurfable").tiles():
-            image = pygame.image.load(WARP_PATH)
-            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE + BLOCK_SIZE // 4)
-            image = pygame.transform.scale_by(surf, 1)
-            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+        if self.save.gotDaniel():
+            for x, y, surf in Left.tmx.get_layer_by_name("UpSurfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE + BLOCK_SIZE // 4)
+                image = pygame.transform.scale_by(image, 0.5)
+                Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
-        for x, y, surf in Left.tmx.get_layer_by_name("DownSurfable").tiles():
-            image = pygame.image.load(WARP_PATH)
-            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE - BLOCK_SIZE // 2)
-            image = pygame.transform.scale_by(surf, 1)
-            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+            for x, y, surf in Left.tmx.get_layer_by_name("DownSurfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE - BLOCK_SIZE // 2)
+                image = pygame.transform.scale_by(image, 0.5)
+                Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
-        for x, y, surf in Left.tmx.get_layer_by_name("LeftSurfable").tiles():
-            image = pygame.image.load(WARP_PATH)
-            pos = (x * BLOCK_SIZE + 16, y * BLOCK_SIZE)
-            image = pygame.transform.scale_by(surf, 1)
-            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+            for x, y, surf in Left.tmx.get_layer_by_name("LeftSurfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                pos = (x * BLOCK_SIZE + 16, y * BLOCK_SIZE)
+                image = pygame.transform.scale_by(image, 0.5)
+                Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
-        for x, y, surf in Left.tmx.get_layer_by_name("RightSurfable").tiles():
-            image = pygame.image.load(WARP_PATH)
-            pos = (x * BLOCK_SIZE - 16, y * BLOCK_SIZE)
-            image = pygame.transform.scale_by(surf, 1)
-            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+            for x, y, surf in Left.tmx.get_layer_by_name("RightSurfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                pos = (x * BLOCK_SIZE - 16, y * BLOCK_SIZE)
+                image = pygame.transform.scale_by(image, 0.5)
+                Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
         # Players
         for obj in Left.tmx.get_layer_by_name("Player"):
@@ -226,7 +213,7 @@ class Left:
             image=pygame.image.load(WARP_PATH)
             if obj.properties["size"] == "small":
                 image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
-            LeftWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=1)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Left.tmx.get_layer_by_name("Trainers"):
@@ -251,7 +238,7 @@ class Left:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -344,6 +331,7 @@ class Left:
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -360,18 +348,19 @@ class Left:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw()
 
+
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw()
             if self.menu_open: self.menu.update(dt)
 
             self.fade(dt)
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -385,7 +374,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Left(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Left(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

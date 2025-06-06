@@ -5,6 +5,7 @@ from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Mart.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
+FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
@@ -69,22 +71,13 @@ fonts = {
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
 
-class MartWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
-
 class Mart:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -110,11 +103,6 @@ class Mart:
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Home.Home import Home
-        global STAGES
-        STAGES = {
-            "home": lambda screen: Home(screen, LOCATION),
-        }
         # Ground tiles
         for x, y, surf in Mart.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -155,9 +143,14 @@ class Mart:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group), z=1)
 
+        # Furniture
+        for x, y, surf in Mart.tmx.get_layer_by_name("Exit").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
         # Warps
         for obj in Mart.tmx.get_layer_by_name("Warps"):
-            MartWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Mart.tmx.get_layer_by_name("Trainers"):
@@ -257,6 +250,7 @@ class Mart:
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -273,18 +267,19 @@ class Mart:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw()
 
+
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw()
             if self.menu_open: self.menu.update(dt)
 
             self.fade(dt)
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -298,7 +293,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Mart(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Mart(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

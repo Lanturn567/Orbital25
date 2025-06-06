@@ -5,6 +5,7 @@ from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Snow.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
+FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
@@ -151,16 +153,6 @@ class BlizzardEffect:
         surface.blit(self.particle_surface, (0, 0))
 
 
-class SnowWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
-
 class ToUpperLayer(BaseWarp):
 
     def __init__(self, pos, stage, image, groups, game, z=1):
@@ -207,9 +199,10 @@ class ToLowerLayer(BaseWarp):
 class Snow:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -242,13 +235,7 @@ class Snow:
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Town.Town import Town
-        from Code.Stages.Crater.Crater import Crater
-        global STAGES
-        STAGES = {
-            "crater": lambda screen: Crater(screen, LOCATION),
-            "town": lambda screen: Town(screen, LOCATION),
-        }
+
         # Ground tiles
         for x, y, surf in Snow.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -286,7 +273,7 @@ class Snow:
 
         for x, y, surf in Snow.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide, self.trunks), z=2)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.trunks), z=2)
 
         for x, y, surf in Snow.tmx.get_layer_by_name("Bridge").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -302,7 +289,7 @@ class Snow:
 
         # Warps
         for obj in Snow.tmx.get_layer_by_name("Warps"):
-            SnowWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=2)
 
         #def __init__(self, pos, paths, group, game, size, road, z=2):
         # Trainers
@@ -333,7 +320,7 @@ class Snow:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -411,6 +398,8 @@ class Snow:
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
+
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -427,20 +416,21 @@ class Snow:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("white")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                # Draw blizzard on top of everything except UI elements
-                self.blizzard.draw(self.screen)
-                self.redraw()
 
+
+            self.screen.fill("white")
+            self.sprite_group.draw(self.player.rect.center)
+            # Draw blizzard on top of everything except UI elements
+            self.blizzard.draw(self.screen)
+            self.redraw()
             if self.menu_open: self.menu.update(dt)
 
             self.fade(dt)
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -454,7 +444,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Snow(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Snow(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)

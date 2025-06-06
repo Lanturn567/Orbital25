@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="17">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="19">
  <tileset firstgid="1" source="PLAT nature.tsx"/>
  <tileset firstgid="2305" source="PLAT Roads.tsx"/>
  <tileset firstgid="3329" source="PLAT Mount.tsx"/>
@@ -621,6 +621,12 @@
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="18" name="RivalTown" type="rhymond" gid="21089" x="640.939" y="1470.95" width="32" height="64">
+   <properties>
+    <property name="dir" value="left"/>
+    <property name="dis" type="int" value="0"/>
    </properties>
   </object>
  </objectgroup>
