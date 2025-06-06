@@ -1,0 +1,1 @@
+{"events": {"Mom": true, "Prof": true, "Daniel": true, "Found": true, "GymOne": true, "RivalTown": false, "event7": false, "event8": false, "GymTwo": false, "GymThree": false}, "pokemon": [], "items": {}, "stage": "LevelTwo", "pos": "begin", "name": "Lanturn", "muted": false, "pokedex": {}}

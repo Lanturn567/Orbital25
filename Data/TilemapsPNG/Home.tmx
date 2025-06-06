@@ -695,27 +695,31 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="8" name="Warps" locked="1">
+ <objectgroup id="8" name="Warps" visible="0" locked="1">
   <object id="15" name="Lake" gid="2305" x="415" y="2144" width="64" height="64">
    <properties>
+    <property name="dir" value="right"/>
     <property name="pos" value="lake"/>
     <property name="size" value="big"/>
    </properties>
   </object>
   <object id="16" name="Left" gid="2305" x="384" y="576" width="64" height="64">
    <properties>
+    <property name="dir" value="right"/>
     <property name="pos" value="left"/>
     <property name="size" value="big"/>
    </properties>
   </object>
   <object id="17" name="Right" gid="2305" x="2240" y="480" width="64" height="64">
    <properties>
+    <property name="dir" value="left"/>
     <property name="pos" value="right"/>
     <property name="size" value="big"/>
    </properties>
   </object>
   <object id="18" name="Gym" gid="2311" x="576" y="902" width="32" height="32">
    <properties>
+    <property name="dir" value="down"/>
     <property name="pos" value="gym"/>
     <property name="size" value="small"/>
    </properties>
@@ -746,6 +750,7 @@
   </object>
   <object id="23" name="Party" gid="2311" x="672" y="1856" width="32" height="32">
    <properties>
+    <property name="dir" value="down"/>
     <property name="pos" value="party"/>
     <property name="size" value="small"/>
    </properties>
