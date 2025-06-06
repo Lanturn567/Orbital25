@@ -12,6 +12,7 @@ from Code.Opening.Opening import BGAsset
 from Code.Entities.Trainer import Trainer
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,6 +32,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/LevelTwoBGM.mp3")
 FADE_LEVEL = 100
 FADE_CHANGE_PER_FRAME = 6
+FADE_IN_CHANGE_PER_FRAME = 18
 WATER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Water/0.png'),
                os.path.join(BASE_DIR, '../../../Assets/Water/1.png'),
                os.path.join(BASE_DIR, '../../../Assets/Water/2.png'),
@@ -167,10 +169,27 @@ class Leaf(BGAsset):
 
 class LakeVolumeButton(LevelOneVolumeButton):
 
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
         StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
         BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
+        self.game.save.updateMuted()
         self.playing = not self.playing
         self.update_image()
 
@@ -178,22 +197,13 @@ class LakeVolumeButton(LevelOneVolumeButton):
         self.image_idx = 1 if not self.playing else 0
 
 
-class LakeWarp(BaseWarp):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
-        super().warp()
-
-
 class Lake:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.collideLand = pygame.sprite.Group()
@@ -227,13 +237,7 @@ class Lake:
 
 
     def init_assets(self, start_pos):
-        from Code.Stages.Home.Home import Home
-        from Code.Misc.Mountain import Mountain
-        global STAGES
-        STAGES = {
-            "home": lambda screen: Home(screen, LOCATION),
-            "mountain": lambda screen: Mountain(screen, LOCATION),
-        }
+
         # Ground tiles
         for x, y, surf in Lake.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -276,11 +280,12 @@ class Lake:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
 
-        for x, y, surf in Lake.tmx.get_layer_by_name("Surfable").tiles():
-            image = pygame.image.load(WARP_PATH)
-            pos = (x * BLOCK_SIZE + 8, y * BLOCK_SIZE)
-            image = pygame.transform.scale_by(image, 0.75)
-            Waterside(pos=pos, image=image , game=game, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
+        if self.save.gotDaniel():
+            for x, y, surf in Lake.tmx.get_layer_by_name("Surfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                pos = (x * BLOCK_SIZE + 8, y * BLOCK_SIZE)
+                image = pygame.transform.scale_by(image, 0.75)
+                Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
         for x, y, surf in Lake.tmx.get_layer_by_name("Base").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -293,7 +298,7 @@ class Lake:
 
         # Warps
         for obj in Lake.tmx.get_layer_by_name("Warps"):
-            LakeWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=2)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=2)
 
         #def __init__(self, pos, paths, group, game, size, road, z=2):
         # Trainers
@@ -319,7 +324,7 @@ class Lake:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED, MAX_ALPHA)
 
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
@@ -432,7 +437,7 @@ class Lake:
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         Leaf.init_images(LEAF_PATH)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
-
+        self.buttons[VOLUME_BUTTON].first_toggle()
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -448,11 +453,12 @@ class Lake:
                 self.handle_events()
                 self.update_game_state(dt)
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw(dt)
 
+
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw(dt)
             if self.menu_open: self.menu.update(dt)
 
             self.fade(dt)
@@ -460,7 +466,7 @@ class Lake:
 
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -474,7 +480,11 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Lake(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Lake(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)
