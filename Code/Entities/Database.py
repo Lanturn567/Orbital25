@@ -325,6 +325,7 @@ database = {
 
     "Sebastian" : { "team" : [],
                 "talk" : ["Sebastian: So you have made it all the way to me. Impressive.", "Sebastian: Unfortunately for you, however, your journey ends here.", "Sebastian: Fall under the might of a thousand waves!"],
+                "talked" : ["Sebastian: Pant... Wheeze...", "Sebastian: You have bested me. Have this gym badge and go away please.", "Sebastian: Scary person..."],
                 "dead" : True
                 },
     "Reminisque" : { "team" : [],
@@ -434,7 +435,7 @@ database = {
 
     "Lek" : { "team" : [],
                     "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, choose one of these Pokémon to be your first partner.", "Lek: Treat it with care, and it will become your greatest friend."],
-                    "talked" : ["Lek: That's a great Pokemon you have chosen!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the City!"],
+                    "talked" : ["Lek: That's a great Pokemon you have chosen!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the city!"],
                     "dead" : True
                     },
     "Shank" : { "team" : [],
@@ -482,5 +483,13 @@ database = {
                "talk" : ["Otov: Otov is pleased."],
                "dead" : True
                },
+    "DawnLab" : {"team" : [],
+                 "talk" : ["Lanturn: Whoa, you got your first Pokémon? That’s awesome! What did you get?", "Lanturn: Nice choice! Bet you're already dreaming of becoming the Champion, huh?", "Lanturn: Alright then, no better way to start your journey than with a battle!", "Lanturn: Let’s see what you and your new partner can do!"],
+                 "talked" : ["Lanturn: Wow! You're this good already!?"],
+                 "dead" : True},
+    "RivalTown" : {"team" : [],
+                 "talk" : ["Rhymond: So, you're the new kid on the block eh?", "Rhymond: You'll be a wonderful test for my Pokemon!"],
+                 "talked" : ["Rhymond: ???", "Rhymond: So you're not completely hopeless after all...", "Rhymond: I'll see you around then..."],
+                 "dead" : True},
 
 }

@@ -50,10 +50,11 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "moon" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
                   "madam" : [os.path.join(BASE_DIR, '../../Assets/Players/madam.png')],
                   "skiier" : [os.path.join(BASE_DIR, '../../Assets/Players/skiier.png')],
+                  "rhymond" : [os.path.join(BASE_DIR, '../../Assets/Players/rhymond.png')],
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3
-AFTER_EVENT_DELAY = 1
+AFTER_EVENT_DELAY = 4
 TRAINER_EVENT_PATH = [os.path.join(BASE_DIR, '../../Code/Stages/Home/Home1.txt')]
 
 
@@ -218,10 +219,9 @@ class Trainer(Entity):
                     self.facing = DOWN
                 self.currImage = 0
 
-
     def collide(self):
         keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
@@ -230,7 +230,10 @@ class Trainer(Entity):
         # Update position
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
-        self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        if not self.inEvent and not self.game.inEvent:
+            self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        elif self.game.inEvent:
+            self.delayAfterEvent = 0
         # Check for collisions
         if not self.inEvent and self.game.textComplete:
             self.move(dt)

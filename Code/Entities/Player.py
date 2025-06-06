@@ -4,6 +4,7 @@ import os
 ANIM_SPEED = 8
 ANIM_DIST = 4
 MAX_X, MAX_Y = 740, 493
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class OpeningPlayer:
     images = []
@@ -12,14 +13,14 @@ class OpeningPlayer:
     playerHeight = 64
     playerSpeed = 10
     jumpFrames = 8
-    faceForward = 14
+    faceForward = 8
     yboundary = 100
 
     @classmethod
     def init_images(cls):
 
         for dir in ["Front", "Left", "Right", "Back"]:
-            sheet = pygame.image.load("../../Assets/Players/Darnielle/walk" + dir + ".png").convert_alpha()
+            sheet = pygame.image.load(os.path.join(BASE_DIR, "../../Assets/Players/Darnielle/walk" + dir + ".png")).convert_alpha()
             frame_width = sheet.get_width() // cls.numFrames
             frame_height = sheet.get_height()
             curr = []
