@@ -7,10 +7,12 @@ from pytmx.util_pygame import load_pygame
 from Code.Entities.Trainer import *
 from Code.support import *
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton
+from Code.Stages.Lake.Lake import *
 from Code.sprites import *
 from Code.entities import *
+from Code.Save import *
 from Code.Entities.Pokemon import Pokemon
-from Code.Menu import *
+from Code.Battle import Battle
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +28,7 @@ MAX_FPS = 0
 HOME_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
+FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
@@ -52,8 +55,11 @@ TEXT_PATH1 = os.path.join(BASE_DIR, "Home1.txt")
 TEXT_PATH2 = os.path.join(BASE_DIR, "Home2.txt")
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
+LOST_TEXT = os.path.join(BASE_DIR, "HaventMetMom.txt")
+PROF_TEXT = os.path.join(BASE_DIR, "HaventMetProf.txt")
 DELAY_AT_START = 10
 WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
+
 LOCATION = "home"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
@@ -66,49 +72,117 @@ pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
 pygame.display.set_caption("Home")
 
-#CHANGE
 # pokemon frames
 pokemon_frames = {
-    'icons': import_folder_dict('..', '..', '..', 'Assets', 'Pokemon', 'icons'),
-    'pokemon': monster_importer(4, 2, '..', '..', '..', 'Assets', 'Pokemon', 'pokemon'),
-    'ui': import_folder_dict('..', '..', '..', 'Assets', 'UI', 'ui')
+    'icons': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/Pokemon/icons')),
+    'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokemon')),
+    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/UI/ui'))
 }
 
 # fonts
+def get_font_path(*parts):
+    return os.path.join(BASE_DIR, '..', '..', '..', 'Assets', 'Fonts', *parts)
+
+# Load fonts using absolute paths
 fonts = {
-    'dialog': pygame.font.Font(join('..', '..', '..', 'Assets', 'Fonts', 'PixeloidSans.ttf'), 12),
-    'regular': pygame.font.Font(join('..', '..', '..', 'Assets', 'Fonts', 'PixeloidSans.ttf'), 12),
-    'small': pygame.font.Font(join('..', '..', '..', 'Assets', 'Fonts', 'PixeloidSans.ttf'), 11),
-    'bold': pygame.font.Font(join('..', '..', '..', 'Assets', 'Fonts', 'dogicapixelbold.otf'), 13),
+    'dialog': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'regular': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
+    'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
 
-class LevelTwoVolumeButton(LevelOneVolumeButton):
+#CHANGE
+#bg frames
+bg_frames = import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/backgrounds'))
 
-    def toggle_volume(self):
-        pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
-        StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
-        self.playing = not self.playing
-        self.update_image()
+class HomeEventWarp(EventWarp):
+    #dir in ["left", "right", "up", "down"]
+    def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+        self.dir = dir
 
-    def update_image(self):
-        self.image_idx = 1 if not self.playing else 0
+    def makeEvent(self):
+        StoryTextBox.init__text(LOST_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        if self.dir in ["left", "right"]:
+            self.game.player.x = self.rect.x
+        else:
+            self.game.player.y = self.rect.y
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                if self.dir == "left":
+                    self.game.player.x -= BLOCK_SIZE
+                    self.game.player.facing = LEFT
+                elif self.dir == "right":
+                    self.game.player.x += BLOCK_SIZE
+                    self.game.player.facing = RIGHT
+                elif self.dir == "up":
+                    self.game.player.y -= BLOCK_SIZE
+                    self.game.player.facing = UP
+                elif self.dir == "down":
+                    self.game.player.y += BLOCK_SIZE
+                    self.game.player.facing = DOWN
+        self.game.updateEvent = checker
 
 
-class HomeWarp(BaseWarp):
 
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
+class HomeEventWarpPhaseTwo(EventWarp):
+    #dir in ["left", "right", "up", "down"]
+    def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+        self.val = 0
+        self.dir = dir
+
+    def makeEvent(self):
+        StoryTextBox.init__text(LOST_TEXT if self.val == 0 else PROF_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        if self.dir in ["left", "right"]:
+            self.game.player.x = self.rect.x
+        else:
+            self.game.player.y = self.rect.y
+        self.game.inEvent = True
+        self.afterEvent()
 
     def warp(self):
-        self.game.nextStage = STAGES.get(self.stage)(self.game.screen)
+        self.val = self.cond()
+        if self.val == 2:
+            super().warp()
+        else:
+            self.makeEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                if self.dir == "left":
+                    self.game.player.x -= BLOCK_SIZE
+                    self.game.player.facing = LEFT
+                elif self.dir == "right":
+                    self.game.player.x += BLOCK_SIZE
+                    self.game.player.facing = RIGHT
+                elif self.dir == "up":
+                    self.game.player.y -= BLOCK_SIZE
+                    self.game.player.facing = UP
+                elif self.dir == "down":
+                    self.game.player.y += BLOCK_SIZE
+                    self.game.player.facing = DOWN
+        self.game.updateEvent = checker
 
 
 class Home:
     tmx = load_pygame(TMX_PATH)
 
-    def __init__(self, screen, start_pos):
+    def __init__(self, screen, start_pos, save):
         self.start_pos = start_pos
         self.screen = screen
+        self.save = save
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
@@ -131,30 +205,16 @@ class Home:
         self.stageDone = False
         self.finalDelay = 0
 
+        #CHANGE
+        self.dummy_monsters = {
+            0: Pokemon('Finsta', 15),
+            1: Pokemon('Atrox', 13),
+            2: Pokemon('Larvea', 13),
+            3: Pokemon('Pouch', 12),
+        }
+
 
     def init_assets(self, start_pos):
-        from Code.Stages.Right.Right import Right
-        from Code.Stages.Left.Left import Left
-        from Code.Stages.Lake.Lake import Lake
-        from Code.Stages.House.House import House
-        from Code.Stages.Gym.Gym import Gym
-        from Code.Misc.Party import Party
-        from Code.Stages.Dawn.Dawn import Dawn
-        from Code.Stages.Blue.Blue import Blue
-        from Code.Stages.Mart.Mart import Mart
-
-        global STAGES
-        STAGES = {
-            "lake": lambda screen: Lake(screen, LOCATION),
-            "right": lambda screen: Right(screen, LOCATION),
-            "left": lambda screen: Left(screen, LOCATION),
-            "house": lambda screen: House(screen, LOCATION),
-            "gym": lambda screen: Gym(screen, LOCATION),
-            "party": lambda screen: Party(screen, LOCATION),
-            "dawn": lambda screen: Dawn(screen, LOCATION),
-            "blue": lambda screen: Blue(screen, LOCATION),
-            "mart": lambda screen: Mart(screen, LOCATION)
-        }
 
         # Ground tiles
         for x, y, surf in Home.tmx.get_layer_by_name("Ground").tiles():
@@ -192,7 +252,14 @@ class Home:
             image = pygame.image.load(WARP_PATH)
             if obj.properties["size"] == "small":
                 image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
-            HomeWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2)
+            if obj.properties["pos"] in ["left"]:
+                dir = obj.properties["dir"]
+                HomeEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.seenMom)
+            elif obj.properties["pos"] in ["right", "party", "gym", "lake"]:
+                dir = obj.properties["dir"]
+                HomeEventWarpPhaseTwo((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.homeTest)
+            else:
+                BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=2)
 
         # Trees
         for x, y, surf in Home.tmx.get_layer_by_name("Buildings").tiles():
@@ -202,8 +269,7 @@ class Home:
         # Trees
         for x, y, surf in Home.tmx.get_layer_by_name("TallBuildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group ), z=4)
-
+            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
 
         # Trainers
         for obj in Home.tmx.get_layer_by_name("Trainers"):
@@ -213,10 +279,13 @@ class Home:
             name = obj.name
             Trainer((obj.x + 16, obj.y), dis=dis, name=name, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
-        #CHANGE
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
         self.menu_open = False
+
+        #CHANGE
+        # Battle
+        self.battle = Battle(self.player.player_pokemon, self.dummy_monsters, pokemon_frames, bg_frames['forest'], fonts)
 
     def fade(self, dt):
         if not self.nextStage:
@@ -229,8 +298,7 @@ class Home:
             self.fadeInSurface.fill((0, 0, 0, self.alpha))
             self.screen.blit(self.fadeInSurface, self.rect)
             if self.textComplete:
-                self.alpha = min(self.alpha + FADE_CHANGE_PER_FRAME * dt * ANIM_SPEED , MAX_ALPHA)
-
+                self.alpha = min(self.alpha + FADE_IN_CHANGE_PER_FRAME * dt * ANIM_SPEED , MAX_ALPHA)
             if self.alpha >= MAX_ALPHA and self.finalDelay >= FINAL_DELAY:
                 self.stageDone = True
             elif self.alpha >= MAX_ALPHA:
@@ -286,11 +354,11 @@ class Home:
         if self.updateEvent:
             self.updateEvent()
 
-    #CHANGE
     def input(self):
         keys = pygame.key.get_pressed()
 
         if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+            self.menu.open_sound.play()
             self.menu_open = not self.menu_open
             self.player.toggleblock()
 
@@ -303,8 +371,10 @@ class Home:
         pygame.mixer.music.play(-1, 10, 5000)
         StoryTextBox.init__text(TEXT_PATH1 if self.start_pos in ["lake", "right", "left"] else TEXT_PATH2)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LevelTwoVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LevelTwoVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
+        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons[VOLUME_BUTTON].first_toggle()
+
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -320,21 +390,22 @@ class Home:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
-                #CHANGE
                 self.input()
-                self.screen.fill("black")
                 self.sprite_group.update(dt)
-                self.sprite_group.draw(self.player.rect.center)
-                self.redraw()
 
-            #CHANGE
+            self.screen.fill("black")
+            self.sprite_group.draw(self.player.rect.center)
+            self.redraw()
+
             if self.menu_open: self.menu.update(dt)
+            #CHANGE
+            if self.battle: self.battle.update(dt)
 
             self.fade(dt)
             pygame.display.flip()
 
         if self.nextStage:
-            return self.nextStage
+            return self.save.getStage()(self.screen, LOCATION, self.save)
         else:
             pygame.quit()
             sys.exit()
@@ -348,7 +419,12 @@ def checkExit(nextStage):
         sys.exit()
 
 if __name__ == "__main__":
-    game = Home(screen, START_POS)
+    save = Save("test")
+    save.updateStage(LOCATION.title())
+    save.updatePos(START_POS)
+    SaveSystem.write(save)
+    game = Home(screen, START_POS, save)
     nextStage = game.run()
     while True:
         nextStage = checkExit(nextStage)
+

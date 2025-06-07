@@ -9,6 +9,8 @@ from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
 from Code.Save import *
+from random import uniform
+from Code.support import draw_bar
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -91,6 +93,15 @@ class AllSprites(pygame.sprite.LayeredUpdates):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
+
+class BattleSprites(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+
+    def draw(self):
+        for sprite in sorted(self, key = lambda sprite: sprite.z):
+            self.display_surface.blit(sprite.image, sprite.rect)
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
@@ -268,4 +279,88 @@ class Waterside(Event):
         else:
             return False
 
+
+class PokemonSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity):
+        # data
+        self.index = index
+        self.pos_index = pos_index
+        self.entity = entity
+        self.pokemon = pokemon
+        self.frame_index, self.frames, self.state = 0, frames, 'idle'
+        self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
+        self.z = BATTLE_LAYERS['monster']
+
+        # sprite setup
+        super().__init__(groups)
+        self.image = self.frames[self.state][self.frame_index]
+        self.rect = self.image.get_rect(center = pos)
+
+    def animate(self, dt):
+        self.frame_index += ANIMATION_SPEED * dt
+        self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
+
+    def update(self, dt):
+        self.animate(dt)
+
+class PokemonNamesprite(pygame.sprite.Sprite):
+    def __init__(self, pos, pokemon_sprite, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.z = BATTLE_LAYERS['name']
+
+        text_surf = font.render(pokemon_sprite.pokemon.name, False, COLORS['black'])
+        padding = 10
+
+
+        self.image = pygame.Surface((text_surf.get_width() + 2 * padding, text_surf.get_height() + 2 * padding))
+        self.image.fill(COLORS['white'])
+        self.image.blit(text_surf, (padding, padding))
+        self.rect = self.image.get_rect(midtop=pos)
+
+
+class PokemonLevelSprite(pygame.sprite.Sprite):
+    def __init__(self, entity, pos, pokemon_sprite, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.font = font
+        self.z = BATTLE_LAYERS['name']
+
+        self.image = pygame.Surface((60,26))
+        self.rect = self.image.get_rect(topleft = pos) if entity == 'player' else self.image.get_rect(topright = pos)
+        self.xp_rect = pygame.Rect(0,self.rect.height - 2,self.rect.width,2)
+
+    def update(self, _):
+        self.image.fill(COLORS['white'])
+
+        text_surf = self.font.render(f'Lvl {self.pokemon_sprite.pokemon.level}', False, COLORS['black'])
+        text_rect = text_surf.get_rect(center=(self.rect.width / 2, self.rect.height / 2))
+        self.image.blit(text_surf, text_rect)
+
+        draw_bar(self.image, self.xp_rect, self.pokemon_sprite.pokemon.xp, self.pokemon_sprite.pokemon.level_up, COLORS['black'], COLORS['white'], 0)
+
+class PokemonStatsSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, pokemon_sprite, size, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.image = pygame.Surface(size)
+        self.rect = self.image.get_rect(midbottom = pos)
+        self.font = font
+        self.z = BATTLE_LAYERS['overlay']
+
+    def update(self, _):
+        self.image.fill(COLORS['white'])
+
+        for index, (value, max_value) in enumerate(self.pokemon_sprite.pokemon.get_info()):
+            color = (COLORS['red'], COLORS['blue'], COLORS['gray'])[index]
+            if index < 2:  # health and energy
+                text_surf = self.font.render(f'{int(value)}/{max_value}', False, COLORS['black'])
+                text_rect = text_surf.get_rect(topleft=(self.rect.width * 0.05, index * self.rect.height / 2))
+                bar_rect = pygame.Rect(text_rect.bottomleft + vector(0, -2), (self.rect.width * 0.9, 4))
+
+                self.image.blit(text_surf, text_rect)
+                draw_bar(self.image, bar_rect, value, max_value, color, COLORS['black'], 2)
+            else:  # initiative
+                init_rect = pygame.Rect((0, self.rect.height - 2), (self.rect.width, 2))
+                draw_bar(self.image, init_rect, value, max_value, color, COLORS['white'], 0)
 

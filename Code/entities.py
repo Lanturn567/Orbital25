@@ -115,7 +115,7 @@ class MC(Entity):
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Charmadillo', 30),
+            0: Pokemon('Sparchu', 30),
             1: Pokemon('Friolera', 29),
             2: Pokemon('Plumette', 30),
             3: Pokemon('Ivieron', 29),
@@ -164,7 +164,7 @@ class MC(Entity):
 
     def input(self, dt):
         # Store previous position
-        if self.game.textComplete and not self.game.inEvent and not self.blocked:
+        if self.game.textComplete and not self.game.inEvent and not self.blocked and not self.game.battle:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
