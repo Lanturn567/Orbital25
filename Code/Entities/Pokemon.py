@@ -4,6 +4,7 @@ import random
 class Pokemon:
     def __init__(self, name, level):
         self.name, self.level = name, level
+        self.paused = False
 
         # stats
         self.element = POKEMON_DATA[name]['stats']['element']
@@ -12,7 +13,7 @@ class Pokemon:
         self.health -= random.randint(0, 200)
         self.energy = self.base_stats['max_energy'] * self.level
         self.energy -= random.randint(0, 200)
-        self.initiative = random.randint(0, 100)
+        self.initiative = 0
         self.abilities = POKEMON_DATA[name]['abilities']
 
         # experience
@@ -24,7 +25,6 @@ class Pokemon:
 
     def get_stat(self, stat):
         return self.base_stats[stat] * self.level
-
 
     def get_stats(self):
         return {
@@ -47,3 +47,6 @@ class Pokemon:
             (self.initiative, 100)
         )
 
+    def update(self, dt):
+        if not self.paused:
+            self.initiative += self.get_stat('speed') * dt

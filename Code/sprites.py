@@ -99,9 +99,13 @@ class BattleSprites(pygame.sprite.Group):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
 
-    def draw(self):
+    def draw(self, current_pokemon_sprite):
         for sprite in sorted(self, key = lambda sprite: sprite.z):
-            self.display_surface.blit(sprite.image, sprite.rect)
+            if sprite.z == BATTLE_LAYERS['outline']:
+                if sprite.pokemon_sprite == current_pokemon_sprite:
+                    self.display_surface.blit(sprite.image, sprite.rect)
+            else:
+                self.display_surface.blit(sprite.image, sprite.rect)
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
@@ -290,6 +294,7 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.frame_index, self.frames, self.state = 0, frames, 'idle'
         self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
         self.z = BATTLE_LAYERS['monster']
+        self.highlight = False
 
         # sprite setup
         super().__init__(groups)
@@ -298,10 +303,15 @@ class PokemonSprite(pygame.sprite.Sprite):
 
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED * dt
-        self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
+        self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
+        self.image = self.frames[self.state][self.adjusted_frame_index]
+
+    def set_highlight(self, value):
+        self.highlight = value
 
     def update(self, dt):
         self.animate(dt)
+        self.pokemon.update(dt)
 
 class PokemonNamesprite(pygame.sprite.Sprite):
     def __init__(self, pos, pokemon_sprite, groups, font):
@@ -364,3 +374,15 @@ class PokemonStatsSprite(pygame.sprite.Sprite):
                 init_rect = pygame.Rect((0, self.rect.height - 2), (self.rect.width, 2))
                 draw_bar(self.image, init_rect, value, max_value, color, COLORS['white'], 0)
 
+class PokemonOutlineSprite(pygame.sprite.Sprite):
+    def __init__(self, pokemon_sprite, groups, frames):
+        super().__init__(groups)
+        self.z = BATTLE_LAYERS['outline']
+        self.pokemon_sprite = pokemon_sprite
+        self.frames = frames
+
+        self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.frame_index]
+        self.rect = self.image.get_rect(center = self.pokemon_sprite.rect.center)
+
+    def update(self, _):
+        self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.adjusted_frame_index]

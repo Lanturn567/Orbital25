@@ -79,6 +79,9 @@ pokemon_frames = {
     'ui': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/UI/ui'))
 }
 
+#CHANGE
+pokemon_frames['outlines'] = outline_creator(pokemon_frames['pokemon'], 4)
+
 # fonts
 def get_font_path(*parts):
     return os.path.join(BASE_DIR, '..', '..', '..', 'Assets', 'Fonts', *parts)
