@@ -100,10 +100,16 @@ class BattleSprites(pygame.sprite.Group):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
 
-    def draw(self, current_pokemon_sprite):
+    def draw(self, current_pokemon_sprite, side, mode, target_index, player_sprites, opponent_sprites):
+        #get available positions
+        sprite_group = opponent_sprites if side == 'opponent' else player_sprites
+        sprites = {sprite.pos_index: sprite for sprite in sprite_group}
+        pokemon_sprite = sprites[list(sprites.keys())[target_index]] if sprites else None
+
         for sprite in sorted(self, key = lambda sprite: sprite.z):
             if sprite.z == BATTLE_LAYERS['outline']:
-                if sprite.pokemon_sprite == current_pokemon_sprite:
+                if (sprite.pokemon_sprite == current_pokemon_sprite and not (mode == 'target' and side == 'player')
+                        or sprite.pokemon_sprite == pokemon_sprite and sprite.pokemon_sprite.entity == side and mode and mode == 'target'):
                     self.display_surface.blit(sprite.image, sprite.rect)
             else:
                 self.display_surface.blit(sprite.image, sprite.rect)
@@ -286,7 +292,7 @@ class Waterside(Event):
 
 
 class PokemonSprite(pygame.sprite.Sprite):
-    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity):
+    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity, apply_attack, create_pokemon):
         # data
         self.index = index
         self.pos_index = pos_index
@@ -296,6 +302,10 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
         self.z = BATTLE_LAYERS['monster']
         self.highlight = False
+        self.target_sprite = None
+        self.current_attack = None
+        self.apply_attack = apply_attack
+        self.create_pokemon = create_pokemon
 
         # sprite setup
         super().__init__(groups)
@@ -304,11 +314,16 @@ class PokemonSprite(pygame.sprite.Sprite):
 
         #timers
         self.timers = {
-            'remove highlight': Timer(200, func = lambda: self.set_highlight(False))
+            'remove highlight': Timer(200, func = lambda: self.set_highlight(False)),
+            'kill': Timer(400, func = self.destroy)
         }
 
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED * dt
+        if self.state == 'attack' and self.frame_index >= len(self.frames['attack']):
+            self.apply_attack(self.target_sprite, self.current_attack, self.pokemon.get_base_damage(self.current_attack))
+            self.state = 'idle'
+
         self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
         self.image = self.frames[self.state][self.adjusted_frame_index]
 
@@ -321,6 +336,23 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.highlight = value
         if value:
             self.timers['remove highlight'].activate()
+
+    def activate_attack(self, target_sprite, attack):
+        self.state = 'attack'
+        self.frame_index = 0
+        self.target_sprite = target_sprite
+        self.current_attack = attack
+        self.pokemon.reduce_energy(attack)
+
+    def delayed_kill(self, new_pokemon):
+        if not self.timers['kill'].active:
+            self.next_pokemon_data = new_pokemon
+            self.timers['kill'].activate()
+
+    def destroy(self):
+        if self.next_pokemon_data:
+            self.create_pokemon(*self.next_pokemon_data)
+        self.kill()
 
     def update(self, dt):
         for timer in self.timers.values():
@@ -343,6 +375,9 @@ class PokemonNamesprite(pygame.sprite.Sprite):
         self.image.blit(text_surf, (padding, padding))
         self.rect = self.image.get_rect(midtop=pos)
 
+    def update(self, _):
+        if not self.pokemon_sprite.groups():
+            self.kill()
 
 class PokemonLevelSprite(pygame.sprite.Sprite):
     def __init__(self, entity, pos, pokemon_sprite, groups, font):
@@ -363,6 +398,9 @@ class PokemonLevelSprite(pygame.sprite.Sprite):
         self.image.blit(text_surf, text_rect)
 
         draw_bar(self.image, self.xp_rect, self.pokemon_sprite.pokemon.xp, self.pokemon_sprite.pokemon.level_up, COLORS['black'], COLORS['white'], 0)
+
+        if not self.pokemon_sprite.groups():
+            self.kill()
 
 class PokemonStatsSprite(pygame.sprite.Sprite):
     def __init__(self, pos, pokemon_sprite, size, groups, font):
@@ -389,6 +427,9 @@ class PokemonStatsSprite(pygame.sprite.Sprite):
                 init_rect = pygame.Rect((0, self.rect.height - 2), (self.rect.width, 2))
                 draw_bar(self.image, init_rect, value, max_value, color, COLORS['white'], 0)
 
+        if not self.pokemon_sprite.groups():
+            self.kill()
+
 class PokemonOutlineSprite(pygame.sprite.Sprite):
     def __init__(self, pokemon_sprite, groups, frames):
         super().__init__(groups)
@@ -401,3 +442,28 @@ class PokemonOutlineSprite(pygame.sprite.Sprite):
 
     def update(self, _):
         self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.adjusted_frame_index]
+        if not self.pokemon_sprite.groups():
+            self.kill()
+
+class AttackSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, frames, groups, z=BATTLE_LAYERS['overlay']):
+        super().__init__(groups)
+        self.frames = frames
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+
+        # Positioning
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = self.rect.copy()
+        self.z = z
+        self.y_sort = self.rect.centery
+
+    def animate(self, dt):
+        self.frame_index += ANIMATION_SPEED * dt
+        if self.frame_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.kill()
+
+    def update(self, dt):
+        self.animate(dt)

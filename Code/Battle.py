@@ -1,7 +1,8 @@
 import pygame
 from Code.game_data import *
 from Code.settings import *
-from Code.sprites import PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite, BattleSprites, PokemonOutlineSprite
+from Code.sprites import (PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite,
+                          BattleSprites, PokemonOutlineSprite, AttackSprite)
 from Code.support import *
 
 class Battle:
@@ -22,6 +23,7 @@ class Battle:
         self.current_pokemon = None
         self.selection_mode = None
         self.selection_side = 'player'
+        self.selected_attack = None
         self.indexes = {
             'general': 0,
             'monster': 0,
@@ -37,6 +39,11 @@ class Battle:
             for index, pokemon in {k: v for k, v in pokemon.items() if k <= 2}.items():
                 self.create_pokemon(pokemon, index, index, entity)
 
+            # remove opponent pokemon data
+            for i in range(len(self.opponent_sprites)):
+                del self.pokemon_data['opponent'][i]
+        print(self.pokemon_data['opponent'])
+
     def create_pokemon(self, pokemon, index, pos_index, entity):
         frames = self.pokemon_frames['pokemon'][pokemon.name]
         outline_frames = self.pokemon_frames['outlines'][pokemon.name]
@@ -51,7 +58,7 @@ class Battle:
             pos = list(BATTLE_POSITIONS['right'].values())[pos_index]
             groups = (self.battle_sprites, self.opponent_sprites)
 
-        pokemon_sprite = PokemonSprite(pos, frames, groups, pokemon, index, pos_index, entity)
+        pokemon_sprite = PokemonSprite(pos, frames, groups, pokemon, index, pos_index, entity, self.apply_attack, self.create_pokemon)
         PokemonOutlineSprite(pokemon_sprite, self.battle_sprites, outline_frames)
 
         #ui
@@ -70,12 +77,32 @@ class Battle:
                 case 'general': limiter = len(BATTLE_CHOICES['full'])
                 case 'attacks': limiter = len(self.current_pokemon.pokemon.get_abilities(all = False))
                 case 'switch' : limiter = len(self.available_pokemon)
+                case 'target' : limiter = len(self.opponent_sprites) if self.selection_side == 'opponent' else len(self.player_sprites)
 
             if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
+
             if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
+
             if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
+
+                if self.selection_mode == 'target':
+                    sprite_group = self.opponent_sprites if self.selection_side == 'opponent' else self.player_sprites
+                    sprites = {sprite.pos_index: sprite for sprite in sprite_group}
+                    pokemon_sprite = sprites[list(sprites.keys())[self.indexes['target']]]
+
+                    if self.selected_attack:
+                        self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
+                        self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
+                    else:
+                        pass
+
+                if self.selection_mode == 'attacks':
+                    self.selection_mode = 'target'
+                    self.selected_attack = self.current_pokemon.pokemon.get_abilities(all = False)[self.indexes['attacks']]
+                    self.selection_side = ATTACK_DATA[self.selected_attack]['target']
+
                 if self.selection_mode == 'general':
                     if self.indexes['general'] == 0:
                         self.selection_mode = 'attacks'
@@ -90,6 +117,7 @@ class Battle:
 
                     if self.indexes['general'] == 3:
                         print('catch')
+
             if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
                 if self.selection_mode in ('attacks', 'switch', 'target'):
                     self.selection_mode = 'general'
@@ -110,6 +138,49 @@ class Battle:
     def update_all_pokemon(self, option):
         for pokemon_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
             pokemon_sprite.pokemon.paused = True if option == 'pause' else False
+
+    def apply_attack(self, target_sprite, attack, amount):
+        AttackSprite(target_sprite.rect.center, self.pokemon_frames['attacks'][ATTACK_DATA[attack]['animation']], self.battle_sprites)
+        # play animation
+
+        # get correct attack damage amount (defense, element)
+        attack_element = ATTACK_DATA[attack]['element']
+        target_element = target_sprite.pokemon.element
+
+        # double attack
+        if attack_element == 'fire' and target_element == 'plant' or \
+                attack_element == 'water' and target_element == 'fire' or \
+                attack_element == 'plant' and target_element == 'water':
+            amount *= 2
+
+        # halve attack
+        if attack_element == 'fire' and target_element == 'water' or \
+                attack_element == 'water' and target_element == 'plant' or \
+                attack_element == 'plant' and target_element == 'fire':
+            amount *= 0.5
+
+        target_defense = 1 - target_sprite.pokemon.get_stat('defense') / 2000
+        target_defense = max(0, min(1, target_defense))
+
+        # update the monster health
+        target_sprite.pokemon.health -= amount * target_defense
+        self.check_death()
+
+        # resume
+        self.update_all_pokemon('resume')
+
+    def check_death(self):
+        for pokemon_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
+            if pokemon_sprite.pokemon.health <= 0:
+                if self.player_sprites in pokemon_sprite.groups():
+                    pass
+                else:
+                    new_pokemon_data = (list(self.pokemon_data['opponent'].values())[0], pokemon_sprite.index,
+                                        pokemon_sprite.pos_index, 'opponent') if self.pokemon_data['opponent'] else None
+                    if self.pokemon_data['opponent']:
+                        del self.pokemon_data['opponent'][min(self.pokemon_data['opponent'])]
+                    # xp
+                pokemon_sprite.delayed_kill(new_pokemon_data)
 
     def draw_ui(self):
         if self.current_pokemon:
@@ -219,5 +290,6 @@ class Battle:
 
         #draw
         self.display_surface.blit(self.bg_surf, (0, 0))
-        self.battle_sprites.draw(self.current_pokemon)
+        self.battle_sprites.draw(self.current_pokemon, self.selection_side, self.selection_mode, self.indexes['target'],
+                                 self.player_sprites, self.opponent_sprites)
         self.draw_ui()

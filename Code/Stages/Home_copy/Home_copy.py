@@ -76,7 +76,8 @@ pygame.display.set_caption("Home")
 pokemon_frames = {
     'icons': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/Pokemon/icons')),
     'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokemon')),
-    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/UI/ui'))
+    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/UI/ui')),
+    'attacks': attack_importer(os.path.join(BASE_DIR, '../../../Assets/attacks'))
 }
 
 #CHANGE
@@ -210,10 +211,14 @@ class Home:
 
         #CHANGE
         self.dummy_monsters = {
-            0: Pokemon('Finsta', 1),
-            1: Pokemon('Atrox', 1),
+            0: Pokemon('Finsta', 5),
+            1: Pokemon('Atrox', 2),
             2: Pokemon('Larvea', 1),
             3: Pokemon('Pouch', 1),
+            4: Pokemon('Finsta', 5),
+            5: Pokemon('Atrox', 2),
+            6: Pokemon('Larvea', 1),
+            7: Pokemon('Pouch', 1)
         }
 
 
