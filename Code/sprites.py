@@ -11,6 +11,7 @@ from Code.Opening.Opening import BGAsset
 from Code.Save import *
 from random import uniform
 from Code.support import draw_bar
+from Code.timer import Timer
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -301,15 +302,29 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.image = self.frames[self.state][self.frame_index]
         self.rect = self.image.get_rect(center = pos)
 
+        #timers
+        self.timers = {
+            'remove highlight': Timer(200, func = lambda: self.set_highlight(False))
+        }
+
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED * dt
         self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
         self.image = self.frames[self.state][self.adjusted_frame_index]
 
+        if self.highlight:
+            white_surf = pygame.mask.from_surface(self.image).to_surface()
+            white_surf.set_colorkey('black')
+            self.image = white_surf
+
     def set_highlight(self, value):
         self.highlight = value
+        if value:
+            self.timers['remove highlight'].activate()
 
     def update(self, dt):
+        for timer in self.timers.values():
+            timer.update()
         self.animate(dt)
         self.pokemon.update(dt)
 

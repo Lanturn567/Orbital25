@@ -1,4 +1,4 @@
-from Code.game_data import POKEMON_DATA
+from Code.game_data import *
 import random
 
 class Pokemon:
@@ -37,8 +37,11 @@ class Pokemon:
         }
 
 
-    def get_abilities(self):
-        return [ability for lvl, ability in self.abilities.items() if self.level >= lvl]
+    def get_abilities(self, all = True):
+        if all:
+            return [ability for lvl, ability in self.abilities.items() if self.level >= lvl]
+        else:
+            return [ability for lvl, ability in self.abilities.items() if self.level >= lvl and ATTACK_DATA[ability]['cost'] < self.energy]
 
     def get_info(self):
         return (

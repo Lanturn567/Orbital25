@@ -116,8 +116,8 @@ class MC(Entity):
         #player Pokemon
         self.player_pokemon = {
             0: Pokemon('Sparchu', 30),
-            1: Pokemon('Friolera', 29),
-            2: Pokemon('Plumette', 30),
+            1: Pokemon('Friolera', 25),
+            2: Pokemon('Plumette', 20),
             3: Pokemon('Ivieron', 29),
             4: Pokemon('Sparchu', 30),
             5: Pokemon('Cindrill', 29),

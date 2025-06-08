@@ -210,10 +210,10 @@ class Home:
 
         #CHANGE
         self.dummy_monsters = {
-            0: Pokemon('Finsta', 15),
-            1: Pokemon('Atrox', 13),
-            2: Pokemon('Larvea', 13),
-            3: Pokemon('Pouch', 12),
+            0: Pokemon('Finsta', 1),
+            1: Pokemon('Atrox', 1),
+            2: Pokemon('Larvea', 1),
+            3: Pokemon('Pouch', 1),
         }
 
 
