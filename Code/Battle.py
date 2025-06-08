@@ -2,6 +2,7 @@ import pygame
 from Code.game_data import *
 from Code.settings import *
 from Code.sprites import PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite, BattleSprites, PokemonOutlineSprite
+from Code.support import *
 
 class Battle:
     def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts):
@@ -68,6 +69,7 @@ class Battle:
             match self.selection_mode:
                 case 'general': limiter = len(BATTLE_CHOICES['full'])
                 case 'attacks': limiter = len(self.current_pokemon.pokemon.get_abilities(all = False))
+                case 'switch' : limiter = len(self.available_pokemon)
 
             if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
@@ -88,6 +90,9 @@ class Battle:
 
                     if self.indexes['general'] == 3:
                         print('catch')
+            if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
+                if self.selection_mode in ('attacks', 'switch', 'target'):
+                    self.selection_mode = 'general'
 
             self.prev_keys = keys
 
@@ -165,7 +170,46 @@ class Battle:
                 self.display_surface.blit(text_surf, text_rect)
 
     def draw_switch(self):
-        pass
+        # data
+        width, height = 200, 215
+        visible_pokemon = 4
+        item_height = height / visible_pokemon
+        v_offset = 0 if self.indexes['switch'] < visible_pokemon else -(self.indexes['switch'] - visible_pokemon + 1) * item_height
+        bg_rect = pygame.Rect((0, 0), (width, height))
+        bg_rect.midleft = self.current_pokemon.rect.midright + vector(10, 0)
+        pygame.draw.rect(self.display_surface, COLORS['white'], bg_rect, 0, 5)
+
+        # pokemon
+        active_pokemon = [(pokemon_sprite.index, pokemon_sprite.pokemon) for pokemon_sprite in self.player_sprites]
+        self.available_pokemon = {index: pokemon for index, pokemon in self.pokemon_data['player'].items()
+                                  if (index, pokemon) not in active_pokemon and pokemon.health > 0}
+
+        for index, pokemon in enumerate(self.available_pokemon.values()):
+            selected = index == self.indexes['switch']
+            item_bg_rect = pygame.Rect((0, 0), (width, item_height))
+            item_bg_rect.midleft = (bg_rect.left, bg_rect.top + item_height / 2 + index * item_height + v_offset)
+
+            icon_surf = self.pokemon_frames['icons'][pokemon.name]
+            icon_rect = icon_surf.get_rect(midleft = bg_rect.topleft + vector(10, item_height / 2 + index * item_height + v_offset))
+            text_surf = self.fonts['regular'].render(f'{pokemon.name} ({pokemon.level})', False, COLORS['red'] if selected else COLORS['black'])
+            text_rect = text_surf.get_rect(topleft=(bg_rect.left + 90, icon_rect.top))
+
+            # selection bg
+            if selected:
+                if item_bg_rect.collidepoint(bg_rect.topleft):
+                    pygame.draw.rect(self.display_surface, COLORS['dark white'], item_bg_rect, 0, 0, 5, 5)
+                elif item_bg_rect.collidepoint(bg_rect.midbottom + vector(0, -1)):
+                    pygame.draw.rect(self.display_surface, COLORS['dark white'], item_bg_rect, 0, 0, 0, 0, 5, 5)
+                else:
+                    pygame.draw.rect(self.display_surface, COLORS['dark white'], item_bg_rect)
+
+            if bg_rect.collidepoint(item_bg_rect.center):
+                for surf, rect in ((icon_surf, icon_rect), (text_surf, text_rect)):
+                    self.display_surface.blit(surf, rect)
+                health_rect = pygame.Rect((text_rect.bottomleft + vector(0, 4)), (100, 4))
+                energy_rect = pygame.Rect((health_rect.bottomleft + vector(0, 2)), (80, 4))
+                draw_bar(self.display_surface, health_rect, pokemon.health, pokemon.get_stat('max_health'), COLORS['red'], COLORS['black'])
+                draw_bar(self.display_surface, energy_rect, pokemon.energy, pokemon.get_stat('max_energy'), COLORS['blue'], COLORS['black'])
 
     def update(self, dt):
         #updates

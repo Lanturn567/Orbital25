@@ -121,7 +121,14 @@ class MC(Entity):
             3: Pokemon('Ivieron', 29),
             4: Pokemon('Sparchu', 30),
             5: Pokemon('Cindrill', 29),
-            6: Pokemon('Cindrill', 100)
+            6: Pokemon('Cindrill', 100),
+            7: Pokemon('Sparchu', 30),
+            8: Pokemon('Friolera', 25),
+            9: Pokemon('Plumette', 20),
+            10: Pokemon('Ivieron', 29),
+            11: Pokemon('Sparchu', 30),
+            12: Pokemon('Cindrill', 29),
+            13: Pokemon('Cindrill', 100)
         }
 
         if self.facing == LEFT:
