@@ -4,6 +4,8 @@ from Code.settings import *
 from Code.sprites import (PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite,
                           BattleSprites, PokemonOutlineSprite, AttackSprite)
 from Code.support import *
+from Code.timer import Timer
+from random import choice
 
 class Battle:
     def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts):
@@ -13,6 +15,11 @@ class Battle:
         self.pokemon_frames = pokemon_frames
         self.fonts = fonts
         self.pokemon_data = {'player': player_pokemon, 'opponent': opponent_pokemon}
+
+        # timers
+        self.timers = {
+            'opponent delay': Timer(600, func = self.opponent_attack)
+        }
 
         # groups
         self.battle_sprites = BattleSprites()
@@ -42,7 +49,6 @@ class Battle:
             # remove opponent pokemon data
             for i in range(len(self.opponent_sprites)):
                 del self.pokemon_data['opponent'][i]
-        print(self.pokemon_data['opponent'])
 
     def create_pokemon(self, pokemon, index, pos_index, entity):
         frames = self.pokemon_frames['pokemon'][pokemon.name]
@@ -117,12 +123,17 @@ class Battle:
 
                     if self.indexes['general'] == 3:
                         print('catch')
+                self.indexes = {k: 0 for k in self.indexes}
 
             if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
                 if self.selection_mode in ('attacks', 'switch', 'target'):
                     self.selection_mode = 'general'
 
             self.prev_keys = keys
+
+    def update_timers(self):
+        for timer in self.timers.values():
+            timer.update()
 
     #battle system
     def check_active(self):
@@ -134,6 +145,8 @@ class Battle:
                 self.current_pokemon = pokemon_sprite
                 if self.player_sprites in pokemon_sprite.groups():
                     self.selection_mode = 'general'
+                else:
+                    self.timers['opponent delay'].activate()
 
     def update_all_pokemon(self, option):
         for pokemon_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
@@ -173,14 +186,32 @@ class Battle:
         for pokemon_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
             if pokemon_sprite.pokemon.health <= 0:
                 if self.player_sprites in pokemon_sprite.groups():
-                    pass
+                    active_pokemon = [(pokemon_sprite.index, pokemon_sprite.pokemon) for pokemon_sprite in self.player_sprites.sprites()]
+                    available_pokemon = [(index, pokemon) for index, pokemon in self.pokemon_data['player'].items() if pokemon.health > 0 and (index, pokemon) not in active_pokemon]
+                    if available_pokemon:
+                        new_pokemon_data = [(pokemon, index, pokemon_sprite.pos_index, 'player') for index, pokemon in available_pokemon][0]
+                    else:
+                        new_pokemon_data = None
                 else:
                     new_pokemon_data = (list(self.pokemon_data['opponent'].values())[0], pokemon_sprite.index,
                                         pokemon_sprite.pos_index, 'opponent') if self.pokemon_data['opponent'] else None
                     if self.pokemon_data['opponent']:
                         del self.pokemon_data['opponent'][min(self.pokemon_data['opponent'])]
                     # xp
+                    xp_amount = pokemon_sprite.pokemon.level * 100 / len(self.player_sprites)
+                    for player_sprite in self.player_sprites:
+                        player_sprite.pokemon.update_xp(xp_amount)
+
                 pokemon_sprite.delayed_kill(new_pokemon_data)
+
+    def opponent_attack(self):
+        ability = choice(self.current_pokemon.pokemon.get_abilities())
+        side = ATTACK_DATA[ability]['target']
+        if side == 'player':
+            random_target = choice(self.opponent_sprites.sprites())
+        else:
+            random_target = choice(self.player_sprites.sprites())
+        self.current_pokemon.activate_attack(random_target, ability)
 
     def draw_ui(self):
         if self.current_pokemon:
@@ -285,6 +316,7 @@ class Battle:
     def update(self, dt):
         #updates
         self.input()
+        self.update_timers()
         self.battle_sprites.update(dt)
         self.check_active()
 

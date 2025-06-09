@@ -15,7 +15,7 @@ class Pokemon:
         self.abilities = POKEMON_DATA[name]['abilities']
 
         # experience
-        self.xp = 1500
+        self.xp = 0
         self.level_up = self.level * 150
 
     def __repr__(self):
@@ -53,6 +53,14 @@ class Pokemon:
 
     def get_base_damage(self, attack):
         return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
+
+    def update_xp(self, amount):
+        if self.level_up - self.xp > amount:
+            self.xp += amount
+        else:
+            self.level += 1
+            self.xp = amount - (self.level_up - self.xp)
+            self.level_up = self.level * 150
 
     def update(self, dt):
         if not self.paused:
