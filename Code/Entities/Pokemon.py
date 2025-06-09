@@ -13,6 +13,7 @@ class Pokemon:
         self.energy = self.base_stats['max_energy'] * self.level
         self.initiative = 0
         self.abilities = POKEMON_DATA[name]['abilities']
+        self.defending = False
 
         # experience
         self.xp = 0

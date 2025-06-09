@@ -467,3 +467,17 @@ class AttackSprite(pygame.sprite.Sprite):
 
     def update(self, dt):
         self.animate(dt)
+
+class TimedSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups, duration, z=BATTLE_LAYERS['overlay']):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_rect(topleft=pos)
+        self.rect.center = pos  # Override to set center if needed
+        self.z = z
+        self.y_sort = self.rect.centery
+        self.hitbox = self.rect.copy()
+        self.death_timer = Timer(duration, autostart=True, func=self.kill)
+
+    def update(self, _):
+        self.death_timer.update()

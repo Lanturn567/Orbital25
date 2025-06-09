@@ -2,7 +2,7 @@ import pygame
 from Code.game_data import *
 from Code.settings import *
 from Code.sprites import (PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite,
-                          BattleSprites, PokemonOutlineSprite, AttackSprite)
+                          BattleSprites, PokemonOutlineSprite, AttackSprite, TimedSprite)
 from Code.support import *
 from Code.timer import Timer
 from random import choice
@@ -15,6 +15,7 @@ class Battle:
         self.pokemon_frames = pokemon_frames
         self.fonts = fonts
         self.pokemon_data = {'player': player_pokemon, 'opponent': opponent_pokemon}
+        self.battle_over = False
 
         # timers
         self.timers = {
@@ -93,6 +94,13 @@ class Battle:
 
             if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
 
+                if self.selection_mode == 'switch':
+                    index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
+                    self.current_pokemon.kill()
+                    self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
+                    self.selection_mode = None
+                    self.update_all_pokemon('resume')
+
                 if self.selection_mode == 'target':
                     sprite_group = self.opponent_sprites if self.selection_side == 'opponent' else self.player_sprites
                     sprites = {sprite.pos_index: sprite for sprite in sprite_group}
@@ -102,7 +110,12 @@ class Battle:
                         self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
                         self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
                     else:
-                        pass
+                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.9:
+                            self.pokemon_data['player'][len(self.pokemon_data['player'])] = pokemon_sprite.pokemon
+                            pokemon_sprite.delayed_kill(None)
+                            self.update_all_pokemon('resume')
+                        else:
+                            TimedSprite(pokemon_sprite.rect.center, self.pokemon_frames['ui']['cross'], self.battle_sprites, 1000)
 
                 if self.selection_mode == 'attacks':
                     self.selection_mode = 'target'
@@ -114,6 +127,7 @@ class Battle:
                         self.selection_mode = 'attacks'
 
                     if self.indexes['general'] == 1:
+                        self.current_pokemon.pokemon.defending = True
                         self.update_all_pokemon('resume')
                         self.current_pokemon, self.selection_mode = None, None
                         self.indexes['general'] = 0
@@ -122,7 +136,8 @@ class Battle:
                         self.selection_mode = 'switch'
 
                     if self.indexes['general'] == 3:
-                        print('catch')
+                        self.selection_mode = 'target'
+                        self.selection_side = 'opponent'
                 self.indexes = {k: 0 for k in self.indexes}
 
             if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
@@ -139,6 +154,7 @@ class Battle:
     def check_active(self):
         for pokemon_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
             if pokemon_sprite.pokemon.initiative >= 100:
+                pokemon_sprite.pokemon.defending = False
                 self.update_all_pokemon('pause')
                 pokemon_sprite.pokemon.initiative = 0
                 pokemon_sprite.set_highlight(True)
@@ -173,6 +189,8 @@ class Battle:
             amount *= 0.5
 
         target_defense = 1 - target_sprite.pokemon.get_stat('defense') / 2000
+        if target_sprite.pokemon.defending == True:
+            target_defense -= 0.2
         target_defense = max(0, min(1, target_defense))
 
         # update the monster health
@@ -212,6 +230,17 @@ class Battle:
         else:
             random_target = choice(self.player_sprites.sprites())
         self.current_pokemon.activate_attack(random_target, ability)
+
+    def check_end_battle(self):
+        if len(self.opponent_sprites) == 0 and not self.battle_over:
+            self.battle_over = True
+            print('battle won')
+            for pokemon in self.pokemon_data['player'].values():
+                pokemon.initiative = 0
+
+        if len(self.player_sprites) == 0:
+            pygame.quit()
+            exit()
 
     def draw_ui(self):
         if self.current_pokemon:
@@ -314,6 +343,8 @@ class Battle:
                 draw_bar(self.display_surface, energy_rect, pokemon.energy, pokemon.get_stat('max_energy'), COLORS['blue'], COLORS['black'])
 
     def update(self, dt):
+        self.check_end_battle()
+
         #updates
         self.input()
         self.update_timers()
