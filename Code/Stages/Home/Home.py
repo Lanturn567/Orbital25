@@ -231,7 +231,7 @@ class Home:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
 
-        # Flowers
+        # Flowersd
         for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)

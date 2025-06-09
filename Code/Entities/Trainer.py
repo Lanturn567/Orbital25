@@ -5,6 +5,10 @@ import os
 from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON, ANIM_SPEED
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.Entities.Database import *
+from Code.Battle import Battle
+from Code.support import *
+from Code.Entities.Pokemon import Pokemon
+from Code.timer import Timer
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCK_SIZE = 32
@@ -57,6 +61,32 @@ ANIM_DIST = 3
 AFTER_EVENT_DELAY = 4
 TRAINER_EVENT_PATH = [os.path.join(BASE_DIR, '../../Code/Stages/Home/Home1.txt')]
 
+# pokemon frames
+pokemon_frames = {
+    'icons': import_folder_dict(os.path.join(BASE_DIR, '../../Assets/Pokemon/icons')),
+    'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../Assets/Pokemon/pokemon')),
+    'ui': import_folder_dict(os.path.join(BASE_DIR, '../../Assets/UI/ui')),
+    'attacks': attack_importer(os.path.join(BASE_DIR, '../../Assets/attacks'))
+}
+
+#CHANGE
+pokemon_frames['outlines'] = outline_creator(pokemon_frames['pokemon'], 4)
+
+# fonts
+def get_font_path(*parts):
+    return os.path.join(BASE_DIR, '..', '..', 'Assets', 'Fonts', *parts)
+
+# Load fonts using absolute paths
+fonts = {
+    'dialog': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'regular': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 12),
+    'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
+    'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
+}
+
+#CHANGE
+#bg frames
+bg_frames = import_folder_dict(os.path.join(BASE_DIR, '../../Assets/backgrounds'))
 
 class Trainer(Entity):
 
@@ -110,6 +140,16 @@ class Trainer(Entity):
         self.ticker = 0
         self.inEvent = False
         self.delayAfterEvent = 0
+
+        #pokemon
+        self.dummy_monsters = {
+            0: Pokemon('Finsta', 2),
+            1: Pokemon('Atrox', 2),
+            2: Pokemon('Larvea', 1),
+            3: Pokemon('Pouch', 1)
+        }
+
+        self.defeated = False
 
 
     @classmethod
@@ -226,6 +266,10 @@ class Trainer(Entity):
             self.game.inEvent = True
             self.makeEvent()
 
+        # Check if text is finished and we were waiting to start the battle
+        if self.inEvent and getattr(self, 'awaiting_battle', False) and self.game.textComplete and not self.defeated:
+            self.start_battle()
+
     def update(self, dt):
         # Update position
         self.rect.center = (self.x, self.y)
@@ -249,4 +293,21 @@ class Trainer(Entity):
         StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
+        self.awaiting_battle = True
+
+    def start_battle(self):
+        self.game.battle = Battle(
+            player_pokemon=self.game.player.player_pokemon,
+            opponent_pokemon=self.dummy_monsters,
+            pokemon_frames=pokemon_frames,
+            bg_surf=bg_frames['forest'],
+            fonts=fonts,
+            trainer=self,
+            game=self.game
+        )
+        self.awaiting_battle = False  # Clear flag
+        self.inEvent = False
+        self.game.inEvent = False
+        self.game.textComplete = False
 

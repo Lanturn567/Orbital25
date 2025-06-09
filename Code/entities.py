@@ -171,7 +171,7 @@ class MC(Entity):
 
     def input(self, dt):
         # Store previous position
-        if self.game.textComplete and not self.game.inEvent and not self.blocked and not self.game.battle:
+        if self.game.textComplete and not self.game.inEvent and not self.blocked:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]

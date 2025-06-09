@@ -8,7 +8,7 @@ from Code.timer import Timer
 from random import choice
 
 class Battle:
-    def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts):
+    def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts, trainer, game):
         # general
         self.display_surface = pygame.display.get_surface()
         self.bg_surf = bg_surf
@@ -40,6 +40,8 @@ class Battle:
             'target': 0
         }
 
+        self.trainer = trainer
+        self.game = game
         self.setup()
 
     def setup(self):
@@ -237,6 +239,9 @@ class Battle:
             print('battle won')
             for pokemon in self.pokemon_data['player'].values():
                 pokemon.initiative = 0
+            if self.trainer:
+                self.trainer.defeated = True
+            self.game.end_battle()
 
         if len(self.player_sprites) == 0:
             pygame.quit()

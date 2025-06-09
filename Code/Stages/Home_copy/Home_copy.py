@@ -217,6 +217,7 @@ class Home:
             3: Pokemon('Pouch', 1)
         }
 
+        self.battle = None
 
     def init_assets(self, start_pos):
 
@@ -286,10 +287,6 @@ class Home:
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
         self.menu_open = False
-
-        #CHANGE
-        # Battle
-        self.battle = Battle(self.player.player_pokemon, self.dummy_monsters, pokemon_frames, bg_frames['forest'], fonts)
 
     def fade(self, dt):
         if not self.nextStage:
@@ -367,6 +364,10 @@ class Home:
             self.player.toggleblock()
 
         self.prev_keys = keys
+
+    def end_battle(self):
+        self.battle = None
+        #to add in transition effects
 
     def run(self):
         self.init_assets(self.start_pos)
