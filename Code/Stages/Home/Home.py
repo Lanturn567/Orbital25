@@ -56,6 +56,7 @@ TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 LOST_TEXT = os.path.join(BASE_DIR, "HaventMetMom.txt")
 PROF_TEXT = os.path.join(BASE_DIR, "HaventMetProf.txt")
+DLKL_TEXT = os.path.join(BASE_DIR, "HaventBeatDLKL.txt")
 DELAY_AT_START = 10
 WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
 
@@ -91,7 +92,6 @@ fonts = {
 }
 
 
-
 class HomeEventWarp(EventWarp):
     #dir in ["left", "right", "up", "down"]
     def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
@@ -124,6 +124,41 @@ class HomeEventWarp(EventWarp):
                     self.game.player.facing = UP
                 elif self.dir == "down":
                     self.game.player.y += BLOCK_SIZE
+                    self.game.player.facing = DOWN
+        self.game.updateEvent = checker
+
+
+class HomeBuildingsEventWarp(EventWarp):
+    #dir in ["left", "right", "up", "down"]
+    def __init__(self, pos, stage, image, groups, game, loc, cond, dir, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+        self.dir = dir
+
+    def makeEvent(self):
+        StoryTextBox.init__text(DLKL_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        if self.dir in ["left", "right"]:
+            self.game.player.x = self.rect.x
+        else:
+            self.game.player.y = self.rect.y + BLOCK_SIZE
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                if self.dir == "left":
+                    self.game.player.x -= BLOCK_SIZE
+                    self.game.player.facing = LEFT
+                elif self.dir == "right":
+                    self.game.player.x += BLOCK_SIZE
+                    self.game.player.facing = RIGHT
+                elif self.dir == "up":
+                    self.game.player.y -= BLOCK_SIZE
+                    self.game.player.facing = UP
+                elif self.dir == "down":
                     self.game.player.facing = DOWN
         self.game.updateEvent = checker
 
@@ -197,7 +232,6 @@ class Home:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
@@ -232,6 +266,11 @@ class Home:
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
 
         # Flowers
+        for x, y, surf in Home.tmx.get_layer_by_name("Encounter").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
+
+        # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
@@ -244,9 +283,12 @@ class Home:
             if obj.properties["pos"] in ["left"]:
                 dir = obj.properties["dir"]
                 HomeEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.seenMom)
-            elif obj.properties["pos"] in ["right", "party", "gym", "lake"]:
+            elif obj.properties["pos"] in ["right", "lake"]:
                 dir = obj.properties["dir"]
                 HomeEventWarpPhaseTwo((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.homeTest)
+            elif obj.properties["pos"] in ["party", "gym"]:
+                dir = obj.properties["dir"]
+                HomeBuildingsEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, dir=dir, loc=LOCATION, cond=self.save.beatDLKLAtPeak)
             else:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=2)
 
@@ -260,13 +302,65 @@ class Home:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
 
-        # Trainers
-        for obj in Home.tmx.get_layer_by_name("Trainers"):
-            facing = obj.properties["dir"]
-            type = obj.type
-            dis = obj.properties["dis"]
-            name = obj.name
-            Trainer((obj.x + 16, obj.y), dis=dis, name=name, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        if self.save.gotDaniel():
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("Rocket").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("TallRocket").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketFloor").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
+
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketWall").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=4)
+
+                # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketRocks").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketGround").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
+
+            # Trainers
+            for obj in Home.tmx.get_layer_by_name("TrainersRocket"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                name = obj.name
+                Trainer((obj.x + 16, obj.y), dis=dis, name=name, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        else:
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketChairs").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
+            # Trees
+            for x, y, surf in Home.tmx.get_layer_by_name("RocketFence").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+            for x, y, surf in Home.tmx.get_layer_by_name("Trees").tiles():
+                pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+                building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+            # Trainers
+            for obj in Home.tmx.get_layer_by_name("Trainers"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                name = obj.name
+                Trainer((obj.x + 16, obj.y), dis=dis, name=name, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

@@ -39,6 +39,7 @@ DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH1 = os.path.join(BASE_DIR, "Gym.txt")
+TEXT_PATH2 = os.path.join(BASE_DIR, "Gym2.txt")
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
@@ -152,6 +153,24 @@ class Spotlight:
 
         # Blend with main surface
         surface.blit(self.surface, (0, 0))
+
+
+class Raysen(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.battle = self.info["battle"]
+        self.talkedTo = False
+        self.battled = False
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.battled else self.battle if not self.talkedTo else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.save.updateEvent("GymThree")
+        if not self.battled:
+            self.battled = True
+        elif not self.talkedTo:
+            self.talkedTo = True
 
 
 class Spectator(Trainer):
@@ -288,24 +307,32 @@ class Gym:
         for x, y, surf in Gym.tmx.get_layer_by_name("LeftSpec").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
+            while type == "furina":
+                type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Spectator", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="left", z=3)
 
         # Furniture
         for x, y, surf in Gym.tmx.get_layer_by_name("RightSpec").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
+            while type == "furina":
+                type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Spectator", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="right", z=3)
 
         # Furniture
         for x, y, surf in Gym.tmx.get_layer_by_name("UpSpec").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
+            while type == "furina":
+                type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Spectator", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="up", z=3)
 
         # Furniture
         for x, y, surf in Gym.tmx.get_layer_by_name("DownSpec").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
+            while type == "furina":
+                type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Spectator", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="down", z=3)
 
         # Warps
@@ -317,7 +344,12 @@ class Gym:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if obj.name == "Bodyguard" and self.save.seenRaysenSister():
+                continue
+            elif obj.name == "Raysen":
+                Raysen((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
@@ -402,11 +434,12 @@ class Gym:
         pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
         pygame.mixer.music.set_volume(GAME_VOLUME)
         pygame.mixer.music.play(-1, 10, 5000)
-        StoryTextBox.init__text(TEXT_PATH1)
+        StoryTextBox.init__text(TEXT_PATH1 if not self.save.beenInGym() else TEXT_PATH2)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
+        self.save.updateEvent("FirstTimeInGym")
 
         self.clock = pygame.time.Clock()
         self.running = True

@@ -74,6 +74,34 @@ fonts = {
 }
 
 
+class Dawn(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.talkedTo and not self.game.save.seenDawn() else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.save.updateEvent("Dawn")
+        self.talkedTo = True
+
+
+class EndgameDawn(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+        if self.game.save.beatEndgameDawn():
+            self.talkedTo = True
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.talkedTo else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.save.updateEvent("EndgameDawn")
+        self.talkedTo = True
+
+
 class Dawn:
     tmx = load_pygame(TMX_PATH)
 
@@ -118,8 +146,6 @@ class Dawn:
         self.current_flash_index = 0
         self.flash_timer = 0
         self.flash_interval = 0.5  # seconds between flashes
-
-
 
     def init_assets(self, start_pos):
 
@@ -167,7 +193,12 @@ class Dawn:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, text=TEXT_EVENTS_PATHS, facing=facing, z=3)
+            if self.save.beatChampion():
+                EndgameDawn((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            elif self.save.seenProf():
+                continue
+            else:
+                Dawn((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

@@ -10,7 +10,7 @@ from Code.Save import *
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Mart.tmx")
-START_POS = "home"
+START_POS = "town"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 PLAYER_SIZE = (32, 64)
@@ -150,7 +150,8 @@ class Mart:
 
         # Warps
         for obj in Mart.tmx.get_layer_by_name("Warps"):
-            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
+            if obj.properties["pos"] == start_pos:
+                BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Mart.tmx.get_layer_by_name("Trainers"):
@@ -158,6 +159,37 @@ class Mart:
             type = obj.type
             dis = obj.properties["dis"]
             Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        # Trainers
+        if start_pos == "city":
+            for obj in Mart.tmx.get_layer_by_name("TrainersCity"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        # Trainers
+        elif start_pos == "town":
+            for obj in Mart.tmx.get_layer_by_name("TrainersTown"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        # Trainers
+        elif start_pos == "home":
+            for obj in Mart.tmx.get_layer_by_name("TrainersHome"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        # Trainers
+        elif start_pos == "crater":
+            for obj in Mart.tmx.get_layer_by_name("TrainersCrater"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
