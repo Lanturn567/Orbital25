@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="19">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="32">
  <tileset firstgid="1" source="PLAT nature.tsx"/>
  <tileset firstgid="2305" source="PLAT Roads.tsx"/>
  <tileset firstgid="3329" source="PLAT Mount.tsx"/>
@@ -491,7 +491,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="8" name="TallBuildings" width="50" height="50" visible="0">
+ <layer id="8" name="TallBuildings" width="50" height="50">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -546,19 +546,44 @@
 </data>
  </layer>
  <objectgroup id="9" name="Player">
-  <object id="1" gid="21089" x="1408" y="320" width="32" height="64">
+  <object id="1" name="Snow" gid="21089" x="1408" y="320" width="32" height="64">
    <properties>
     <property name="pos" value="snow"/>
    </properties>
   </object>
-  <object id="2" gid="21089" x="160" y="320" width="32" height="64">
+  <object id="2" name="Waterfall" gid="21089" x="160" y="320" width="32" height="64">
    <properties>
     <property name="pos" value="waterfall"/>
    </properties>
   </object>
-  <object id="3" gid="21089" x="160" y="1472" width="32" height="64">
+  <object id="3" name="Right" gid="21089" x="160" y="1472" width="32" height="64">
    <properties>
     <property name="pos" value="right"/>
+   </properties>
+  </object>
+  <object id="27" name="Th2" gid="21091" x="735.058" y="704.731" width="32" height="64">
+   <properties>
+    <property name="pos" value="th2"/>
+   </properties>
+  </object>
+  <object id="28" name="Th1" gid="21091" x="383.217" y="704.099" width="32" height="64">
+   <properties>
+    <property name="pos" value="th1"/>
+   </properties>
+  </object>
+  <object id="29" name="Tbh" gid="21091" x="606.829" y="1088.79" width="32" height="64">
+   <properties>
+    <property name="pos" value="tbh"/>
+   </properties>
+  </object>
+  <object id="30" name="Th3" gid="21091" x="1248.61" y="1441.26" width="32" height="64">
+   <properties>
+    <property name="pos" value="th3"/>
+   </properties>
+  </object>
+  <object id="31" name="Mart" gid="21099" x="1248.61" y="1088.79" width="32" height="64">
+   <properties>
+    <property name="pos" value="mart"/>
    </properties>
   </object>
  </objectgroup>
@@ -581,7 +606,7 @@
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>
-  <object id="10" name="Polly" type="white" gid="21089" x="704" y="736" width="32" height="64">
+  <object id="10" name="Polly" type="white" gid="21089" x="639.569" y="766.952" width="32" height="64">
    <properties>
     <property name="dir" value="left"/>
     <property name="dis" type="int" value="4"/>
@@ -631,19 +656,52 @@
   </object>
  </objectgroup>
  <objectgroup id="10" name="Warps">
-  <object id="4" gid="21089" x="1504.95" y="326.753" width="64" height="64">
+  <object id="4" name="Snow" gid="21089" x="1504.95" y="326.753" width="64" height="64">
    <properties>
     <property name="pos" value="snow"/>
+    <property name="size" value="big"/>
    </properties>
   </object>
-  <object id="5" gid="21089" x="30.3276" y="322.505" width="64" height="64">
+  <object id="5" name="Waterfall" gid="21089" x="30.3276" y="322.505" width="64" height="64">
    <properties>
     <property name="pos" value="waterfall"/>
+    <property name="size" value="big"/>
    </properties>
   </object>
-  <object id="6" gid="21089" x="32.7966" y="1473.87" width="64" height="64">
+  <object id="6" name="Right" gid="21089" x="32.7966" y="1473.87" width="64" height="64">
    <properties>
     <property name="pos" value="right"/>
+    <property name="size" value="big"/>
+   </properties>
+  </object>
+  <object id="19" name="Mart" gid="21091" x="1248.61" y="1008.41" width="32" height="32">
+   <properties>
+    <property name="pos" value="mart"/>
+    <property name="size" value="small"/>
+   </properties>
+  </object>
+  <object id="20" name="TownBigHouse" gid="21091" x="607.46" y="1007.93" width="32" height="32">
+   <properties>
+    <property name="pos" value="tbh"/>
+    <property name="size" value="small"/>
+   </properties>
+  </object>
+  <object id="24" name="TownHouse3" gid="21091" x="1247.98" y="1360.41" width="32" height="32">
+   <properties>
+    <property name="pos" value="th3"/>
+    <property name="size" value="small"/>
+   </properties>
+  </object>
+  <object id="25" name="TownHouse2" gid="21091" x="736.953" y="625.772" width="32" height="32">
+   <properties>
+    <property name="pos" value="th2"/>
+    <property name="size" value="small"/>
+   </properties>
+  </object>
+  <object id="26" name="TownHouse1" gid="21091" x="382.585" y="623.245" width="32" height="32">
+   <properties>
+    <property name="pos" value="th1"/>
+    <property name="size" value="small"/>
    </properties>
   </object>
  </objectgroup>
