@@ -119,6 +119,7 @@ class RivalTown(Trainer):
                 self.x += dt * FURINA_AWAY_SPEED
             else:
                 self.kill()
+                self.game.player.blocked = False
                 self.game.save.updateEvent("RivalTown")
                 self.game.inEvent = False
 
@@ -277,8 +278,10 @@ class Town:
         # Warps
         for obj in Town.tmx.get_layer_by_name("Warps"):
             image=pygame.image.load(WARP_PATH)
+            if obj.properties["size"] == "small":
+                image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
             if obj.properties["pos"] in ["snow"]:
-                TownEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymOne)
+                TownEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.seenElder)
             else:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
@@ -290,6 +293,8 @@ class Town:
                 self.rival = RivalTown((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                                        groups=(self.sprite_group, self.collide, self.entities),
                                        game=self, size=PLAYER_SIZE, facing=facing, z=3)
+                self.player.facing = RIGHT
+                self.player.blocked = True  # Block player movement initially
             elif obj.name != "RivalTown":
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                         groups=(self.sprite_group, self.collide, self.entities),

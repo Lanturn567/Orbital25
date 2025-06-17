@@ -3,6 +3,7 @@ import os
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
+from Code.Stages.Right.Right import LOST_TEXT
 from Code.sprites import *
 from Code.entities import *
 from Code.Save import *
@@ -44,6 +45,7 @@ VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.pn
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 DELAY_AT_START = 10
 WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
+LOST_TEXT = os.path.join(BASE_DIR, "Fear.txt")
 LOCATION = "waterfall"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
@@ -88,6 +90,30 @@ class Sebastian(Trainer):
         self.game.save.updateEvent("GymOne")
         SaveSystem.write(self.game.save)
         self.talkedTo = True
+
+
+class WaterFallEventWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(LOST_TEXT)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.game.player.y = self.rect.y + BLOCK_SIZE
+        self.game.inEvent = True
+        self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.y = self.rect.y + BLOCK_SIZE
+                self.game.player.facing = DOWN
+
+        self.game.updateEvent = checker
+
 
 class WaterfallAnim(AnimatedSpriteFromSheet):
     def update(self, dt, *args, **kwargs):
@@ -226,7 +252,13 @@ class Waterfall:
 
         # Warps
         for obj in Waterfall.tmx.get_layer_by_name("Warps"):
-            BaseWarp((obj.x, obj.y ), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
+            image = pygame.image.load(WARP_PATH)
+            if obj.properties["size"] == "small":
+                image = pygame.transform.scale_by(image, 0.5)
+            if obj.name == "Shortcut":
+                WaterFallEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, cond=self.save.beatGymOne, z=1)
+            else:
+                BaseWarp((obj.x, obj.y ), obj.properties["pos"], image=image , groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Waterfall.tmx.get_layer_by_name("Trainers"):

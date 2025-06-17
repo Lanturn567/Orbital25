@@ -50,8 +50,8 @@ FINAL_DELAY = 5
 STAGES = {}
 
 # Add these constants near the top of your file
-BLIZZARD_PARTICLE_COUNT = 500
-BLIZZARD_PARTICLE_SPEED = 200  # pixels per second
+BLIZZARD_PARTICLE_COUNT = 800
+BLIZZARD_PARTICLE_SPEED = 400  # pixels per second
 BLIZZARD_PARTICLE_SIZE_RANGE = (3, 5)
 BLIZZARD_WIND_CHANGE_INTERVAL = 3.0  # seconds
 BLIZZARD_ALPHA = 255  # Semi-transparent particles
@@ -300,10 +300,12 @@ class Snow:
             Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities, self.collideUpper), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         for obj in Snow.tmx.get_layer_by_name("IncreaseZ"):
-            ToUpperLayer((obj.x + 16, obj.y), None, pygame.image.load(WARP_PATH), (self.sprite_group, self.collide), game=self, z=4)
+            image = pygame.image.load(WARP_PATH)
+            ToUpperLayer((obj.x, obj.y), None, pygame.transform.scale_by(image, 2), (self.sprite_group, self.collide), game=self, z=4)
 
         for obj in Snow.tmx.get_layer_by_name("LowerZ"):
-            ToLowerLayer((obj.x + 16, obj.y), None, pygame.image.load(WARP_PATH), (self.sprite_group, self.collideUpper), game=self, z=4)
+            image = pygame.image.load(WARP_PATH)
+            ToLowerLayer((obj.x, obj.y), None, pygame.transform.scale_by(image, 2), (self.sprite_group, self.collideUpper), game=self, z=4)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

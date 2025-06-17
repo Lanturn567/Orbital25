@@ -79,7 +79,6 @@ fonts = {
 }
 
 
-
 class RightEventWarp(EventWarp):
 
     def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
