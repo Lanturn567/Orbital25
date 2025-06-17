@@ -115,20 +115,9 @@ class MC(Entity):
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Sparchu', 1),
+            0: Pokemon('Sparchu', 150),
             1: Pokemon('Friolera', 25),
-            2: Pokemon('Plumette', 20),
-            3: Pokemon('Ivieron', 29),
-            4: Pokemon('Sparchu', 30),
-            5: Pokemon('Cindrill', 29),
-            6: Pokemon('Cindrill', 100),
-            7: Pokemon('Sparchu', 30),
-            8: Pokemon('Friolera', 25),
-            9: Pokemon('Plumette', 20),
-            10: Pokemon('Ivieron', 29),
-            11: Pokemon('Sparchu', 30),
-            12: Pokemon('Cindrill', 29),
-            13: Pokemon('Cindrill', 100)
+            2: Pokemon('Plumette', 20)
         }
 
         if self.facing == LEFT:
@@ -233,6 +222,12 @@ class MC(Entity):
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
 
+        # Check if player moved
+        if self.x != self.old_x or self.y != self.old_y:
+            self.moving = True
+        else:
+            self.moving = False
+
         # Check for collisions
         self.collide()
 
@@ -255,6 +250,10 @@ class MC(Entity):
                     self.x, self.y = self.old_x, self.old_y
                     self.rect.center = (self.x, self.y)
                     self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
+
+    def heal_pokemon(self):
+        for pokemon in self.player_pokemon.values():
+            pokemon.heal()
 
     def toggleblock(self):
         self.blocked = not self.blocked

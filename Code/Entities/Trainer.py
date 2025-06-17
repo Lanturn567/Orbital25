@@ -144,11 +144,10 @@ class Trainer(Entity):
         #pokemon
         self.dummy_monsters = {
             0: Pokemon('Finsta', 2),
-            1: Pokemon('Atrox', 2),
-            2: Pokemon('Larvea', 1),
-            3: Pokemon('Pouch', 1)
+            1: Pokemon('Sparchu', 2)
         }
 
+        self.awaiting_battle = False
         self.defeated = False
 
 
@@ -265,10 +264,7 @@ class Trainer(Entity):
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
-
-        # Check if text is finished and we were waiting to start the battle
-        if self.inEvent and getattr(self, 'awaiting_battle', False) and self.game.textComplete and not self.defeated:
-            self.start_battle()
+            self.awaiting_battle = True
 
     def update(self, dt):
         # Update position
@@ -288,13 +284,15 @@ class Trainer(Entity):
             self.game.inEvent = False
             self.delayAfterEvent = 0
 
+            if self.awaiting_battle:
+                self.game.start_battle(self.dummy_monsters)
+                self.awaiting_battle = False
+
 
     def makeEvent(self):
         StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
-
-        self.awaiting_battle = True
 
     def start_battle(self):
         self.game.battle = Battle(
@@ -306,8 +304,4 @@ class Trainer(Entity):
             trainer=self,
             game=self.game
         )
-        self.awaiting_battle = False  # Clear flag
-        self.inEvent = False
-        self.game.inEvent = False
-        self.game.textComplete = False
 

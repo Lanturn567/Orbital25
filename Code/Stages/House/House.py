@@ -266,6 +266,8 @@ class House:
         self.clock = pygame.time.Clock()
         self.running = True
 
+        self.player.heal_pokemon()
+
         while self.running and not self.stageDone:
             dt = self.clock.tick(MAX_FPS) / 1000.0  # Convert milliseconds to seconds
             if self.ticker < DELAY_AT_START:

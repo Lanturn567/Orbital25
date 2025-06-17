@@ -46,7 +46,7 @@ class Battle:
 
     def setup(self):
         for entity, pokemon in self.pokemon_data.items():
-            for index, pokemon in {k: v for k, v in pokemon.items() if k <= 2}.items():
+            for index, pokemon in {k: v for k, v in pokemon.items() if k <= 0}.items():
                 self.create_pokemon(pokemon, index, index, entity)
 
             # remove opponent pokemon data
@@ -57,14 +57,14 @@ class Battle:
         frames = self.pokemon_frames['pokemon'][pokemon.name]
         outline_frames = self.pokemon_frames['outlines'][pokemon.name]
         if entity == 'player':
-            pos = list(BATTLE_POSITIONS['left'].values())[pos_index]
+            pos = list(BATTLE_POSITIONS['left'].values())[1]
             groups = (self.battle_sprites, self.player_sprites)
             frames = {state: [pygame.transform.flip(frame, True, False) for frame in frames] for state, frames in
                       frames.items()}
             outline_frames = {state: [pygame.transform.flip(frame, True, False) for frame in frames] for state, frames in
                       outline_frames.items()}
         else:
-            pos = list(BATTLE_POSITIONS['right'].values())[pos_index]
+            pos = list(BATTLE_POSITIONS['right'].values())[1]
             groups = (self.battle_sprites, self.opponent_sprites)
 
         pokemon_sprite = PokemonSprite(pos, frames, groups, pokemon, index, pos_index, entity, self.apply_attack, self.create_pokemon)
@@ -75,7 +75,7 @@ class Battle:
         name_sprite = PokemonNamesprite(name_pos, pokemon_sprite, self.battle_sprites, self.fonts['regular'])
         level_pos = name_sprite.rect.bottomleft if entity == 'player' else name_sprite.rect.bottomright
         PokemonLevelSprite(entity, level_pos, pokemon_sprite, self.battle_sprites, self.fonts['small'])
-        PokemonStatsSprite(pokemon_sprite.rect.midright + vector(0, 50) if entity == 'player' else pokemon_sprite.rect.midleft + vector(0, 50),
+        PokemonStatsSprite(pokemon_sprite.rect.midbottom if entity == 'player' else pokemon_sprite.rect.midbottom,
                            pokemon_sprite,(110, 40), self.battle_sprites, self.fonts['small'])
 
     def input(self):

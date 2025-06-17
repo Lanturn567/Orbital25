@@ -1,6 +1,7 @@
 import sys
 import math
 import os
+import copy
 
 from pygame import SCALED
 from pytmx.util_pygame import load_pygame
@@ -13,6 +14,7 @@ from Code.entities import *
 from Code.Save import *
 from Code.Entities.Pokemon import Pokemon
 from Code.Battle import Battle
+from random import randint
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -190,6 +192,7 @@ class Home:
         self.sprite_group = AllSprites()
         self.collide = pygame.sprite.Group()
         self.entities = pygame.sprite.Group()
+        self.encounter = pygame.sprite.Group()
         self.alpha = 255
         self.rect = self.screen.get_rect()
         self.fadeInSurface = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
@@ -211,13 +214,10 @@ class Home:
 
         #CHANGE
         self.dummy_monsters = {
-            0: Pokemon('Finsta', 2),
-            1: Pokemon('Atrox', 2),
-            2: Pokemon('Larvea', 1),
-            3: Pokemon('Pouch', 1)
+            0: Pokemon('Atrox', 2)
         }
 
-        self.battle = None
+        self.encounter_timer = Timer(2000, func = self.pokemon_encounter)
 
     def init_assets(self, start_pos):
 
@@ -245,7 +245,7 @@ class Home:
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.encounter), z=2)
 
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
@@ -287,6 +287,9 @@ class Home:
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
         self.menu_open = False
+
+        # Battle
+        self.battle = None
 
     def fade(self, dt):
         if not self.nextStage:
@@ -366,8 +369,30 @@ class Home:
         self.prev_keys = keys
 
     def end_battle(self):
+        self.encounter_timer.deactivate()
         self.battle = None
         #to add in transition effects
+
+    def check_pokemon(self):
+        if [sprite for sprite in self.encounter if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
+            if not self.encounter_timer.active:
+                self.encounter_timer.activate()
+
+    def pokemon_encounter(self):
+        print('lol')
+        self.start_battle(copy.deepcopy(self.dummy_monsters))
+
+    def start_battle(self, monsters):
+        if self.battle == None:
+            self.battle = Battle(
+                player_pokemon=self.player.player_pokemon,
+                opponent_pokemon=monsters,
+                pokemon_frames=pokemon_frames,
+                bg_surf=bg_frames['forest'],
+                fonts=fonts,
+                trainer=None,
+                game=self
+            )
 
     def run(self):
         self.init_assets(self.start_pos)
@@ -395,6 +420,8 @@ class Home:
             if not self.nextStage:
                 self.handle_events()
                 self.update_game_state(dt)
+                self.encounter_timer.update()
+                self.check_pokemon()
                 self.input()
                 self.sprite_group.update(dt)
 

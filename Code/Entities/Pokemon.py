@@ -55,6 +55,11 @@ class Pokemon:
     def get_base_damage(self, attack):
         return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
 
+    def heal(self):
+        self.health = self.base_stats['max_health'] * self.level
+        self.energy = self.base_stats['max_energy'] * self.level
+
+
     def update_xp(self, amount):
         if self.level_up - self.xp > amount:
             self.xp += amount
