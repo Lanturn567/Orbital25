@@ -64,6 +64,11 @@ FINAL_DELAY = 5
 
 SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/Surf.txt")
 NO_SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/NoSurf.txt")
+DOWN_WATERFALL_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/WaterfallDown.txt")
+
+WATER_PATH =  os.path.join(BASE_DIR, "../Data/TilemapsPNG/PLAT Nature.png")
+WATER_FRAMES = 8
+
 
 
 class AllSprites(pygame.sprite.LayeredUpdates):
@@ -221,6 +226,8 @@ class FurinaWarp(EventWarp):
         self.game.updateEvent = checker
 
 
+
+
 class Event(Sprite):
 
     def __init__(self, pos, image, groups, game, z=0):
@@ -240,7 +247,7 @@ class Waterside(Event):
     tolerance = BLOCK_SIZE
 
     def event(self):
-        if self.test():
+        if self.test() and not self.game.inEvent:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE] and self.game.water and self.game.player.moveWater():
                     StoryTextBox.init__text(NO_SURF_TEXT_PATH)
@@ -268,4 +275,28 @@ class Waterside(Event):
         else:
             return False
 
+
+class WaterfallDown(Event):
+    tolerance = BLOCK_SIZE
+
+    def event(self):
+        if self.test() and not self.game.inEvent:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.game.water:
+                StoryTextBox.init__text(DOWN_WATERFALL_TEXT_PATH)
+                self.game.buttons[TEXT_BUTTON].reset()
+                #change game state
+                self.game.inEvent = True
+                self.game.waterfall = True
+                self.game.player.toggleblock()
+                self.game.player.moveWaterfallStart()
+                self.game.player.collidable = []
+
+    def test(self):
+        return self.game.player.facing == DOWN and self.game.player.y < self.rect.y + WaterfallDown.tolerance and abs(self.game.player.x - self.rect.x) < WaterfallDown.tolerance
+
+class Water(AnimatedSpriteFromSheet):
+    def update(self, dt, *args, **kwargs):
+        self.currImage += WATER_SPEED * dt
+        self.image = Water.assets[int(self.currImage) % Water.length]
 

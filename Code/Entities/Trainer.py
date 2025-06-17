@@ -51,6 +51,19 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "madam" : [os.path.join(BASE_DIR, '../../Assets/Players/madam.png')],
                   "skiier" : [os.path.join(BASE_DIR, '../../Assets/Players/skiier.png')],
                   "rhymond" : [os.path.join(BASE_DIR, '../../Assets/Players/rhymond.png')],
+                  "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/Furina/WalkLeftFurina.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/WalkRightFurina.png')],
+                  "daniel" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "squirtle" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "ponyta" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "munchlax" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "snorlax" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "happiny" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "pikachu" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "starly" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "clodsire" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "bidoof" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "bossdlkl" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')],
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3
@@ -117,7 +130,7 @@ class Trainer(Entity):
         for key in database:
             paths = database[key]
             curr = []
-            #or 4 spritesheets (4x1)
+            #or 4 spritesheets (4x1) if 2 sheets, ignore last 2 dont access down up
             if len(paths) > 1:
                 for path in paths:
                     try:

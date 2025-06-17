@@ -113,6 +113,10 @@ class MC(Entity):
         self.speed = PLAYER_SPEED
         self.blocked = False
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
+
+        self.following = None
+        self.follow_distance = BLOCK_SIZE // 4  # Distance to maintain from the leader
+
         #player Pokemon
         self.player_pokemon = {
             0: Pokemon('Charmadillo', 30),
@@ -163,8 +167,61 @@ class MC(Entity):
         cls.rightFrames = len(cls.assets[RIGHT])
 
     def input(self, dt):
+        if self.following:
+            # Calculate direction to follow target
+            dx = self.following.x - self.x
+            dy = self.following.y - self.y
+            distance = math.sqrt(dx*dx + dy*dy)
+
+            if distance > self.follow_distance:
+                # Normalize direction and move
+                if distance > 0:
+                    dx /= distance
+                    dy /= distance
+
+                # Move towards the target but maintain follow distance
+                target_x = self.following.x - dx * self.follow_distance
+                target_y = self.following.y - dy * self.follow_distance
+
+                diff_x = (target_x - self.x)
+                diff_y = (target_y - self.y)
+                # Move with same speed as the leader
+                self.x += diff_x * dt * FURINA_GO_SPEED / distance
+                self.y += diff_y * dt * FURINA_GO_SPEED / distance
+
+                if diff_x > 0 and abs(diff_x) >= abs(diff_y):
+                    if self.facing == RIGHT:
+                        self.currImage += ANIM_SPEED * dt
+                    else:
+                        self.facing = RIGHT
+                        self.maxFrames = MC.rightFrames
+                        self.currImage = 0
+
+                elif diff_x <= 0 and abs(diff_x) >= abs(diff_y):
+                    if self.facing == LEFT:
+                        self.currImage += ANIM_SPEED * dt
+                    else:
+                        self.facing = LEFT
+                        self.maxFrames = MC.leftFrames
+                        self.currImage = 0
+
+                elif diff_y > 0 and abs(diff_x) < abs(diff_y):
+                    if self.facing == DOWN:
+                        self.currImage += ANIM_SPEED * dt
+                    else:
+                        self.facing = DOWN
+                        self.maxFrames = MC.rightFrames
+                        self.currImage = 0
+                else:
+                    if self.facing == UP:
+                        self.currImage += ANIM_SPEED * dt
+                    else:
+                        self.facing = UP
+                        self.maxFrames = MC.leftFrames
+                        self.currImage = 0
+
         # Store previous position
-        if self.game.textComplete and not self.game.inEvent and not self.blocked:
+        elif self.game.textComplete and not self.game.inEvent and not self.blocked:
             self.old_x, self.old_y = self.x, self.y
             keys = pygame.key.get_pressed()
             up = keys[pygame.K_UP] or keys[pygame.K_w]
@@ -242,6 +299,8 @@ class MC(Entity):
                     sprite.warp()
                 elif isinstance(sprite, Waterside):
                     sprite.event()
+                elif isinstance(sprite, WaterfallDown):
+                    sprite.event()
                 # Move back to previous position if collision occurs
                 elif not moved:
                     moved = True
@@ -253,7 +312,7 @@ class MC(Entity):
         self.blocked = not self.blocked
 
     def moveWater(self):
-        checkCollide = self.game.collide if self.collidable == self.game.collideLand else self.game.collideLand if self.collidable == self.game.collide else None
+        checkCollide = self.game.collide if self.collidable == self.game.collideLand else self.game.collideLand if self.collidable == self.game.collide or self.collidable == self.game.collideUpper else None
         if checkCollide:
             if self.facing == LEFT:
                 self.x -= BLOCK_SIZE * 2
@@ -286,7 +345,15 @@ class MC(Entity):
             return True
         return False
 
+    def moveWaterfall(self, dt):
+        self.y += FURINA_GO_SPEED * dt * 2
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
 
+    def moveWaterfallStart(self):
+        self.y += BLOCK_SIZE * 2
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
 
 class Furina(Entity):
 
