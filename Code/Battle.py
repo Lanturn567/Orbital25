@@ -57,6 +57,7 @@ class Battle:
         self.trainer = trainer
         self.game = game
         self.setup()
+        self.prev_keys = pygame.key.get_pressed()
 
     def setup(self):
         for entity, pokemon in self.pokemon_data.items():

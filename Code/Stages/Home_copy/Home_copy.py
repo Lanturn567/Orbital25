@@ -402,6 +402,9 @@ class Home:
 
         self.bg_music_muted = False
 
+        # unblock player
+        self.player.blocked = False
+
     def check_pokemon(self):
         if [sprite for sprite in self.encounter if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
             if not self.encounter_timer.active:
@@ -438,6 +441,9 @@ class Home:
                 pygame.mixer.music.set_volume(GAME_VOLUME)
                 pygame.mixer.music.play(-1)
                 self.transition_music_playing = True
+
+            # block player
+            self.player.blocked = True
 
     def tint_screen(self, dt):
         if self.tint_type == 'fade':
