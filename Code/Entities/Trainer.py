@@ -264,7 +264,9 @@ class Trainer(Entity):
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
-            self.awaiting_battle = True
+
+            if not self.defeated:
+                self.awaiting_battle = True
 
     def update(self, dt):
         # Update position
@@ -285,8 +287,8 @@ class Trainer(Entity):
             self.delayAfterEvent = 0
 
             if self.awaiting_battle:
-                self.game.start_battle(self.dummy_monsters)
                 self.awaiting_battle = False
+                self.game.start_battle(self.dummy_monsters, self)
 
 
     def makeEvent(self):

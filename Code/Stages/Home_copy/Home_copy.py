@@ -2,6 +2,7 @@ import sys
 import math
 import os
 import copy
+import math
 
 from pygame import SCALED
 from pytmx.util_pygame import load_pygame
@@ -28,6 +29,7 @@ MAX_SPEED = BLOCK_SIZE * 2 // 3
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 HOME_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -219,6 +221,19 @@ class Home:
 
         self.encounter_timer = Timer(2000, func = self.pokemon_encounter)
 
+        # transition / tint
+        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.transition_target = None
+        self.tint_surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.tint_mode = 'untint'
+        self.tint_progress = 0
+        self.tint_direction = -1
+        self.tint_speed = 600
+        self.tint_type = 'fade'  # 'fade' or 'flash'
+        self.flash_count = 0
+        self.flash_total = 2  # 3 flashes = 6 transitions (in+out x3)
+        self.flash_state = 'in'  # current phase of a flash
+
     def init_assets(self, start_pos):
 
         # Ground tiles
@@ -245,7 +260,7 @@ class Home:
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.encounter), z=2)
+            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=2)
 
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
@@ -274,7 +289,7 @@ class Home:
         # Trees
         for x, y, surf in Home.tmx.get_layer_by_name("TallBuildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.encounter), z=4)
 
         # Trainers
         for obj in Home.tmx.get_layer_by_name("Trainers"):
@@ -370,8 +385,9 @@ class Home:
 
     def end_battle(self):
         self.encounter_timer.deactivate()
-        self.battle = None
-        #to add in transition effects
+        self.transition_target = 'level'
+        self.tint_mode = 'tint'
+        self.tint_type = 'fade'  # normal fade transition
 
     def check_pokemon(self):
         if [sprite for sprite in self.encounter if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
@@ -380,19 +396,67 @@ class Home:
 
     def pokemon_encounter(self):
         print('lol')
-        self.start_battle(copy.deepcopy(self.dummy_monsters))
+        self.start_battle(copy.deepcopy(self.dummy_monsters), None)
 
-    def start_battle(self, monsters):
-        if self.battle == None:
-            self.battle = Battle(
+    def start_battle(self, monsters, trainer):
+        if self.battle is None:
+            self.transition_target = Battle(
                 player_pokemon=self.player.player_pokemon,
                 opponent_pokemon=monsters,
                 pokemon_frames=pokemon_frames,
                 bg_surf=bg_frames['forest'],
                 fonts=fonts,
-                trainer=None,
+                trainer=trainer,
                 game=self
             )
+            self.tint_mode = 'tint'
+            self.tint_type = 'flash'
+            self.flash_count = 0
+            self.flash_state = 'in'
+            self.tint_progress = 0
+
+    def tint_screen(self, dt):
+        if self.tint_type == 'fade':
+            # original single fade-in/out
+            if self.tint_mode == 'untint':
+                self.tint_progress -= self.tint_speed * dt
+
+            elif self.tint_mode == 'tint':
+                self.tint_progress += self.tint_speed * dt
+                if self.tint_progress >= 255:
+                    if isinstance(self.transition_target, Battle):
+                        self.battle = self.transition_target
+                    elif self.transition_target == 'level':
+                        self.battle = None
+                    self.tint_mode = 'untint'
+                    self.transition_target = None
+
+        elif self.tint_type == 'flash':
+            speed = self.tint_speed * dt * 3  # faster for flash
+
+            if self.flash_state == 'in':
+                self.tint_progress += speed
+                if self.tint_progress >= 255:
+                    self.tint_progress = 255
+                    self.flash_state = 'out'
+            else:
+                self.tint_progress -= speed
+                if self.tint_progress <= 0:
+                    self.tint_progress = 0
+                    self.flash_count += 1
+                    if self.flash_count >= self.flash_total:
+                        # Flashing complete — transition now
+                        if isinstance(self.transition_target, Battle):
+                            self.battle = self.transition_target
+                        self.tint_mode = 'untint'
+                        self.tint_type = 'fade'  # reset back to default
+                        self.transition_target = None
+                    else:
+                        self.flash_state = 'in'
+
+        self.tint_progress = max(0, min(self.tint_progress, 255))
+        self.tint_surf.set_alpha(self.tint_progress)
+        self.display_surface.blit(self.tint_surf, (0, 0))
 
     def run(self):
         self.init_assets(self.start_pos)
@@ -434,6 +498,7 @@ class Home:
             if self.battle: self.battle.update(dt)
 
             self.fade(dt)
+            self.tint_screen(dt)
             pygame.display.flip()
 
         if self.nextStage:
