@@ -29,7 +29,7 @@ MAX_SPEED = BLOCK_SIZE * 2 // 3
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 HOME_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
-BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Battle/battle_song.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -234,6 +234,10 @@ class Home:
         self.flash_total = 2  # 3 flashes = 6 transitions (in+out x3)
         self.flash_state = 'in'  # current phase of a flash
 
+        self.transition_music_path = BATTLE_MUSIC_PATH
+        self.transition_music_playing = False
+        self.bg_music_muted = False
+
     def init_assets(self, start_pos):
 
         # Ground tiles
@@ -389,6 +393,15 @@ class Home:
         self.tint_mode = 'tint'
         self.tint_type = 'fade'  # normal fade transition
 
+        # Reset music back to background music
+        if self.transition_music_playing:
+            pygame.mixer.music.load(HOME_MUSIC_PATH)  # or dynamic bgm path
+            pygame.mixer.music.set_volume(GAME_VOLUME)
+            pygame.mixer.music.play(-1)
+            self.transition_music_playing = False
+
+        self.bg_music_muted = False
+
     def check_pokemon(self):
         if [sprite for sprite in self.encounter if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
             if not self.encounter_timer.active:
@@ -414,6 +427,17 @@ class Home:
             self.flash_count = 0
             self.flash_state = 'in'
             self.tint_progress = 0
+
+            # Music: mute bg and play battle music
+            if not self.bg_music_muted:
+                pygame.mixer.music.set_volume(0)
+                self.bg_music_muted = True
+
+            if not self.transition_music_playing:
+                pygame.mixer.music.load(self.transition_music_path)
+                pygame.mixer.music.set_volume(GAME_VOLUME)
+                pygame.mixer.music.play(-1)
+                self.transition_music_playing = True
 
     def tint_screen(self, dt):
         if self.tint_type == 'fade':
