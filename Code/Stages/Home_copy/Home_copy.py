@@ -228,10 +228,10 @@ class Home:
         self.tint_mode = 'untint'
         self.tint_progress = 0
         self.tint_direction = -1
-        self.tint_speed = 600
+        self.tint_speed = 900
         self.tint_type = 'fade'  # 'fade' or 'flash'
         self.flash_count = 0
-        self.flash_total = 2  # 3 flashes = 6 transitions (in+out x3)
+        self.flash_total = 2.5  # 3 flashes = 6 transitions (in+out x3)
         self.flash_state = 'in'  # current phase of a flash
 
         self.transition_music_path = BATTLE_MUSIC_PATH
@@ -428,8 +428,10 @@ class Home:
             self.tint_mode = 'tint'
             self.tint_type = 'flash'
             self.flash_count = 0
+            self.flash_total = 3
             self.flash_state = 'in'
             self.tint_progress = 0
+            self.chain_fade_after_flash = True
 
             # Music: mute bg and play battle music
             if not self.bg_music_muted:
@@ -438,7 +440,7 @@ class Home:
 
             if not self.transition_music_playing:
                 pygame.mixer.music.load(self.transition_music_path)
-                pygame.mixer.music.set_volume(GAME_VOLUME)
+                pygame.mixer.music.set_volume(GAME_VOLUME * 0.3)
                 pygame.mixer.music.play(-1)
                 self.transition_music_playing = True
 
@@ -462,25 +464,31 @@ class Home:
                     self.transition_target = None
 
         elif self.tint_type == 'flash':
-            speed = self.tint_speed * dt * 3  # faster for flash
+            speed = self.tint_speed * dt * 3  # Flashing speed multiplier
 
             if self.flash_state == 'in':
                 self.tint_progress += speed
                 if self.tint_progress >= 255:
                     self.tint_progress = 255
                     self.flash_state = 'out'
-            else:
+            elif self.flash_state == 'out':
                 self.tint_progress -= speed
                 if self.tint_progress <= 0:
                     self.tint_progress = 0
-                    self.flash_count += 1
+                    self.flash_count += 1  # Only increment after a full in-out cycle
                     if self.flash_count >= self.flash_total:
-                        # Flashing complete — transition now
-                        if isinstance(self.transition_target, Battle):
-                            self.battle = self.transition_target
-                        self.tint_mode = 'untint'
-                        self.tint_type = 'fade'  # reset back to default
-                        self.transition_target = None
+                        # All flashes done
+                        if self.chain_fade_after_flash:
+                            self.tint_type = 'fade'
+                            self.tint_mode = 'tint'
+                            self.tint_progress = 0
+                            self.chain_fade_after_flash = False
+                        else:
+                            if isinstance(self.transition_target, Battle):
+                                self.battle = self.transition_target
+                            self.tint_mode = 'untint'
+                            self.tint_type = 'fade'
+                            self.transition_target = None
                     else:
                         self.flash_state = 'in'
 
