@@ -429,7 +429,8 @@ class Home:
         # Reset music
         if self.transition_music_playing:
             pygame.mixer.music.load(HOME_MUSIC_PATH)
-            pygame.mixer.music.set_volume(GAME_VOLUME)
+            volume = 0 if self.save.getMuted() else GAME_VOLUME
+            pygame.mixer.music.set_volume(volume)
             pygame.mixer.music.play(-1)
             self.transition_music_playing = False
 
@@ -463,7 +464,8 @@ class Home:
 
             if not self.transition_music_playing:
                 pygame.mixer.music.load(self.transition_music_path)
-                pygame.mixer.music.set_volume(GAME_VOLUME * 0.3)
+                volume = 0 if self.save.getMuted() else GAME_VOLUME * 0.3
+                pygame.mixer.music.set_volume(volume)
                 pygame.mixer.music.play(-1)
                 self.transition_music_playing = True
 
@@ -623,7 +625,6 @@ class Home:
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
 
-
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -650,6 +651,8 @@ class Home:
             if self.menu_open: self.menu.update(dt)
             #CHANGE
             if self.battle: self.battle.update(dt)
+
+            self.buttons[VOLUME_BUTTON].draw(self.screen)
 
             self.fade(dt)
             self.tint_screen(dt)

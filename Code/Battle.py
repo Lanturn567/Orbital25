@@ -9,11 +9,19 @@ from Code.timer import Timer
 from random import choice
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BATTLE_TOGGLE_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Battle/battle_toggle.mp3")
 MENU_OPEN_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_open.mp3")
 MENU_CLICK_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_click.mp3")
 MENU_SELECT_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_select.mp3")
 
 class Battle:
+    # Class-level attributes (shared across all instances)
+    toggle_sound = pygame.mixer.Sound(BATTLE_TOGGLE_SOUND_PATH)
+    toggle_sound.set_volume(0.2)
+
+    select_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
+    select_sound.set_volume(0.2)
+
     def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts, trainer, game):
         # general
         self.display_surface = pygame.display.get_surface()
@@ -22,14 +30,6 @@ class Battle:
         self.fonts = fonts
         self.pokemon_data = {'player': player_pokemon, 'opponent': opponent_pokemon}
         self.battle_over = False
-
-        # sounds
-        Battle.select_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
-        Battle.select_sound.set_volume(0.1)
-        Battle.switch_sound = pygame.mixer.Sound(MENU_CLICK_SOUND_PATH)
-        Battle.switch_sound.set_volume(0.05)
-        Battle.back_sound = pygame.mixer.Sound(MENU_SELECT_SOUND_PATH)
-        Battle.back_sound.set_volume(0.1)
 
         # timers
         self.timers = {
@@ -104,11 +104,11 @@ class Battle:
                 case 'target' : limiter = len(self.opponent_sprites) if self.selection_side == 'opponent' else len(self.player_sprites)
 
             if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
-                Battle.switch_sound.play()
+                Battle.toggle_sound.play()
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
 
             if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
-                Battle.switch_sound.play()
+                Battle.toggle_sound.play()
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
 
             if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
@@ -160,7 +160,7 @@ class Battle:
                 self.indexes = {k: 0 for k in self.indexes}
 
             if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
-                Battle.back_sound.play()
+                Battle.toggle_sound.play()
                 if self.selection_mode in ('attacks', 'switch', 'target'):
                     self.selection_mode = 'general'
 
