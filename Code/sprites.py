@@ -307,10 +307,15 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.apply_attack = apply_attack
         self.create_pokemon = create_pokemon
 
+        self.dying = False
+        self.die_duration = 1.0  # seconds
+        self.die_elapsed = 0
+
         # sprite setup
         super().__init__(groups)
         self.image = self.frames[self.state][self.frame_index]
         self.rect = self.image.get_rect(center = pos)
+        self.original_image = self.image  # Keep unscaled version
 
         #timers
         self.timers = {
@@ -345,9 +350,11 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.pokemon.reduce_energy(attack)
 
     def delayed_kill(self, new_pokemon):
-        if not self.timers['kill'].active:
+        if not self.dying:
+            self.dying = True
+            self.die_elapsed = 0
             self.next_pokemon_data = new_pokemon
-            self.timers['kill'].activate()
+            self.original_image = self.image.copy()  # Copy for scaling
 
     def destroy(self):
         if self.next_pokemon_data:
@@ -357,8 +364,22 @@ class PokemonSprite(pygame.sprite.Sprite):
     def update(self, dt):
         for timer in self.timers.values():
             timer.update()
-        self.animate(dt)
-        self.pokemon.update(dt)
+
+        if self.dying:
+            self.die_elapsed += dt
+            scale = max(0, 1 - self.die_elapsed / self.die_duration)
+
+            # Scale down image
+            w, h = self.original_image.get_size()
+            new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
+            self.image = pygame.transform.scale(self.original_image, new_size)
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+            if self.die_elapsed >= self.die_duration:
+                self.destroy()
+        else:
+            self.animate(dt)
+            self.pokemon.update(dt)
 
 class PokemonNamesprite(pygame.sprite.Sprite):
     def __init__(self, pos, pokemon_sprite, groups, font):
@@ -376,7 +397,7 @@ class PokemonNamesprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midtop=pos)
 
     def update(self, _):
-        if not self.pokemon_sprite.groups():
+        if self.pokemon_sprite.dying or not self.pokemon_sprite.groups():
             self.kill()
 
 class PokemonLevelSprite(pygame.sprite.Sprite):
@@ -399,7 +420,7 @@ class PokemonLevelSprite(pygame.sprite.Sprite):
 
         draw_bar(self.image, self.xp_rect, self.pokemon_sprite.pokemon.xp, self.pokemon_sprite.pokemon.level_up, COLORS['black'], COLORS['white'], 0)
 
-        if not self.pokemon_sprite.groups():
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
             self.kill()
 
 class PokemonStatsSprite(pygame.sprite.Sprite):
@@ -427,7 +448,7 @@ class PokemonStatsSprite(pygame.sprite.Sprite):
                 init_rect = pygame.Rect((0, self.rect.height - 2), (self.rect.width, 2))
                 draw_bar(self.image, init_rect, value, max_value, color, COLORS['white'], 0)
 
-        if not self.pokemon_sprite.groups():
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
             self.kill()
 
 class PokemonOutlineSprite(pygame.sprite.Sprite):
@@ -442,7 +463,7 @@ class PokemonOutlineSprite(pygame.sprite.Sprite):
 
     def update(self, _):
         self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.adjusted_frame_index]
-        if not self.pokemon_sprite.groups():
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
             self.kill()
 
 class AttackSprite(pygame.sprite.Sprite):
