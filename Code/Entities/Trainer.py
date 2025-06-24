@@ -150,6 +150,8 @@ class Trainer(Entity):
         self.awaiting_battle = False
         self.defeated = False
 
+        self.transitioning_to_battle = False  # Prevents retriggering
+
 
     @classmethod
     def init_assets(cls, database):
@@ -260,7 +262,7 @@ class Trainer(Entity):
 
     def collide(self):
         keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and not self.transitioning_to_battle and self.delayAfterEvent >= AFTER_EVENT_DELAY:
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
@@ -288,6 +290,7 @@ class Trainer(Entity):
 
             if self.awaiting_battle:
                 self.awaiting_battle = False
+                self.transitioning_to_battle = True
                 self.game.start_battle(self.dummy_monsters, self)
 
 

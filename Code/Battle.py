@@ -56,8 +56,12 @@ class Battle:
 
         self.trainer = trainer
         self.game = game
-        self.setup()
+        #self.setup()
         self.prev_keys = pygame.key.get_pressed()
+
+        self.initial_delay = 500  # milliseconds = 10 seconds
+        self.battle_timer = 0  # time since battle began
+        self.ready = False  # controls when setup() should run
 
     def setup(self):
         for entity, pokemon in self.pokemon_data.items():
@@ -69,6 +73,7 @@ class Battle:
                 del self.pokemon_data['opponent'][i]
 
     def create_pokemon(self, pokemon, index, pos_index, entity):
+        print('create')
         frames = self.pokemon_frames['pokemon'][pokemon.name]
         outline_frames = self.pokemon_frames['outlines'][pokemon.name]
         if entity == 'player':
@@ -259,6 +264,7 @@ class Battle:
                 pokemon.initiative = 0
             if self.trainer:
                 self.trainer.defeated = True
+                self.trainer.transitioning_to_battle = False  # Reset lock
             self.game.end_battle()
 
         if len(self.player_sprites) == 0:
@@ -366,15 +372,24 @@ class Battle:
                 draw_bar(self.display_surface, energy_rect, pokemon.energy, pokemon.get_stat('max_energy'), COLORS['blue'], COLORS['black'])
 
     def update(self, dt):
-        self.check_end_battle()
 
-        #updates
+        # Wait before spawning Pokémon
+        if not self.ready:
+            self.battle_timer += dt * 1000  # dt is in seconds
+            self.display_surface.blit(self.bg_surf, (0, 0))  # just background
+            if self.battle_timer >= self.initial_delay:
+                self.ready = True
+                self.setup()
+            return  # Stop here until ready
+
+        # updates
+        self.check_end_battle()
         self.input()
         self.update_timers()
         self.battle_sprites.update(dt)
         self.check_active()
 
-        #draw
+        # draw
         self.display_surface.blit(self.bg_surf, (0, 0))
         self.battle_sprites.draw(self.current_pokemon, self.selection_side, self.selection_mode, self.indexes['target'],
                                  self.player_sprites, self.opponent_sprites)

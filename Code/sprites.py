@@ -311,16 +311,20 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.die_duration = 1.0  # seconds
         self.die_elapsed = 0
 
-        # sprite setup
+        self.spawning = True
+        self.spawn_duration = 1.0  # seconds
+        self.spawn_elapsed = 0
+
+        # sprite setup - must come before using self.image.copy()
         super().__init__(groups)
         self.image = self.frames[self.state][self.frame_index]
-        self.rect = self.image.get_rect(center = pos)
-        self.original_image = self.image  # Keep unscaled version
+        self.rect = self.image.get_rect(center=pos)
+        self.original_image = self.image.copy()  # safe now
 
-        #timers
+        # timers
         self.timers = {
-            'remove highlight': Timer(200, func = lambda: self.set_highlight(False)),
-            'kill': Timer(400, func = self.destroy)
+            'remove highlight': Timer(200, func=lambda: self.set_highlight(False)),
+            'kill': Timer(400, func=self.destroy)
         }
 
     def animate(self, dt):
@@ -368,8 +372,6 @@ class PokemonSprite(pygame.sprite.Sprite):
         if self.dying:
             self.die_elapsed += dt
             scale = max(0, 1 - self.die_elapsed / self.die_duration)
-
-            # Scale down image
             w, h = self.original_image.get_size()
             new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
             self.image = pygame.transform.scale(self.original_image, new_size)
@@ -377,6 +379,21 @@ class PokemonSprite(pygame.sprite.Sprite):
 
             if self.die_elapsed >= self.die_duration:
                 self.destroy()
+
+        elif self.spawning:
+            self.spawn_elapsed += dt
+            scale = min(1, self.spawn_elapsed / self.spawn_duration)
+            w, h = self.original_image.get_size()
+            new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
+            self.image = pygame.transform.scale(self.original_image, new_size)
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+            # Prevent AttributeError during spawn
+            self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
+
+            if self.spawn_elapsed >= self.spawn_duration:
+                self.spawning = False
+
         else:
             self.animate(dt)
             self.pokemon.update(dt)
@@ -400,6 +417,12 @@ class PokemonNamesprite(pygame.sprite.Sprite):
         if self.pokemon_sprite.dying or not self.pokemon_sprite.groups():
             self.kill()
 
+        # Hide the name tag until the Pokémon finishes its spawn animation
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
 class PokemonLevelSprite(pygame.sprite.Sprite):
     def __init__(self, entity, pos, pokemon_sprite, groups, font):
         super().__init__(groups)
@@ -422,6 +445,11 @@ class PokemonLevelSprite(pygame.sprite.Sprite):
 
         if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
             self.kill()
+
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
 
 class PokemonStatsSprite(pygame.sprite.Sprite):
     def __init__(self, pos, pokemon_sprite, size, groups, font):
@@ -451,6 +479,11 @@ class PokemonStatsSprite(pygame.sprite.Sprite):
         if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
             self.kill()
 
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
 class PokemonOutlineSprite(pygame.sprite.Sprite):
     def __init__(self, pokemon_sprite, groups, frames):
         super().__init__(groups)
@@ -464,6 +497,46 @@ class PokemonOutlineSprite(pygame.sprite.Sprite):
     def update(self, _):
         self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.adjusted_frame_index]
         if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
+            self.kill()
+
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
+class PokeballSprite(pygame.sprite.Sprite):
+    def __init__(self, start_pos, target_pos, duration, on_land_callback, groups):
+        super().__init__(groups)
+        self.image = pygame.image.load(os.path.join(BASE_DIR, "../Assets/backgrounds/pokeball.png")).convert_alpha()  # Replace with your pokéball asset
+        self.rect = self.image.get_rect(center=start_pos)
+
+        # Motion
+        self.start_pos = pygame.Vector2(start_pos)
+        self.target_pos = pygame.Vector2(target_pos)
+        self.duration = duration
+        self.elapsed = 0
+
+        # Call when done
+        self.on_land_callback = on_land_callback
+
+        # Precompute distance and height of arc
+        self.arc_height = 100  # height of arc peak
+
+    def update(self, dt):
+        self.elapsed += dt
+        t = min(self.elapsed / self.duration, 1)  # normalized time [0, 1]
+
+        # Interpolate X and Y
+        pos = self.start_pos.lerp(self.target_pos, t)
+        # Add parabolic height offset to Y (arch)
+        height_offset = -4 * self.arc_height * (t - 0.5) ** 2 + self.arc_height
+        pos.y -= height_offset
+
+        self.rect.center = (round(pos.x), round(pos.y))
+
+        # End of arc
+        if self.elapsed >= self.duration:
+            self.on_land_callback()
             self.kill()
 
 class AttackSprite(pygame.sprite.Sprite):
