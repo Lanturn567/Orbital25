@@ -124,6 +124,9 @@ class Battle:
                            pokemon_sprite,(110, 40), self.battle_sprites, self.fonts['small'])
 
     def input(self):
+        if self.battle_over or self.any_pokemon_busy():
+            return  # Block input while Pokémon are animating
+
         if self.selection_mode and self.current_pokemon:
             keys = pygame.key.get_pressed()
 
@@ -295,6 +298,12 @@ class Battle:
         if len(self.player_sprites) == 0:
             pygame.quit()
             exit()
+
+    def any_pokemon_busy(self):
+        for sprite in self.battle_sprites:
+            if isinstance(sprite, PokemonSprite) and sprite.is_busy():
+                return True
+        return False
 
     def draw_ui(self):
         if self.current_pokemon:

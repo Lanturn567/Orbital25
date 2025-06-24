@@ -365,6 +365,10 @@ class PokemonSprite(pygame.sprite.Sprite):
             self.create_pokemon(*self.next_pokemon_data)
         self.kill()
 
+    # In PokemonSprite
+    def is_busy(self):
+        return self.dying or self.spawning or self.state == 'attack'
+
     def update(self, dt):
         for timer in self.timers.values():
             timer.update()
