@@ -504,41 +504,6 @@ class PokemonOutlineSprite(pygame.sprite.Sprite):
         else:
             self.image.set_alpha(255)
 
-class PokeballSprite(pygame.sprite.Sprite):
-    def __init__(self, start_pos, target_pos, duration, on_land_callback, groups):
-        super().__init__(groups)
-        self.image = pygame.image.load(os.path.join(BASE_DIR, "../Assets/backgrounds/pokeball.png")).convert_alpha()  # Replace with your pokéball asset
-        self.rect = self.image.get_rect(center=start_pos)
-
-        # Motion
-        self.start_pos = pygame.Vector2(start_pos)
-        self.target_pos = pygame.Vector2(target_pos)
-        self.duration = duration
-        self.elapsed = 0
-
-        # Call when done
-        self.on_land_callback = on_land_callback
-
-        # Precompute distance and height of arc
-        self.arc_height = 100  # height of arc peak
-
-    def update(self, dt):
-        self.elapsed += dt
-        t = min(self.elapsed / self.duration, 1)  # normalized time [0, 1]
-
-        # Interpolate X and Y
-        pos = self.start_pos.lerp(self.target_pos, t)
-        # Add parabolic height offset to Y (arch)
-        height_offset = -4 * self.arc_height * (t - 0.5) ** 2 + self.arc_height
-        pos.y -= height_offset
-
-        self.rect.center = (round(pos.x), round(pos.y))
-
-        # End of arc
-        if self.elapsed >= self.duration:
-            self.on_land_callback()
-            self.kill()
-
 class AttackSprite(pygame.sprite.Sprite):
     def __init__(self, pos, frames, groups, z=BATTLE_LAYERS['overlay']):
         super().__init__(groups)

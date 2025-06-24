@@ -115,8 +115,8 @@ class MC(Entity):
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Charmadillo', 100),
-            1: Pokemon('Friolera', 25),
+            0: Pokemon('Daniel', 5),
+            1: Pokemon('Friolera', 1),
             2: Pokemon('Plumette', 20)
         }
 

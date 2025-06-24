@@ -64,12 +64,37 @@ class Battle:
         self.ready = False  # controls when setup() should run
 
     def setup(self):
-        for entity, pokemon in self.pokemon_data.items():
-            for index, pokemon in {k: v for k, v in pokemon.items() if k <= 0}.items():
+        # 1. Clear any existing sprites from a previous battle
+        self.battle_sprites.empty()
+        self.player_sprites.empty()
+        self.opponent_sprites.empty()
+
+        # 2. Reset control variables
+        self.current_pokemon = None
+        self.selection_mode = None
+        self.selected_attack = None
+        self.selection_side = 'player'
+        self.indexes = {k: 0 for k in self.indexes}
+
+        # 3. Reset Pokémon state (initiative, paused, defending)
+        for side in self.pokemon_data:
+            for p in self.pokemon_data[side].values():
+                p.initiative = 0
+                p.paused = False
+                p.defending = False
+
+        # 4. Create Pokémon sprites for battle (e.g. 1 Pokémon for now)
+        for entity, pokemon_dict in self.pokemon_data.items():
+            healthy_pokemon = [(k, v) for k, v in pokemon_dict.items() if v.health > 0]
+            if healthy_pokemon:
+                # Sort by index to pick the lowest-index healthy Pokémon
+                healthy_pokemon.sort()
+                index, pokemon = healthy_pokemon[0]
                 self.create_pokemon(pokemon, index, index, entity)
 
-            # remove opponent pokemon data
-            for i in range(len(self.opponent_sprites)):
+        # 5. Clean up opponent dictionary so that only reserve Pokémon remain
+        for i in range(len(self.opponent_sprites)):
+            if i in self.pokemon_data['opponent']:
                 del self.pokemon_data['opponent'][i]
 
     def create_pokemon(self, pokemon, index, pos_index, entity):
