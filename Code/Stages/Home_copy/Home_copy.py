@@ -216,9 +216,11 @@ class Home:
         self.finalDelay = 0
 
         #CHANGE
-        self.dummy_monsters = {
-            0: Pokemon('Atrox', 2)
-        }
+        self.monsters = [
+            {0: Pokemon('Atrox', 1)},
+            {0: Pokemon('Cleaf', 3)},
+            {0: Pokemon('Jacana', 4)}
+        ]
 
         self.encounter_timer = Timer(2000, func = self.pokemon_encounter)
 
@@ -413,7 +415,8 @@ class Home:
 
     def pokemon_encounter(self):
         print('lol')
-        self.start_battle(copy.deepcopy(self.dummy_monsters), None)
+        selected_monsters = random.choice(self.monsters)
+        self.start_battle(copy.deepcopy(selected_monsters), None)
 
     def end_battle(self):
         self.encounter_timer.deactivate()

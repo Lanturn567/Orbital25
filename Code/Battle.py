@@ -255,7 +255,7 @@ class Battle:
 
     def check_death(self):
         for pokemon_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
-            if pokemon_sprite.pokemon.health <= 0:
+            if pokemon_sprite.pokemon.health <= 0.01:
                 if self.player_sprites in pokemon_sprite.groups():
                     active_pokemon = [(pokemon_sprite.index, pokemon_sprite.pokemon) for pokemon_sprite in self.player_sprites.sprites()]
                     available_pokemon = [(index, pokemon) for index, pokemon in self.pokemon_data['player'].items() if pokemon.health > 0 and (index, pokemon) not in active_pokemon]
@@ -404,6 +404,17 @@ class Battle:
                 energy_rect = pygame.Rect((health_rect.bottomleft + vector(0, 2)), (80, 4))
                 draw_bar(self.display_surface, health_rect, pokemon.health, pokemon.get_stat('max_health'), COLORS['red'], COLORS['black'])
                 draw_bar(self.display_surface, energy_rect, pokemon.energy, pokemon.get_stat('max_energy'), COLORS['blue'], COLORS['black'])
+
+    def calculate_catch_chance(pokemon):
+        hp_ratio = pokemon.health / pokemon.get_stat('max_health')
+        base_chance = 0.2  # base 20%
+        if hp_ratio < 0.2:
+            base_chance += 0.4  # +40% if low HP
+        elif hp_ratio < 0.5:
+            base_chance += 0.2  # +20% if mid HP
+        # Optional: add modifiers for rarity or status effects
+
+        return min(base_chance, 0.95)
 
     def update(self, dt):
 
