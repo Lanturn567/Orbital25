@@ -211,7 +211,9 @@ class Battle:
                 self.update_all_pokemon('pause')
                 pokemon_sprite.pokemon.initiative = 0
                 pokemon_sprite.set_highlight(True)
-                self.current_pokemon = pokemon_sprite
+
+                self.current_pokemon = pokemon_sprite  # ✅ Set this first
+
                 if self.player_sprites in pokemon_sprite.groups():
                     self.selection_mode = 'general'
                 else:
@@ -291,7 +293,7 @@ class Battle:
             for pokemon in self.pokemon_data['player'].values():
                 pokemon.initiative = 0
             if self.trainer:
-                self.trainer.defeated = True
+                self.trainer.defeat()
                 self.trainer.transitioning_to_battle = False  # Reset lock
             self.game.end_battle()
 

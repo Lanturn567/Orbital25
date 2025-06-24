@@ -95,13 +95,38 @@ class Entity(pygame.sprite.Sprite):
 
 
 class MC(Entity):
+    _instance = None
     ini = False
     assets = []
 
+    def __new__(cls, pos, paths, group, collidable, game, size, z=2):
+        if cls._instance is None:
+            cls._instance = super(MC, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, pos, paths, group, collidable, game, size, z=2):
+        if hasattr(self, '_initialized') and self._initialized:
+            # Always update per-stage values even for singleton
+            self.group = group
+            self.collidable = collidable
+            self.game = game
+
+            # Put player back in current sprite group
+            if self not in group:
+                group.add(self)
+
+            # Update position and rects
+            self.x, self.y = pos
+            self.rect.center = (self.x, self.y)
+            self.hitbox.center = (self.x + size[0] // 4, self.y + size[1] // 4)
+            return
+
+        self._initialized = True
+
         if not MC.ini:
             MC.init_assets(paths)
             MC.ini = True
+
         super().__init__(pos, group, size, z)
         self.game = game
         self.image = MC.assets[self.facing][self.currImage]
@@ -113,20 +138,22 @@ class MC(Entity):
         self.speed = PLAYER_SPEED
         self.blocked = False
         self.hitbox = pygame.Rect(self.x + size[0] * 4, self.y + size[1] * 4, size[0] // 2, size[1] // 2)
-        #player Pokemon
+
+        # player Pokemon - only set on first creation
         self.player_pokemon = {
-            0: Pokemon('Daniel', 5),
-            1: Pokemon('Friolera', 1),
+            0: Pokemon('Daniel', 1),
+            1: Pokemon('Friolera', 2),
             2: Pokemon('Plumette', 20)
         }
 
+        # Animation frame setup
         if self.facing == LEFT:
             self.maxFrames = MC.leftFrames
-        if self.facing == RIGHT:
+        elif self.facing == RIGHT:
             self.maxFrames = MC.rightFrames
-        if self.facing == UP:
+        elif self.facing == UP:
             self.maxFrames = MC.upFrames
-        if self.facing == DOWN:
+        elif self.facing == DOWN:
             self.maxFrames = MC.downFrames
 
     @classmethod

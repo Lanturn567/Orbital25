@@ -92,6 +92,7 @@ class Trainer(Entity):
 
     ini = False
     assets = {}
+    trainer_states = {}
 
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         if not Trainer.ini:
@@ -148,9 +149,12 @@ class Trainer(Entity):
         }
 
         self.awaiting_battle = False
-        self.defeated = False
+        state = Trainer.trainer_states.get(name, {})
+        self.defeated = state.get("defeated", False)
 
         self.transitioning_to_battle = False  # Prevents retriggering
+
+        self.can_battle = True
 
 
     @classmethod
@@ -267,7 +271,7 @@ class Trainer(Entity):
             self.game.inEvent = True
             self.makeEvent()
 
-            if not self.defeated:
+            if not self.defeated and self.can_battle:
                 self.awaiting_battle = True
 
     def update(self, dt):
@@ -309,4 +313,8 @@ class Trainer(Entity):
             trainer=self,
             game=self.game
         )
+
+    def defeat(self):
+        self.defeated = True
+        Trainer.trainer_states[self.name] = {"defeated": True}
 
