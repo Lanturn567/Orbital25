@@ -22,7 +22,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Town.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/MtX.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -96,7 +96,7 @@ class ToPeakEventWarp(EventWarp):
                 self.game.inEvent = False
                 self.game.updateEvent = None
                 self.game.player.y = self.rect.y - BLOCK_SIZE
-                self.game.player.facing = DOWN
+                self.game.player.facing = UP
 
         self.game.updateEvent = checker
 

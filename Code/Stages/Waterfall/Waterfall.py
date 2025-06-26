@@ -1,5 +1,6 @@
 import sys
 import os
+
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
@@ -77,19 +78,43 @@ fonts = {
 
 
 class Sebastian(Trainer):
-    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+    def __init__(self, pos, groups, game, size, facing, name, friends, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
         self.talked = self.info["talked"]
         self.talkedTo = False
+        self.battle = self.info["battle"]
+        self.friends = friends
         if self.game.save.beatGymOne():
             self.talkedTo = True
 
     def makeEvent(self):
+        check = self.checkFriends()
+        StoryTextBox.init__text(self.text if not check else self.talked if self.talkedTo else self.battle)
+        self.game.buttons[TEXT_BUTTON].reset()
+        if check:
+            self.game.save.updateEvent("GymOne")
+            SaveSystem.write(self.game.save)
+            self.talkedTo = True
+
+    def checkFriends(self):
+        if self.game.save.beatGymOne():
+            return True
+        for friend in self.friends:
+            if not friend.talkedTo:
+                return False
+        return True
+
+class SebFriend(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+    def makeEvent(self):
         StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
-        self.game.save.updateEvent("GymOne")
-        SaveSystem.write(self.game.save)
         self.talkedTo = True
+
 
 
 class WaterFallEventWarp(EventWarp):
@@ -164,11 +189,12 @@ class Waterfall:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
 
+        self.seb = None
+        self.sebFriends = []
 
     def init_assets(self, start_pos):
 
@@ -208,6 +234,11 @@ class Waterfall:
         for x, y, surf in Waterfall.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
+
+        # 1warer tiles
+        for x, y, surf in Waterfall.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 
         # 1warer tiles
         for x, y, surf in Waterfall.tmx.get_layer_by_name("Waterside").tiles():
@@ -266,9 +297,13 @@ class Waterfall:
             type = obj.type
             dis = obj.properties["dis"]
             if obj.name == "Sebastian":
-                Sebastian((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+                self.seb = obj
+            elif obj.name == "Lascalle" or obj.name == "Reminisque":
+                self.sebFriends.append(SebFriend((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3))
             else:
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        self.seb = Sebastian((self.seb.x + 16, self.seb.y),friends=self.sebFriends, name=self.seb.name, dis=self.seb.properties["dis"], type=self.seb.type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=self.seb.properties["dir"], z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

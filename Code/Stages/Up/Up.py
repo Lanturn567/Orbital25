@@ -20,7 +20,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Left.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Up.mp3")
 POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
@@ -32,7 +32,8 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 
-GAME_VOLUME = 0.3
+GAME_VOLUME = 0.15
+
 ANIM_SPEED = 8
 
 DELAY_AFTER_CLICK = 4
@@ -171,6 +172,11 @@ class Up:
             Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 
         #Trees tiles
+        for x, y, surf in Up.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
+
+        #Trees tiles
         for x, y, surf in Up.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
@@ -183,7 +189,7 @@ class Up:
         # 1warer tiles
         for x, y, surf in Up.tmx.get_layer_by_name("UpperRock").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group, self.collide, self.collideLand), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
 
         # 1warer tiles
         for x, y, surf in Up.tmx.get_layer_by_name("Flowers").tiles():
