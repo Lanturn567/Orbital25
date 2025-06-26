@@ -1,6 +1,8 @@
 import sys
 import os
 import random
+
+import pygame.transform
 from pygame import gfxdraw
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
@@ -21,7 +23,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Town.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/MtX.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -209,8 +211,10 @@ class Mtexit:
                 Waterside(pos=pos, image=image , game=self, groups=(self.sprite_group, self.collideLand, self.collide), z=2)
 
             for x, y, surf in Mtexit.tmx.get_layer_by_name("WaterfallSurfable").tiles():
+                image = pygame.image.load(WARP_PATH)
+                image = pygame.transform.scale_by(image, 0.5)
                 pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-                WaterfallDown(pos, image=surf, game=self, groups=(self.sprite_group, self.collideLand), z=3)
+                WaterfallDown(pos, image=image, game=self, groups=(self.sprite_group, self.collideLand), z=3)
 
     # Players
         for obj in Mtexit.tmx.get_layer_by_name("Player"):

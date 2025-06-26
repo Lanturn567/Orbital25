@@ -271,6 +271,10 @@ class Party:
         self.stageDone = False
         self.finalDelay = 0
 
+        self.wii = None
+        self.woo = None
+        self.w = None
+
     def init_assets(self, start_pos):
         # Ground tiles
         for x, y, surf in Party.tmx.get_layer_by_name("Ground").tiles():
@@ -312,6 +316,11 @@ class Party:
         for x, y, surf in Party.tmx.get_layer_by_name("Furniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
+
+        # Furniture
+        for x, y, surf in Party.tmx.get_layer_by_name("TallFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group), z=4)
 
         # Furniture
         for x, y, surf in Party.tmx.get_layer_by_name("Exit").tiles():

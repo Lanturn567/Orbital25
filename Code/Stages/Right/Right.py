@@ -212,6 +212,11 @@ class Right:
             Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 
         # 1warer tiles
+        for x, y, surf in Right.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
+
+        # 1warer tiles
         for x, y, surf in Right.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=2)

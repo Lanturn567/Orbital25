@@ -36,6 +36,11 @@ SNORLAX_SOUND = os.path.join(BASE_DIR, '../../../Audio/Snorlax.wav')
 GAME_VOLUME = 0.3
 ANIM_SPEED = 8
 
+WATER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Water/0.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/1.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/2.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/3.png')]
+
 DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
@@ -272,6 +277,10 @@ class River:
         for x, y, surf in River.tmx.get_layer_by_name("UpperTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
+
+        for x, y, surf in River.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=4)
 
         for x, y, surf in River.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
