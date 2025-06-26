@@ -48,7 +48,7 @@ WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
 PINK = os.path.join(BASE_DIR, '../../../Assets/Background/Pink.png')
 LOCATION = "left"
 MAX_ALPHA = 255
-FINAL_DELAY = 5
+FINAL_DELAY = 3
 
 STAGES = {}
 
