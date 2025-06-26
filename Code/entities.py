@@ -66,6 +66,7 @@ WARP_PATH = "../../Assets/Background/Warp.png"
 LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
+RESET_DELAY = 0.5
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, pos, groups, size, z=2):
@@ -136,6 +137,8 @@ class MC(Entity):
             self.maxFrames = MC.upFrames
         if self.facing == DOWN:
             self.maxFrames = MC.downFrames
+
+        self.timeBeforeReset = 0
 
     @classmethod
     def init_assets(cls, paths):
@@ -274,8 +277,12 @@ class MC(Entity):
                     self.maxFrames = MC.rightFrames
                     self.currImage = 0
 
-            if not left and not right and not up and not down:
+            if not left and not right and not up and not down and self.timeBeforeReset > RESET_DELAY:
                 self.currImage = 0
+            elif not left and not right and not up and not down:
+                self.timeBeforeReset += dt
+            else:
+                self.timeBeforeReset = 0
 
     def move(self):
 

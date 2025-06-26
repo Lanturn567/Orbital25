@@ -58,6 +58,10 @@ class StoryTextBox(Opening.Button):
         self.accumulated_time = 0.0  # Tracks time between character updates
         self.char_delay = 1.0 / CHARACTERS_PER_SECOND  # Time between characters
 
+        self.name = self.game.save.getName().title()
+        for i, line in enumerate(StoryTextBox.text):
+            StoryTextBox.text[i] = line.replace("Darnielle", self.name)
+
     def wrap_text(self, text):
         """Break text into multiple lines that fit within the text box width"""
         words = text.split(' ')
@@ -148,6 +152,8 @@ class StoryTextBox(Opening.Button):
             self.accumulated_time -= chars_to_add * self.char_delay
 
     def reset(self):
+        for i, line in enumerate(StoryTextBox.text):
+            StoryTextBox.text[i] = line.replace("Darnielle", self.name)
         self.currLine = 0
         self.currChar = 0
         self.currString = ""

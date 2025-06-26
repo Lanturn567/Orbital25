@@ -780,6 +780,18 @@ class LevelTwo:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
 
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=3)
+
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in LevelTwo.tmx.get_layer_by_name("TreesBelowBuildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+
         for x, y, surf in LevelTwo.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)

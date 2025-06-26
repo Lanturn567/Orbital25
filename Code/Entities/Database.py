@@ -164,7 +164,7 @@ database = {
               "dead" : True
               },
     "Healy" : { "team" : [],
-              "talk" : ["Healy: Good morning young miss. Do your Pokemon need healing?"],
+              "talk" : ["Healy: Good morning young miss. I'll heal your Pokemon for you. Come on little ones!"],
               "dead" : True
               },
     "Jordan" : { "team" : [],
@@ -352,16 +352,19 @@ database = {
                 },
     "Lascalle" : { "team" : [],
                 "talk" : ["Lascalle: No way in hell will I let you face our gym leader unchallenged!"],
+                "talked" : ["Lascalle: Your power is superbe..."],
                 "dead" : True
                 },
 
     "Sebastian" : { "team" : [],
-                "talk" : ["Sebastian: So you have made it all the way to me. Impressive.", "Sebastian: Unfortunately for you, however, your journey ends here.", "Sebastian: Fall under the might of a thousand waves!"],
+                "talk" : ["Sebastian is currently in a deep meditative state...", "His associates beckon for you."],
+                "battle" : ["Sebastian: So you have made it all the way to me. Impressive.", "Sebastian: Unfortunately for you, however, your journey ends here.", "Sebastian: Fall under the might of a thousand waves!"],
                 "talked" : ["Sebastian: Pant... Wheeze...", "Sebastian: You have bested me. With your strength, maybe it is possible...", "Sebastian: Go see the elder please, he lives in the biggest house of all.", "Sebastian: Also, jump down the hole behind me for a shortcut back to town...", "Sebastian: Scary person..."],
                 "dead" : True
                 },
     "Reminisque" : { "team" : [],
                 "talk" : ["Reminisque: No way in hell will I let you face our gym leader unchallenged!"],
+                "talked" : ["Reminisque: Your power is magnifique..."],
                 "dead" : True
                 },
     "Disse" : { "team" : [],
@@ -478,6 +481,7 @@ database = {
     "Lek" : { "team" : [],
                     "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, choose one of these Pokémon to be your first partner.", "Lek: Treat it with care, and it will become your greatest friend."],
                     "talked" : ["Lek: That's a great Pokemon you have chosen!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the city!"],
+                    "late" : ["Lek: Wow! Darnielle, you've really matured into a fine woman.", "Lek: Your Pokemon are bustling with happiness and vigor!", "Lek: I knew I could count on you!"],
                     "dead" : True
                     },
     "Shank" : { "team" : [],
@@ -486,8 +490,13 @@ database = {
                     },
     "Mom" : { "team" : [],
                 "talk" : ["Mom: Welcome back dear. How has your day been?", "Mom: Oh I met the Pokemon Professor the other day,", "Mom: And he asked me to invite you to his lab!", "Mom: I think you should oblige. It'll be so exciting!", "Mom: His lab is outside the city, take the North-West exit!", "Mom: Stay safe now! And have fun!"],
-                "talked" : ["Mom: Remember, it's the North-West exit. Have fun!"],
-                "dead" : True
+                "talked" : ["Mom: Take as much time as you need before you go!", "Mom: Remember, it's the North-West exit. Have fun!"],
+                "first" : ["Mom: Welcome back dear. Take a rest.", "Mom: Wow! I've heard you conquered your very first gym!", "Mom: Keep going! I'm sure you'll achieve great things!"],
+                "rocket" : ["Mom: Welcome back dear. Take a rest.", "Mom: Oh hello Darnielle! Where did you get that rocket ship?", "Mom: People from all over town were pestering me so very much about it...", "Mom: Oh well! Whatever it is, all that matters is you having fun!"],
+                "second" : ["Mom: Welcome back dear. Take a rest.", "Mom: You beat the second gym too? Wow!", "Mom: Might as well complete the set, right?", "Mom: One last gym remains here in our very city!", "Mom: I'm with you every step of the way!"],
+                "third" : ["Mom: Welcome back dear. Take a rest.", "Mom: You did it! You've collected every single gym badge!", "Mom: What? You say you've been invited to challenge the Champion himself?", "Mom: That sounds like a fearsome foe. Whatever happens, I'll always have your back."],
+                "champ" : ["Mom: Welcome back dear. Take a rest.", "Mom: Darnielle, you've grown up so fast...", "Mom: I'd never imagine the day when you'd be Champion.", "Mom: I think you deserve a long, well-deserved break for a job well done!"],
+              "dead" : True
                 },
     "Party" : { "team" : [],
                 "talk" : ["Partygoer: Best night ever, you gotta join in!"],
@@ -1071,7 +1080,7 @@ database = {
                  "dead" : True
                  },
     "Pou" : { "team" : [],
-                 "talk" : ["Pou: They say a legendary Pokemon lives at the peak. But no one has ever scaled this mountain before..."],
+                 "talk" : ["Pou: They say a legendary Pokemon lives at the peak.", "Pou: But no one has ever scaled this mountain before..."],
                  "dead" : True
                  },
     "DLKL1" : { "team" : [],
@@ -1278,7 +1287,7 @@ database = {
                 },
     "Dominique" : {"team" : [],
                         "talk" : ["Dominique: Hm, isn't the breeze wonderful?", "Dominique: The birds are chirping, the water's lush and what a sight the river is!", "Dominique: Oh hello, a new challenger perhaps. I'm this city's gym leader!", "Dominique: Come on then, show me what you got!"],
-                        "talked" : ["Dominique: Lalala... Amazing. You simply are amazing.", "Dominique: You have bested me and as a symbol of that, have this gym badge.", "Dominique: Now, on to another problem. Strange things have happened on the mountain north of the city.", "Dominique: Could I trouble you to investigate? You're the best! Lalala..."],
+                        "talked" : ["Dominique: Lalala... Amazing. You simply are amazing.", "Dominique: You have bested me and as a symbol of that, have this gym badge.", "Dominique: Now, on to another problem.", "Dominique: It seems that strange things have happened on the mountain north of the city.", "Dominique: Could I trouble you to investigate? You're the best! Lalala..."],
                         "dead" : True},
     "Champ" : { "team" : [],
               "talk" : ["Champ: Ah, this place is so relaxing..."],

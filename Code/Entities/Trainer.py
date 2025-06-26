@@ -5,6 +5,7 @@ import os
 from Code.LevelTwoStage.LevelTwo import Entity, TEXT_BUTTON, ANIM_SPEED
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.Entities.Database import *
+from Code.entities import *
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCK_SIZE = 32
@@ -233,11 +234,26 @@ class Trainer(Entity):
                 self.currImage = 0
 
     def collide(self):
-        keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
-            self.inEvent = True
-            self.game.inEvent = True
-            self.makeEvent()
+            keys = pygame.key.get_pressed()
+            if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+                self.inEvent = True
+                self.game.inEvent = True
+                self.makeEvent()
+                if self.facing == UP:
+                    self.game.player.facing = DOWN
+                    self.game.player.maxFrames = MC.downFrames
+                elif self.facing == DOWN:
+                    self.game.player.facing = UP
+                    self.game.player.maxFrames = MC.upFrames
+                elif self.facing == RIGHT:
+                    self.game.player.facing = LEFT
+                    self.game.player.maxFrames = MC.leftFrames
+                elif self.facing == LEFT:
+                    self.game.player.facing = RIGHT
+                    self.game.player.maxFrames = MC.rightFrames
+                self.game.player.currImage = 0
+                self.game.player.image = MC.assets[self.game.player.facing][int(self.game.player.currImage) % self.game.player.maxFrames]
+
 
     def update(self, dt):
         # Update position
@@ -262,4 +278,5 @@ class Trainer(Entity):
         StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
 
