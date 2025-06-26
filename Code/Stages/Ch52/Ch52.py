@@ -18,7 +18,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Ch.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -128,8 +128,10 @@ class Ch52:
 
         # Boundary
         for x, y, surf in Ch52.tmx.get_layer_by_name("ExitWall").tiles():
+            image = pygame.image.load(WARP_PATH)
+            image = pygame.transform.scale_by(image, 0.5)
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+            Sprite(pos=pos, image=image, groups=(self.sprite_group, self.collide), z=3)
 
         #Movable
         for x, y, surf in Ch52.tmx.get_layer_by_name("TallFurniture").tiles():
@@ -140,6 +142,11 @@ class Ch52:
         for x, y, surf in Ch52.tmx.get_layer_by_name("Furniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
+
+        # Furniture
+        for x, y, surf in Ch52.tmx.get_layer_by_name("ExitFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
         # Warps
         for obj in Ch52.tmx.get_layer_by_name("Warps"):

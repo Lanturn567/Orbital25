@@ -18,7 +18,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Basement.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -163,7 +163,8 @@ class Basement:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Champion((obj.x + 16, obj.y + 16), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if self.save.beatGymThree():
+                Champion((obj.x + 16, obj.y + 16), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

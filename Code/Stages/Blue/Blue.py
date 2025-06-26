@@ -39,6 +39,7 @@ DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH1 = os.path.join(BASE_DIR, "Blue.txt")
+LOST_TEXT = os.path.join(BASE_DIR, "HaventBeatRaysen.txt")
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
@@ -75,6 +76,29 @@ fonts = {
     'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
+
+class BlueEventWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+
+    def makeEvent(self):
+        if not self.game.inEvent:
+            StoryTextBox.init__text(LOST_TEXT)
+            self.game.buttons[TEXT_BUTTON].reset()
+            self.game.player.y = self.rect.y + BLOCK_SIZE
+            self.game.inEvent = True
+            self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.y = self.rect.y + BLOCK_SIZE * 2
+                self.game.player.facing = DOWN
+
+        self.game.updateEvent = checker
 
 class Blue:
     tmx = load_pygame(TMX_PATH)
@@ -146,7 +170,10 @@ class Blue:
             image = pygame.image.load(WARP_PATH)
             if obj.properties["size"] == "small":
                 image = pygame.transform.scale(image, (BLOCK_SIZE, BLOCK_SIZE))
-            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
+            if obj.properties["pos"] in ["up"]:
+                BlueEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymThree)
+            else:
+                BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
@@ -182,7 +209,6 @@ class Blue:
         if keys[pygame.K_SPACE] and not self.isClicked:
             self.buttons[TEXT_BUTTON].action()
             self.clickDelay = DELAY_AFTER_CLICK
-
 
         self.buttons[TEXT_BUTTON].updateString(dt)
         if self.isClicked:
@@ -242,7 +268,6 @@ class Blue:
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
-
 
         self.clock = pygame.time.Clock()
         self.running = True

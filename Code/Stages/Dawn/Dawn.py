@@ -74,7 +74,7 @@ fonts = {
 }
 
 
-class Dawn(Trainer):
+class Lanturn(Trainer):
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
         self.talked = self.info["talked"]
@@ -85,7 +85,6 @@ class Dawn(Trainer):
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.updateEvent("Dawn")
         self.talkedTo = True
-
 
 class EndgameDawn(Trainer):
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
@@ -193,12 +192,10 @@ class Dawn:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            if self.save.beatChampion():
+            if obj.name == "EndgameLanturn" and self.save.beatChampion():
                 EndgameDawn((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
-            elif self.save.seenProf():
-                continue
-            else:
-                Dawn((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            elif obj.name == "LanturnDawn" and not self.save.seenProf():
+                Lanturn((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
@@ -323,7 +320,6 @@ class Dawn:
             self.fade(dt)
 
             pygame.display.flip()
-
 
         if self.nextStage:
             return self.save.getStage()(self.screen, LOCATION, self.save)

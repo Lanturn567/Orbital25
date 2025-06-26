@@ -6,7 +6,6 @@ from pygame import SCALED
 from pytmx.util_pygame import load_pygame
 from Code.Entities.Trainer import *
 from Code.support import *
-from Code.LevelOneStage.LevelOne import LevelOneVolumeButton
 from Code.Stages.Lake.Lake import *
 from Code.sprites import *
 from Code.entities import *
@@ -90,7 +89,6 @@ fonts = {
     'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
-
 
 class HomeEventWarp(EventWarp):
     #dir in ["left", "right", "up", "down"]

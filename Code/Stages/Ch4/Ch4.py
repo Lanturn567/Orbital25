@@ -18,7 +18,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Ch.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -135,6 +135,11 @@ class Ch4:
         for x, y, surf in Ch4.tmx.get_layer_by_name("MoreFurniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
+
+        #Movable
+        for x, y, surf in Ch4.tmx.get_layer_by_name("UpperMoreFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
 
         # Furniture
         for x, y, surf in Ch4.tmx.get_layer_by_name("Furniture").tiles():

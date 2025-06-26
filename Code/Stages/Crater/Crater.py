@@ -590,6 +590,10 @@ class Crater:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
 
+        for x, y, surf in Crater.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=3)
+
         for x, y, surf in Crater.tmx.get_layer_by_name("Bridge").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.bridges), z=2)

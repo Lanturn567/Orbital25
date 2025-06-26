@@ -18,7 +18,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Gym2.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -135,14 +135,25 @@ class Gym22:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
+        for x, y, surf in Gym22.tmx.get_layer_by_name("TallFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+
         for x, y, surf in Gym22.tmx.get_layer_by_name("Movables").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
 
+        # 1warer tiles
+        for x, y, surf in Gym22.tmx.get_layer_by_name("ExitWall").tiles():
+            image = pygame.image.load(WARP_PATH)
+            image = pygame.transform.scale_by(image, 0.5)
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=image, groups=(self.sprite_group, self.collide), z=1)
+
         # Warps
         for obj in Gym22.tmx.get_layer_by_name("Warps"):
             image = pygame.image.load(WARP_PATH)
-            if obj.properties["pos"] == "small":
+            if obj.properties["size"] == "small":
                 image = pygame.transform.scale_by(image, 0.5)
             BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 

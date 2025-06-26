@@ -1,5 +1,7 @@
 import sys
 import os
+
+import pygame.transform
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
@@ -18,7 +20,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Town.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/City.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -29,7 +31,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 
-GAME_VOLUME = 0.3
+GAME_VOLUME = 0.15
 ANIM_SPEED = 8
 
 DELAY_AFTER_CLICK = 4
@@ -43,6 +45,7 @@ VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.pn
 DELAY_AT_START = 10
 WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
 LOST_TEXT = os.path.join(BASE_DIR, "HaventBeatGym.txt")
+GYM_TEXT = os.path.join(BASE_DIR, "WrongEntrancetoGym.txt")
 LOCATION = "city"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
@@ -186,6 +189,30 @@ class CityEventWarp(EventWarp):
         self.game.updateEvent = checker
 
 
+class CityGymEventWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+
+    def makeEvent(self):
+        if not self.game.inEvent:
+            StoryTextBox.init__text(GYM_TEXT)
+            self.game.buttons[TEXT_BUTTON].reset()
+            self.game.player.y = self.rect.y + BLOCK_SIZE
+            self.game.inEvent = True
+            self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.y = self.rect.y + BLOCK_SIZE * 2
+                self.game.player.facing = DOWN
+
+        self.game.updateEvent = checker
+
+
 class City:
     tmx = load_pygame(TMX_PATH)
 
@@ -268,6 +295,13 @@ class City:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group, self.collide), z=2)
 
+        # Island tiles
+        for x, y, surf in City.tmx.get_layer_by_name("InvisWall").tiles():
+            image = pygame.image.load(WARP_PATH)
+            image = pygame.transform.scale_by(image, 0.5)
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=image, groups=(self.sprite_group, self.collide), z=2)
+
         # 1warer tiles
         for x, y, surf in City.tmx.get_layer_by_name("UpperWall").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -313,6 +347,8 @@ class City:
             image=pygame.image.load(WARP_PATH)
             if obj.properties["pos"] in ["up"]:
                 CityEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymTwo)
+            elif obj.properties["pos"] in ["gym22"]:
+                CityGymEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymTwo)
             else:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 

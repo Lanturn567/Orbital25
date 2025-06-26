@@ -18,7 +18,7 @@ PLAYER_SPEED = BLOCK_SIZE // 3
 MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
-LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Gym2.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -36,6 +36,7 @@ DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH1 = os.path.join(BASE_DIR, "Gym2main.txt")
+GYM_TEXT = os.path.join(BASE_DIR, "HaventBeatLeader.txt")
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
@@ -84,6 +85,30 @@ class Dominique(Trainer):
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.updateEvent("GymTwo")
         self.talkedTo = True
+
+
+class GymTwoEventWarp(EventWarp):
+
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
+
+    def makeEvent(self):
+        if not self.game.inEvent:
+            StoryTextBox.init__text(GYM_TEXT)
+            self.game.buttons[TEXT_BUTTON].reset()
+            self.game.player.y = self.rect.y + BLOCK_SIZE
+            self.game.inEvent = True
+            self.afterEvent()
+
+    def afterEvent(self):
+        def checker():
+            if self.game.textComplete:
+                self.game.inEvent = False
+                self.game.updateEvent = None
+                self.game.player.y = self.rect.y + BLOCK_SIZE * 2
+                self.game.player.facing = DOWN
+
+        self.game.updateEvent = checker
 
 
 class Gym2Main:
@@ -162,9 +187,12 @@ class Gym2Main:
         # Warps
         for obj in Gym2Main.tmx.get_layer_by_name("Warps"):
             image = pygame.image.load(WARP_PATH)
-            if obj.properties["pos"] == "small":
+            if obj.properties["size"] == "small":
                 image = pygame.transform.scale_by(image, 0.5)
-            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
+            if obj.properties["pos"] == "gym22":
+                GymTwoEventWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, z=2, loc=LOCATION, cond=self.save.beatGymTwo)
+            else:
+                BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Gym2Main.tmx.get_layer_by_name("Trainers"):

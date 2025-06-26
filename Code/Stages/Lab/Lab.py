@@ -74,17 +74,22 @@ fonts = {
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
 
+
 class Prof(Trainer):
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
         self.talked = self.info["talked"]
         self.talkedTo = False
+        self.lateGame = self.info["late"]
         self.dawnGo = False
+        self.late = False
         if self.game.save.seenProf():
             self.talkedTo = True
+        if self.game.save.beatGymOne():
+            self.late = True
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
+        StoryTextBox.init__text(self.lateGame if self.late else self.talked if self.talkedTo else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         obj = self.game.dawn
         self.dawn = None
@@ -143,6 +148,10 @@ class DawnLab(Trainer):
                     self.currImage = 0
             else:
                 self.walked = True
+                self.game.player.facing = RIGHT
+                self.game.player.maxFrames = MC.rightFrames
+                self.game.player.currImage = 0
+                self.game.player.image = MC.assets[self.game.player.facing][int(self.game.player.currImage) % self.game.player.maxFrames]
             self.box.center = (self.x, self.y)
 
         elif self.go and not self.talkedTo:
@@ -222,7 +231,6 @@ class Lab:
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0
-
 
     def init_assets(self, start_pos):
 
@@ -334,9 +342,7 @@ class Lab:
             if i != TEXT_BUTTON or not self.textComplete:
                 button.draw(self.screen)
 
-
     def handle_events(self):
-
         """Handle all pygame events"""
         mouse_pos = pygame.mouse.get_pos()
 
@@ -411,7 +417,6 @@ class Lab:
         else:
             pygame.quit()
             sys.exit()
-
 
 def checkExit(nextStage):
     if nextStage is not None:

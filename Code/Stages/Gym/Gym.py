@@ -30,6 +30,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
+PINK = os.path.join(BASE_DIR, '../../../Assets/Background/Pink.png')
 
 
 GAME_VOLUME = 0.3
@@ -219,18 +220,6 @@ class Spectator(Trainer):
                 self.box.center = (self.x, self.y)
 
 
-class GymWarp(BaseWarp):
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-
-    def warp(self):
-        self.game.save.updateStage(self.stage.title())
-        self.game.save.updatePos(LOCATION)
-        self.game.nextStage = True
-        SaveSystem.write(self.game.save)
-        super().warp()
-
-
 class Gym:
     tmx = load_pygame(TMX_PATH)
 
@@ -337,7 +326,7 @@ class Gym:
 
         # Warps
         for obj in Gym.tmx.get_layer_by_name("Warps"):
-            GymWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
+            BaseWarp((obj.x, obj.y), obj.properties["pos"], loc=LOCATION, image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, z=1)
 
         # Trainers
         for obj in Gym.tmx.get_layer_by_name("Trainers"):
