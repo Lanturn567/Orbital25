@@ -70,7 +70,6 @@ WATER_PATH =  os.path.join(BASE_DIR, "../Data/TilemapsPNG/PLAT Nature.png")
 WATER_FRAMES = 8
 
 
-
 class AllSprites(pygame.sprite.LayeredUpdates):
     def __init__(self):
         super().__init__()
@@ -97,6 +96,7 @@ class AllSprites(pygame.sprite.LayeredUpdates):
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
 
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
         super().__init__(groups)
@@ -105,6 +105,7 @@ class Sprite(pygame.sprite.Sprite):
         self.z = z
         self.y_sort = self.rect.centery - BLOCK_SIZE // 2
         self.hitbox = self.rect.copy()
+
 
 class AnimatedSprite(Sprite):
     assets = []
@@ -136,6 +137,7 @@ class AnimatedSprite(Sprite):
         self.currImage += WATER_SPEED * dt
         self.image = cls.assets[int(self.currImage) % cls.length]
 
+
 class AnimatedSpriteFromSheet(Sprite):
     assets = []
     ini = False
@@ -166,6 +168,7 @@ class AnimatedSpriteFromSheet(Sprite):
         self.currImage += WATER_SPEED * dt
         self.image = cls.assets[int(self.currImage) % cls.length]
 
+
 class BaseWarp(Sprite):
     pygame.mixer.init()
     warpSound = pygame.mixer.Sound(WARP_SOUND_PATH)
@@ -184,6 +187,7 @@ class BaseWarp(Sprite):
         self.game.nextStage = True
         SaveSystem.write(self.game.save)
         BaseWarp.warpSound.play()
+
 
 class EventWarp(BaseWarp):
 
@@ -224,8 +228,6 @@ class FurinaWarp(EventWarp):
                 self.game.player.facing = LEFT
 
         self.game.updateEvent = checker
-
-
 
 
 class Event(Sprite):
@@ -294,6 +296,7 @@ class WaterfallDown(Event):
 
     def test(self):
         return self.game.player.facing == DOWN and self.game.player.y < self.rect.y + WaterfallDown.tolerance and abs(self.game.player.x - self.rect.x) < WaterfallDown.tolerance
+
 
 class Water(AnimatedSpriteFromSheet):
     def update(self, dt, *args, **kwargs):

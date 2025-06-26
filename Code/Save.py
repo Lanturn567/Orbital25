@@ -6,21 +6,21 @@ from collections import defaultdict
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 save = {
-    "events": {"Mom" : True,
+    "events": {"Mom" : False,
                "Dawn": False,
                "Prof" : False,
-               "Daniel" : True,
-               "Found" : True,
-               "RivalTown" : True,
-               "GymOne" : True,
-               "SeenElder" : True,
-               "Snorlax" : True,
-               "DawnCity": True,
-               "GymTwo" : True,
-               "RivalMount" : True,
-               "BeatDLKLPeak" : True,
-               "FirstTimeInGym": True,
-               "SeenSister" : True,
+               "Daniel" : False,
+               "Found" : False,
+               "RivalTown" : False,
+               "GymOne" : False,
+               "SeenElder" : False,
+               "Snorlax" : False,
+               "DawnCity": False,
+               "GymTwo" : False,
+               "RivalMount" : False,
+               "BeatDLKLPeak" : False,
+               "FirstTimeInGym": False,
+               "SeenSister" : False,
                "GymThree" : False,
                "BeatChampion" : False,
                "EndgameDawn" : False,
@@ -41,6 +41,8 @@ class Save:
         self.data["name"] = name
 
     def getBadges(self):
+        if self.data["events"]["BeatChampion"]:
+            return "All! :D"
         count = 0
         if self.data["events"]["GymOne"]:
             count += 1
