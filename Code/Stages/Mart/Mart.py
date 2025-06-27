@@ -91,6 +91,7 @@ class Healy(Trainer):
         self.game.buttons[TEXT_BUTTON].reset()
         self.talkedTo = True
         Healy.healingSound.play()
+        self.game.player.heal_pokemon()
         #heal pokemon here
 
 class MartVolumeButton(LakeVolumeButton):

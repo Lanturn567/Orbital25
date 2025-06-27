@@ -28,6 +28,7 @@ MAX_SPEED = BLOCK_SIZE * 2 // 3
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 HOME_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+#CHANGE
 BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Battle/battle_song.mp3")
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
@@ -37,6 +38,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 TREE_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Tree.png')]
+#CHANGE
 POKEBALL_PATH = [os.path.join(BASE_DIR, '../../../Assets/backgrounds/pokeball.png')]
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
@@ -78,6 +80,7 @@ screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
 pygame.display.set_caption("Home")
 
 # pokemon frames
+#CHANGE
 pokemon_frames = {
     'icons': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/Pokemon/icons')),
     'pokemon': monster_importer(4, 2, os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokemon')),
@@ -328,7 +331,7 @@ class Home:
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Encounter").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=surf, groups=self.sprite_group, z=3)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.encounter), z=3)
 
         # Flowers
         for x, y, surf in Home.tmx.get_layer_by_name("Doors").tiles():
@@ -360,7 +363,7 @@ class Home:
         # Trees
         for x, y, surf in Home.tmx.get_layer_by_name("TallBuildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            building = Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.encounter), z=4)
+            building = Sprite(pos=pos, image=surf, groups=self.sprite_group, z=4)
 
         if self.save.gotDaniel():
             # Trees
@@ -507,14 +510,17 @@ class Home:
         self.prev_keys = keys
 
     def check_pokemon(self):
-        if [sprite for sprite in self.encounter if sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
+        if [sprite for sprite in self.encounter if
+            sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
             if not self.encounter_timer.active:
                 self.encounter_timer.activate()
 
     def pokemon_encounter(self):
         print('lol')
-        selected_monsters = random.choice(self.monsters)
-        self.start_battle(copy.deepcopy(selected_monsters), None)
+        if [sprite for sprite in self.encounter if
+            sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
+            selected_monsters = random.choice(self.monsters)
+            self.start_battle(copy.deepcopy(selected_monsters), None)
 
     def end_battle(self):
         self.encounter_timer.deactivate()

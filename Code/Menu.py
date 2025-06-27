@@ -70,6 +70,9 @@ class Menu:
         self.max_stats['energy'] = self.max_stats.pop('max_energy')
 
     def input(self):
+        if len(self.pokemon) == 0:
+            return  # Skip input entirely
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
             self.index -= 1
@@ -260,7 +263,13 @@ class Menu:
             self.display_surface.blit(text_surf, rect)
 
     def update(self, dt):
-        self.input()
         self.display_surface.blit(self.tint_surf, (0, 0))
+
+        if len(self.pokemon) == 0:
+            # Draw blank grey background box
+            pygame.draw.rect(self.display_surface, COLORS['gray'], self.main_rect, border_radius=12)
+            return
+
+        self.input()
         self.display_list()
         self.display_main(dt)

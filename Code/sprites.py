@@ -300,7 +300,7 @@ class Waterside(Event):
             return False
 
 class PokemonSprite(pygame.sprite.Sprite):
-    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity, apply_attack, create_pokemon):
+    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity, apply_attack, create_pokemon, battle):
         # data
         self.index = index
         self.pos_index = pos_index
@@ -314,6 +314,7 @@ class PokemonSprite(pygame.sprite.Sprite):
         self.current_attack = None
         self.apply_attack = apply_attack
         self.create_pokemon = create_pokemon
+        self.battle = battle
 
         self.dying = False
         self.die_duration = 1.0  # seconds
@@ -405,10 +406,13 @@ class PokemonSprite(pygame.sprite.Sprite):
 
             if self.spawn_elapsed >= self.spawn_duration:
                 self.spawning = False
+                self.battle.pause_initiative = False
+                self.battle.lock_input = False
 
         else:
             self.animate(dt)
-            self.pokemon.update(dt)
+            if not self.battle.pause_initiative:
+                self.pokemon.update(dt)
 
 class PokemonNamesprite(pygame.sprite.Sprite):
     def __init__(self, pos, pokemon_sprite, groups, font):

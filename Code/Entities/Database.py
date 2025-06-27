@@ -1,35 +1,45 @@
+from Code.Entities.Pokemon import Pokemon
+
 database = {
     "Default" : { "team" : [],
                   "talk" : ["Def: My speech no render properly. D:"],
-                  "dead" : True
+                  "dead" : True,
+                  "battle" : False
                 },
     "Ander" : { "team" : [],
                 "talk" : ["Ander: Hi im Ander.", "Ander: Nice to meet you! Im Ander.", "Ander: Hi!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
-    "Sarah" : { "team" : [],
+    "Sarah" : { "team" : {0: Pokemon('Jacana', 2)},
                 "talk" : ["Sarah: The breeze is nice and cooling today..."],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Bob" : { "team" : [],
+    "Bob" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Bob: I'm bobbing up and down."],
-                "dead" : True
+                "dead" : True,
+              "battle" : True
                 },
-    "Sally" : { "team" : [],
+    "Sally" : { "team" : {0: Pokemon('Blitzle', 2)},
                 "talk" : ["Sally: I snorted 5 liters of milk today!", "Sally: It felt great!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Dendonka" : { "team" : [],
+    "Dendonka" : { "team" : {0: Pokemon('Finsta', 2)},
                 "talk" : ["Dendonka: My name's a handful to render. I won't speak too much."],
-                "dead" : True
+                "dead" : True,
+                   "battle" : True
                 },
-    "Pollux" : { "team" : [],
+    "Pollux" : { "team" : {0: Pokemon('Finsta', 2)},
                 "talk" : ["Pollux: Find my brother for a prize!"],
-                "dead" : True
+                "dead" : True,
+                 "battle" : True
                 },
-    "Castor" : { "team" : [],
+    "Castor" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Castor: Find my sister for a prize!"],
-                "dead" : True
+                "dead" : True,
+                 "battle" : True
                 },
     "GonRocket" : { "team" : [],
                 "talk" : ["Gon: Gon are the good old days..."],
@@ -63,13 +73,15 @@ database = {
                  "talk" : ["CastorRocket: Darnielle came out of that huge rocket??"],
                  "dead" : True
                  },
-    "Gon" : { "team" : [],
+    "Gon" : { "team" : {0: Pokemon('Cleaf', 2)},
               "talk" : ["Gon: Gon are the good old days..."],
-              "dead" : True
+              "dead" : True,
+              "battle" : True
               },
     "Home" : { "team" : [],
                 "talk" : ["Guide: So you're a challenger eh?", "Guide: This gym ain't for no slouch, better make sure you're prepared!"],
-                "dead" : True
+                "dead" : True,
+               "battle" : False
                 },
     "Ane" : { "team" : [],
                "talk" : ["Ane: The fish are rowdy today..."],
@@ -83,13 +95,15 @@ database = {
                "talk" : ["Annie: Come on, 25 to go..."],
                "dead" : True
                },
-    "Wendy" : { "team" : [],
+    "Wendy" : { "team" : {0: Pokemon('Daniel', 2)},
                "talk" : ["Wendy: The sand feels icky."],
-               "dead" : True
+               "dead" : True,
+                "battle" : True
                },
-    "Tombo" : { "team" : [],
+    "Tombo" : { "team" : {0: Pokemon('Daniel', 2)},
                "talk" : ["Tombo: Tombo."],
-               "dead" : True
+               "dead" : True,
+                "battle" : True
                },
     "Mary" : { "team" : [],
                "talk" : ["Mary: I'm stuck."],
@@ -107,25 +121,30 @@ database = {
                 "talk" : ["Fanny: La la lala la", "Fanny: La lalala la", "Fanny: La lala la", "Fanny: La la lala lala", "Fanny: La la", "Fanny: La la lala la lalala la la la lala", "Fanny: Hm? Is someone there?"],
                 "dead" : True
                 },
-    "Montanna" : { "team" : [],
+    "Montanna" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Montanna: My fish are fishing today!"],
-                "dead" : True
+                "dead" : True,
+                   "battle" : True
                 },
-    "Wally" : { "team" : [],
+    "Wally" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Wally: The grass grows restless."],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Paul" : { "team" : [],
+    "Paul" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Paul: Hello Miss! How's your day gone so far?", "Paul: I've caught 1023 new bugs today! Want to see?"],
-                "dead" : True
+                "dead" : True,
+               "battle" : True
                 },
-    "Gordon" : { "team" : [],
+    "Gordon" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Gordon: The animals are wary."],
-                "dead" : True
+                "dead" : True,
+                 "battle" : True
                 },
     "Hannah" : { "team" : [],
                  "talk" : ["Hannah: The atmosphere here is so calming, isn't it.", "Hannah: After all, I feel at peace."],
-                 "dead" : True
+                 "dead" : True,
+                 "battle" : False
                  },
     "Barry" : { "team" : [],
                  "talk" : ["Barry: WAHHHH WAHHHHHH WAHHHH!!!!"],
@@ -137,35 +156,43 @@ database = {
                  },
     "Nila" : { "team" : [],
                  "talk" : ["Nila: My Pokemon are resting in that room over there.", "Nila: I hope they get better soon!"],
-                 "dead" : True
+                 "dead" : True,
+               "battle" : False
                  },
     "Benson" : { "team" : [],
                "talk" : ["Benson: My new experiments have ended in a blazing success. HEHEHEHAW."],
-               "dead" : True
+               "dead" : True,
+                 "battle" : False
                },
     "Wilma" : { "team" : [],
                "talk" : ["Wilma: My eye tickles."],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "Wanda" : { "team" : [],
                "talk" : ["Wanda: My ear hurts.", "Wanda: I can hear 2 kids crying from here."],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "Jon" : { "team" : [],
                "talk" : ["Jon: Huff. Pyuff. Hyuff."],
-               "dead" : True
+               "dead" : True,
+              "battle" : False
                },
     "Marty" : { "team" : [],
               "talk" : ["Marty: Good morning young miss. Would you care for purchasing some goods?"],
-              "dead" : True
+              "dead" : True,
+                "battle" : False
               },
     "Marty2" : { "team" : [],
               "talk" : ["Marty: Good morning young miss. Would you care for purchasing some wares?"],
-              "dead" : True
+              "dead" : True,
+                 "battle" : False
               },
     "Healy" : { "team" : [],
               "talk" : ["Healy: Good morning young miss. I'll heal your Pokemon for you. Come on little ones!"],
-              "dead" : True
+              "dead" : True,
+                "battle" : False
               },
     "Jordan" : { "team" : [],
                 "talk" : ["Jordan: Just ignore him.", "Jordan: On second thoughts, can you do my laundry?"],
@@ -415,7 +442,8 @@ database = {
                           "Lanturn: Just don’t leave me in the dust, alright?"
                       ],
                       "talked": ["Lanturn: Let’s make this a journey we’ll never forget!"],
-                      "dead" : True
+                      "dead" : True,
+                      "battle" : False
               },
     "fake" : { "team" : [],
                "talk" : ["That's not a Pokemon..."],
@@ -427,15 +455,18 @@ database = {
             },
     "Bodyguard" : { "team" : [],
                "talk" : ["Bodyguard: Sorry. No going past. Many people are already in line to battle Raysen.", "Bodyguard: In fact, the only way to get to the front would be to beat his sister.", "Bodyguard: She's performing in the huge building to the South of here."],
-               "dead" : True
+               "dead" : True,
+                    "battle" : False
                },
     "Holmes" : { "team" : [],
                "talk" : ["Holmes: I sense a plot at work..."],
-               "dead" : True
+               "dead" : True,
+                 "battle" : False
                },
     "Watson" : { "team" : [],
                "talk" : ["Watson: I don't sense anything."],
-               "dead" : True
+               "dead" : True,
+                 "battle" : False
                },
     "Bellman" : { "team" : [],
                "talk" : ["Bellman: The gym leader's so cool!"],
@@ -467,26 +498,31 @@ database = {
                },
     "Elesa" : { "team" : [],
                "talk" : ["Elesa: See that stud down there?", "Elesa: He's this town's gym leader, currently undefeated for 100 battles.", "Elesa: Will he ever be beaten?"],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "Spectator" : { "team" : [],
                    "talk" : ["Woohoo!!!"],
-                   "dead" : True
+                   "dead" : True,
+                    "battle" : False
                    },
     "Manson" : { "team" : [],
                     "talk" : ["Manson: I've worked here for twenty years already,", "Manson: And i've never seen anyone but you give off such an aura..."],
-                    "dead" : True
+                    "dead" : True,
+                 "battle" : False
                     },
 
     "Lek" : { "team" : [],
                     "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, choose one of these Pokémon to be your first partner.", "Lek: Treat it with care, and it will become your greatest friend."],
                     "talked" : ["Lek: That's a great Pokemon you have chosen!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the city!"],
                     "late" : ["Lek: Wow! Darnielle, you've really matured into a fine woman.", "Lek: Your Pokemon are bustling with happiness and vigor!", "Lek: I knew I could count on you!"],
-                    "dead" : True
+                    "dead" : True,
+              "battle" : False
                     },
     "Shank" : { "team" : [],
                     "talk" : ["Shank: I love Pokemon!"],
-                    "dead" : True
+                    "dead" : True,
+                "battle" : False
                     },
     "Mom" : { "team" : [],
                 "talk" : ["Mom: Welcome back dear. How has your day been?", "Mom: Oh I met the Pokemon Professor the other day,", "Mom: And he asked me to invite you to his lab!", "Mom: I think you should oblige. It'll be so exciting!", "Mom: His lab is outside the city, take the North-West exit!", "Mom: Stay safe now! And have fun!"],
@@ -496,35 +532,42 @@ database = {
                 "second" : ["Mom: Welcome back dear. Take a rest.", "Mom: You beat the second gym too? Wow!", "Mom: Might as well complete the set, right?", "Mom: One last gym remains here in our very city!", "Mom: I'm with you every step of the way!"],
                 "third" : ["Mom: Welcome back dear. Take a rest.", "Mom: You did it! You've collected every single gym badge!", "Mom: What? You say you've been invited to challenge the Champion himself?", "Mom: That sounds like a fearsome foe. Whatever happens, I'll always have your back."],
                 "champ" : ["Mom: Welcome back dear. Take a rest.", "Mom: Darnielle, you've grown up so fast...", "Mom: I'd never imagine the day when you'd be Champion.", "Mom: I think you deserve a long, well-deserved break for a job well done!"],
-              "dead" : True
+              "dead" : True,
+              "battle" : False
                 },
     "Party" : { "team" : [],
                 "talk" : ["Partygoer: Best night ever, you gotta join in!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Partyguard" : { "team" : [],
                 "talk" : ["Bodyguard: Stay safe now!"],
-                "dead" : True
+                "dead" : True,
+                     "battle" : False
                 },
-    "Woo" : { "team" : [],
+    "Woo" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Woo: We're the Trio de Dango, WOOO!!"],
                 "talked" : ["Woo: Woooo... I'm all burned out."],
-                "dead" : True
+                "dead" : True,
+              "battle" : True
                 },
-    "Wii" : { "team" : [],
+    "Wii" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Wii: We're the Trio de Dango, WIII!!"],
                 "talked" : ["Wii: Wiiii... I'm all burned out."],
-                "dead" : True
+                "dead" : True,
+              "battle" : True
                 },
-    "W" : { "team" : [],
+    "W" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["W: Sorry, please refer to my associates for any business."],
-                "battle" : ["W: WII WII WOO!!!", "W: Why hello there. I'm W, the leader of the Trio de Dango.", "W: My brother's the gym leader!", "W: If you want to, I could put in a word.", "W: Only if you beat me though! Teehee!"],
+                "battles" : ["W: WII WII WOO!!!", "W: Why hello there. I'm W, the leader of the Trio de Dango.", "W: My brother's the gym leader!", "W: If you want to, I could put in a word.", "W: Only if you beat me though! Teehee!"],
                 "talked" : ["W: Wow! You're good indeed! I'll do as I promised then.", "W: HELLO RAYSEN BROTHER! I'VE GOT A STWONG OPPONENT FOR YOU TO FIGHT :D.", "W: He said he'll part the queue for you. Good luck!!"],
-                "dead" : True
+                "dead" : True,
+            "battle" : True
                 },
     "Bisque" : { "team" : [],
                 "talk" : ["Bisque: The band thats playing are the Trio de Danga!", "Bisque: They're the most popular band in the whole world!"],
-                "dead" : True
+                "dead" : True,
+                 "battle" : False
                 },
     "Lina" : { "team" : [],
                 "talk" : ["Lina: The music is so soothing and electric!"],
@@ -532,16 +575,18 @@ database = {
                 },
     "Ski" : { "team" : [],
                 "talk" : ["Ski: I'm at the front! What a view!"],
-                "dead" : True
+                "dead" : True,
+              "battle" : False
                 },
     "Otov" : { "team" : [],
                "talk" : ["Otov: Otov is pleased."],
                "dead" : True
                },
-    "DawnLab" : {"team" : [],
+    "DawnLab" : {"team" : {0: Pokemon('Daniel', 2)},
                  "talk" : ["Lanturn: Whoa, you got your first Pokémon? That’s awesome! What did you get?", "Lanturn: Nice choice! Bet you're already dreaming of becoming the Champion, huh?", "Lanturn: Alright then, no better way to start your journey than with a battle!", "Lanturn: Let’s see what you and your new partner can do!"],
                  "talked" : ["Lanturn: Wow! You're this good already!?"],
-                 "dead" : True},
+                 "dead" : True,
+                 "battle" : True},
     "RivalTown" : {"team" : [],
                  "talk" : ["Rhymond: So, you're the new kid on the block eh?", "Rhymond: You'll be a wonderful test for my Pokemon!"],
                  "talked" : ["Rhymond: ???", "Rhymond: So you're not completely hopeless after all...", "Rhymond: I'll see you around then..."],
@@ -664,37 +709,44 @@ database = {
                 "talk" : ["Stonk: Print money print!"],
                 "dead" : True
                 },
-    "Quill" : { "team" : [],
+    "Quill" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Quill: Erm... What is that?"],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Palla" : { "team" : [],
+    "Palla" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Palla: That structure was not there yesterday..."],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Doug" : { "team" : [],
+    "Doug" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Doug: The snow finally cleared and that's what i see??"],
-                "dead" : True
+                "dead" : True,
+               "battle" : True
                 },
-    "Jamie" : { "team" : [],
+    "Jamie" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Jamie: Why is there a pool?"],
-                "dead" : True
+                "dead" : True,
+                "battle" : True
                 },
-    "Jill" : { "team" : [],
+    "Jill" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Jill: What is that thing down there?"],
-                "dead" : True
+                "dead" : True,
+               "battle" : True
                 },
-    "Jack" : { "team" : [],
+    "Jack" : { "team" : {0: Pokemon('Daniel', 2)},
                "talk" : ["Jack: I ain't getting distracted by those shenanigans.", "Jack: Show me what you got."],
-               "dead" : True
+               "dead" : True,
+               "battle" : True
                },
     "FurinaCrater" : { "team" : [],
                "talk" : ["Furina: Get back here!! I told you to stop getting out of your ball!"],
                "dead" : True
                },
-    "Lemin" : { "team" : [],
+    "Lemin" : { "team" : {0: Pokemon('Cleaf', 2)},
                "talk" : ["Lemin: The snow has finally cleared up!"],
-               "dead" : True
+               "dead" : True,
+                "battle" : True
                },
     "Tarik" : { "team" : [],
                "talk" : ["Tarik: It's not my fault right... There's no way it's my fault..."],
@@ -731,11 +783,13 @@ database = {
                 },
     "Polar" : { "team" : [],
                   "talk" : ["Polar: You can heal up at this Pokemon Centre! It's so convenient!"],
-                  "dead" : True
+                  "dead" : True,
+                "battle" : False
                   },
     "DanielCrater" : { "team" : [],
                 "talk" : ["???: So you finally made it.", "???: You took so long my pool froze over...", "???: Let's go, we are already behind schedule. DLKL is rampaging on with no one to stop her...", "???: Get on the ship. I'll explain more there."],
-                "dead" : True
+                "dead" : True,
+                       "battle" : False
                 },
     "Snorlax" : { "team" : [],
                        "talk" : ["Daniel: So she has been here already.", "Daniel: See that? That's the aftermath of her new machine.", "Daniel: It does the reverse of last time, turning Pokemon into DLKLs...", "Daniel: Guess she got new inspiration after that long slumber.", "Daniel: Deal with it. Quickly."],
@@ -743,131 +797,163 @@ database = {
                        },
     "Shira" : { "team" : [],
                   "talk" : ["Shira: Who's that?"],
-                  "dead" : True
+                  "dead" : True,
+                "battle" : False
                   },
     "Candy" : { "team" : [],
                   "talk" : ["Candy: I've heard reports of strange Pokemon appearing around...", "Candy: Be careful out there!"],
-                  "dead" : True
+                  "dead" : True,
+                "battle" : False
                   },
     "Pink" : { "team" : [],
                   "talk" : ["Pink: The weather station looks as beautiful as ever!"],
-                  "dead" : True
+                  "dead" : True,
+               "battle" : False
                   },
     "Amine" : { "team" : [],
                   "talk" : ["Amine: Welcome to the city! The river is its lifeblood!"],
-                  "dead" : True
+                  "dead" : True,
+                "battle" : False
                   },
     "Lao" : { "team" : [],
                   "talk" : ["Lao: Up there is the route to the mountains.", "Lao: Don't let your guard down, stronger and more dangerous Pokemon are up there."],
-                  "dead" : True
+                  "dead" : True,
+              "battle" : False
                   },
     "Minsleif" : { "team" : [],
                   "talk" : ["Minsleif: The brigdes can go up and down for ships! Its so cool!"],
-                  "dead" : True
+                  "dead" : True,
+                   "battle" : False
                   },
-    "Dera" : { "team" : [],
+    "Dera" : { "team" : {0: Pokemon('Daniel', 2)},
                   "talk" : ["Dera: Lanturn is better!"],
-                  "dead" : True
+                  "dead" : True,
+               "battle" : True
                   },
-    "Zera" : { "team" : [],
+    "Zera" : { "team" : {0: Pokemon('Daniel', 2)},
                   "talk" : ["Zera: Clodsire clears..."],
-                  "dead" : True
+                  "dead" : True,
+               "battle" : True
                   },
-    "Jojo" : { "team" : [],
+    "Jojo" : { "team" : {0: Pokemon('Daniel', 2)},
                   "talk" : ["Jojo: Nice to meet you, platinum star!"],
-                  "dead" : True
+                  "dead" : True,
+               "battle" : True
                   },
     "Ret" : { "team" : [],
                "talk" : ["Ret: Sometimes, I like to sit and watch the ships go bye."],
-               "dead" : True
+               "dead" : True,
+              "battle" : False
                },
     "Randall" : { "team" : [],
                "talk" : ["Randall: This building above me is where I work!", "Randall: I'm so excited to work!"],
-               "dead" : True
+               "dead" : True,
+                  "battle" : False
                },
     "CityGuard" : { "team" : [],
                "talk" : ["Guard: Stay safe in the city and outside it."],
-               "dead" : True
+               "dead" : True,
+                    "battle" : False
                },
     "Cody" : { "team" : [],
                     "talk" : ["Cody: Oh, you've had a long journey haven't you? Have a cookie!"],
-                    "dead" : True
+                    "dead" : True,
+               "battle" : False
                     },
     "CityGuide" : { "team" : [],
                "talk" : ["Guide: Welcome champ! This building beside me's the gym!", "Guide: The gym leader here's much tougher than the last, so get ready!"],
-               "dead" : True
+               "dead" : True,
+                    "battle" : False
                },
     "CityGuide2" : { "team" : [],
                     "talk" : ["Guide: Welcome champ! This building beside me's the gym!", "Guide: Unfortunately, this is not the entrance! Try the other side of the bridge!"],
-                    "dead" : True
+                    "dead" : True,
+                     "battle" : False
                     },
     "Flower" : { "team" : [],
                "talk" : ["Flower: Hello! Welcome to this city's flower shop!", "Flower: Here have a sample on us!"],
-               "dead" : True
+               "dead" : True,
+                 "battle": False
                },
     "Holly" : { "team" : [],
                "talk" : ["Holly: Hello! We sell berries, fruits and flowers! Do take your time!"],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "Money" : { "team" : [],
                 "talk" : ["Money: This is the Trainer School! Where children learn about the wonders of Pokemon!", "Money: You're welcome to stay as long as you like!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Dolly" : { "team" : [],
                 "talk" : ["Dolly: Water is strong to fire!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Lilly" : { "team" : [],
                 "talk" : ["Lilly: Grass is strong to water!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Billy" : { "team" : [],
                 "talk" : ["Billy: Billy is strong to all!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Nilly" : { "team" : [],
                 "talk" : ["Nilly: Fire is strong to grass!"],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Chilly" : { "team" : [],
                 "talk" : ["Chilly: Now class, simmer down..."],
-                "dead" : True
+                "dead" : True,
+                 "battle" : False
                 },
     "Etienne" : { "team" : [],
                  "talk" : ["Etienne: Here have a cookie! It's my mom's favourite!"],
-                 "dead" : True
+                 "dead" : True,
+                  "battle" : False
                  },
     "Ch3Guard" : { "team" : [],
                  "talk" : ["Guard: Welcome to this apartment. But, without a keycard, I can't let you in..."],
-                 "dead" : True
+                 "dead" : True,
+                   "battle" : False
                  },
     "Maya" : { "team" : [],
                  "talk" : ["Maya: This weather station has been here for decades!", "Maya: It's one of the main landmarks of the city!"],
-                 "dead" : True
+                 "dead" : True,
+               "battle" : False
                  },
     "Yumiko" : { "team" : [],
                  "talk" : ["Yumiko: I come here often to stare at the fishes. They relax me."],
-                 "dead" : True
+                 "dead" : True,
+                 "battle" : False
                  },
     "Weatherman" : { "team" : [],
                  "talk" : ["Receptionist: Welcome to the weather station! Do enjoy your time here!"],
-                 "dead" : True
+                 "dead" : True,
+                     "battle" : False
                  },
     "Leonardo" : { "team" : [],
                      "talk" : ["Leonardo: I've made a masterpiece. Da Vinci could not compare."],
-                     "dead" : True
+                     "dead" : True,
+                   "battle" : False
                      },
     "Strife" : { "team" : [],
                      "talk" : ["Strife: Here have this."],
-                     "dead" : True
+                     "dead" : True,
+                 "battle" : False
                      },
     "Skyla" : { "team" : [],
                      "talk" : ["Skyla: Hello, enjoy your time at the weather station!"],
-                     "dead" : True
+                     "dead" : True,
+                "battle" : False
                      },
     "Bastille" : { "team" : [],
                  "talk" : ["Bastille: We've been living here for so long. Its so peaceful."],
-                 "dead" : True
+                 "dead" : True,
+                   "battle" : False
                  },
     "Glenn" : { "team" : [],
                  "talk" : ["Glenn: Past here is the mountain. They say strange things have been happening there..."],
@@ -896,7 +982,8 @@ database = {
 
     "Mio" : { "team" : [],
               "talk" : ["Mio: Maybe I should go for a walk..."],
-              "dead" : True
+              "dead" : True,
+              "battle" : False
               },
 
     "Nub" : { "team" : [],
@@ -905,7 +992,8 @@ database = {
               },
     "MtGuide" : { "team" : [],
               "talk" : ["Guide: Up ahead is the peak... Strange things have been happening up there.", "Guide: Make sure you stay safe and heal up before you go!"],
-              "dead" : True
+              "dead" : True,
+                  "battle" : False
               },
     "Jean" : { "team" : [],
               "talk" : ["Jean: Weird Pokemon have been sprouting out of the grass..."],
@@ -1148,21 +1236,26 @@ database = {
                 "talk" : ["Pauline: Ride the waterfall down to get back down the mountain!"],
                 "dead" : True
                 },
-    "DawnCity" : {"team" : [],
+    "DawnCity" : {"team" : {0: Pokemon('Daniel', 2)},
                    "talk" : ["Lanturn: Oh, fancy seeing you here! How's the journey been?", "Lanturn: This is the city and there's a gym leader here to be challenged!", "Lanturn: But before that, don't you want to test your strength against me?", "Lanturn: Just saying, I've levelled up quite a bit from last time, so be prepared!"],
                    "talked" : ["Lanturn: Stunning! Your strength is truly exceptional!", "Lanturn: The gym here is made up of two towers connected by a bridge!", "Lanturn: You'll know it when you see it! Good luck!"],
-                   "dead" : True},
+                   "dead" : True,
+                  "battle" : True
+                  },
     "Joelle" : { "team" : [],
                   "talk" : ["Joelle: I'm a traveller. But this area's quite dangerous now...", "Joelle: Better to stay here for a while..."],
-                  "dead" : True
+                  "dead" : True,
+                 "battle" : False
                   },
-    "Julienne" : { "team" : [],
+    "Julienne" : { "team" : {0: Pokemon('Blitzle', 2)},
                   "talk" : ["Julienne: Hello dear, why don't we have a battle?"],
-                  "dead" : True
+                  "dead" : True,
+                   "battle" : True
                   },
     "Bazette" : { "team" : [],
                   "talk" : ["Bazette: Any juicy stories for me to know about?"],
-                  "dead" : True
+                  "dead" : True,
+                  "battle" : False
                   },
     "Nell" : { "team" : [],
                   "talk" : ["Nell: I dread the descent that I'll have to do later...", "Nell: After all, the mountain's so cool up here."],
@@ -1205,11 +1298,12 @@ database = {
                     "talk" : ["LKLD: Hello Darnielle. I've been waiting for you, Daniel as well..", "LKLD: Your strength is not to be trifled with I see. Your rampage was noticeable indeed.", "LKLD: However...", "LKLD: I too am formidable.", "LKLD: Do you really think you have the power to stop me?", "LKLD: I am the promised one. A legend destined to conquer.", "LKLD: Tremble in fear as I tear you and your Pokemon apart!"],
                     "talked" : ["LKLD: Impossible!", "LKLD: I am the destined one! A legend a thousand years in the making!", "LKLD: To be felled by a kid is extraordinary...", "LKLD: I will be back and I will have my revenge!"],
                     "dead" : True},
-    "Raysen" : {"team" : [],
+    "Raysen" : {"team" : {0: Pokemon('Daniel', 2)},
                     "talk" : ["Raysen: Well well, you're quite the strong one eh? Beating my sister.", "Raysen: However, it means nothing before me.", "Raysen: Prepare yourself. I am the indomitable.", "Raysen: The undefeated.", "Raysen: RAYSEN!!!"],
-                    "battle" : ["Raysen: It seems the timing you took was fortuitous. Congratulations.", "Raysen: You have not only broken my streak, but also beaten every gym in the world...", "Raysen: Now, only one challenge remains. The champion resides in this city as well.", "Raysen: His name is Rhymond. He lives in a house close to yours.", "Raysen: His basement is the final arena. Go best him. Good luck."],
+                    "battles" : ["Raysen: It seems the timing you took was fortuitous. Congratulations.", "Raysen: You have not only broken my streak, but also beaten every gym in the world...", "Raysen: Now, only one challenge remains. The champion resides in this city as well.", "Raysen: His name is Rhymond. He lives in a house close to yours.", "Raysen: His basement is the final arena. Go best him. Good luck."],
                     "talked" : ["Raysen: The champion lives in a house close to yours.", "Raysen: His basement is the final arena. Good luck."],
-                    "dead" : True},
+                    "dead" : True,
+                "battle" : True},
     "EndgameLanturn" : {"team" : [],
                        "talk" : ["Lanturn: Hello champ, enjoying life so far as the strongest?", "Lanturn: Tell you what, how about we have a battle, for old's time sake.", "Lanturn: Here I come!!"],
                        "talked" : ["Lanturn: Your strength really is amazing.", "Lanturn: Me and my Pokemon have truly been blown away!"],

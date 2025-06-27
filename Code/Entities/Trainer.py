@@ -157,10 +157,7 @@ class Trainer(Entity):
         self.delayAfterEvent = 0
 
         #pokemon
-        self.dummy_monsters = {
-            0: Pokemon('Finsta', 2),
-            1: Pokemon('Sparchu', 2)
-        }
+        self.monsters = self.info["team"]
 
         self.awaiting_battle = False
         state = Trainer.trainer_states.get(name, {})
@@ -168,7 +165,8 @@ class Trainer(Entity):
 
         self.transitioning_to_battle = False  # Prevents retriggering
 
-        self.can_battle = True
+        self.can_battle = self.info.get("battle", False)
+        #self.can_battle = False
 
 
     @classmethod
@@ -323,7 +321,7 @@ class Trainer(Entity):
             if self.awaiting_battle:
                 self.awaiting_battle = False
                 self.transitioning_to_battle = True
-                self.game.start_battle(self.dummy_monsters, self)
+                self.game.start_battle(self.monsters, self)
 
 
     def makeEvent(self):
@@ -334,7 +332,7 @@ class Trainer(Entity):
     def start_battle(self):
         self.game.battle = Battle(
             player_pokemon=self.game.player.player_pokemon,
-            opponent_pokemon=self.dummy_monsters,
+            opponent_pokemon=self.monsters,
             pokemon_frames=pokemon_frames,
             bg_surf=bg_frames['forest'],
             fonts=fonts,

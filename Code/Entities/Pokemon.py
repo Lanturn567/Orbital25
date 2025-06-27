@@ -70,4 +70,4 @@ class Pokemon:
 
     def update(self, dt):
         if not self.paused:
-            self.initiative += 50 * self.get_stat('speed') * dt
+            self.initiative += 10 * self.get_stat('speed') * dt

@@ -146,8 +146,8 @@ class MC(Entity):
 
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Daniel', 1),
-            1: Pokemon('Friolera', 2),
+            0: Pokemon('Altaria', 5),
+            1: Pokemon('Blitzle', 3),
             2: Pokemon('Plumette', 20)
         }
 
@@ -325,6 +325,8 @@ class MC(Entity):
         # Update sprite properties
         self.y_sort = self.rect.centery
         self.image = MC.assets[self.facing][int(self.currImage) % self.maxFrames]
+
+        self.old_x, self.old_y = self.x, self.y
 
     def collide(self):
         # Check for collisions with all collidable sprites

@@ -17,8 +17,8 @@ class Timer:
     def deactivate(self):
         self.active = False
         self.start_time = 0
-        if self.repeat:
-            self.activate()
+        # if self.repeat:
+        #     self.activate()
 
     def update(self):
         if self.active:

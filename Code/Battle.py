@@ -62,6 +62,7 @@ class Battle:
         self.initial_delay = 500  # milliseconds = 10 seconds
         self.battle_timer = 0  # time since battle began
         self.ready = False  # controls when setup() should run
+        self.pause_initiative = False
 
     def setup(self):
         # 1. Clear any existing sprites from a previous battle
@@ -112,7 +113,7 @@ class Battle:
             pos = list(BATTLE_POSITIONS['right'].values())[1]
             groups = (self.battle_sprites, self.opponent_sprites)
 
-        pokemon_sprite = PokemonSprite(pos, frames, groups, pokemon, index, pos_index, entity, self.apply_attack, self.create_pokemon)
+        pokemon_sprite = PokemonSprite(pos, frames, groups, pokemon, index, pos_index, entity, self.apply_attack, self.create_pokemon, self)
         PokemonOutlineSprite(pokemon_sprite, self.battle_sprites, outline_frames)
 
         #ui
@@ -124,7 +125,7 @@ class Battle:
                            pokemon_sprite,(110, 40), self.battle_sprites, self.fonts['small'])
 
     def input(self):
-        if self.battle_over or self.any_pokemon_busy():
+        if self.battle_over or self.any_pokemon_busy() or self.lock_input:
             return  # Block input while Pokémon are animating
 
         if self.selection_mode and self.current_pokemon:
@@ -274,8 +275,9 @@ class Battle:
                     xp_amount = pokemon_sprite.pokemon.level * 100 / len(self.player_sprites)
                     for player_sprite in self.player_sprites:
                         player_sprite.pokemon.update_xp(xp_amount)
-
+                self.pause_initiative = True
                 pokemon_sprite.delayed_kill(new_pokemon_data)
+                self.lock_input = True
 
     def opponent_attack(self):
         ability = choice(self.current_pokemon.pokemon.get_abilities())
