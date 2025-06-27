@@ -152,6 +152,49 @@ class Spotlight:
         surface.blit(self.surface, (0, 0))
 
 
+class Wii(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.talkedTo else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.talkedTo = True
+
+
+class Woo(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.talkedTo = False
+
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not self.talkedTo else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.talkedTo = True
+
+
+class W(Trainer):
+    def __init__(self, pos, groups, game, size, facing, name, wii, woo, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.talked = self.info["talked"]
+        self.battle = self.info["battle"]
+        self.talkedTo = False
+        self.wii = wii
+        self.woo = woo
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text if not (self.wii.talkedTo and self.woo.talkedTo) else self.battle if not self.talkedTo else self.talked)
+        self.game.buttons[TEXT_BUTTON].reset()
+        if self.wii.talkedTo and self.woo.talkedTo:
+            self.game.save.updateEvent("SeenSister")
+            self.talkedTo = True
+
+
 class Spectator(Trainer):
     def move(self, dt):
         # Store previous position
@@ -228,6 +271,10 @@ class Party:
         self.stageDone = False
         self.finalDelay = 0
 
+        self.wii = None
+        self.woo = None
+        self.w = None
+
     def init_assets(self, start_pos):
         # Ground tiles
         for x, y, surf in Party.tmx.get_layer_by_name("Ground").tiles():
@@ -271,6 +318,11 @@ class Party:
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
 
         # Furniture
+        for x, y, surf in Party.tmx.get_layer_by_name("TallFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group), z=4)
+
+        # Furniture
         for x, y, surf in Party.tmx.get_layer_by_name("Exit").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=1)
@@ -284,6 +336,8 @@ class Party:
         for x, y, surf in Party.tmx.get_layer_by_name("People").tiles():
             pos = (x * BLOCK_SIZE + 16, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
+            while type == "furina":
+                type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Party", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="up", z=3)
 
         # Warps
@@ -295,7 +349,21 @@ class Party:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            name = obj.name
+            if name == "Wii":
+                self.wii = Wii((obj.x + 16, obj.y), name=name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            elif name == "Woo":
+                self.woo = Woo((obj.x + 16, obj.y), name=name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            elif name == "W":
+                self.w = obj
+            else:
+                Trainer((obj.x + 16, obj.y), name=name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        self.w = W((self.w.x + 16, self.w.y), wii=self.wii, woo=self.woo, name=self.w.name, dis=self.w.properties["dis"], type=self.w.type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=self.w.properties["dir"], z=3)
+
+
+
+
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)

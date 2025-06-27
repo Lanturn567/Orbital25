@@ -12,8 +12,6 @@ from Code.Save import *
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Left.tmx")
-WATERFALLPNG = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/PLAT Nature.png")
-WATER_FRAMES = 8
 START_POS = "river"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -50,7 +48,7 @@ WARP_PATH = os.path.join(BASE_DIR, "../../../Assets/Background/Warp.png")
 PINK = os.path.join(BASE_DIR, '../../../Assets/Background/Pink.png')
 LOCATION = "left"
 MAX_ALPHA = 255
-FINAL_DELAY = 5
+FINAL_DELAY = 3
 
 STAGES = {}
 
@@ -83,12 +81,6 @@ fonts = {
     'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
-
-class Water(AnimatedSpriteFromSheet):
-    def update(self, dt, *args, **kwargs):
-        self.currImage += WATER_SPEED * dt
-        self.image = Water.assets[int(self.currImage) % Water.length]
-
 
 class Left:
     tmx = load_pygame(TMX_PATH)
@@ -133,7 +125,7 @@ class Left:
 
         # 1warer tiles
         frame_rects = [(x * BLOCK_SIZE, 54 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE) for x in range(WATER_FRAMES)]
-        sheet = pygame.image.load(WATERFALLPNG)
+        sheet = pygame.image.load(WATER_PATH)
         for x, y, surf in Left.tmx.get_layer_by_name("Water").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Water(pos, sheet=sheet, frame_rects=frame_rects, groups=(self.sprite_group, self.collide), z=1)
@@ -265,7 +257,6 @@ class Left:
             )
         elif not self.water:
             self.player.collidable = self.collide
-
 
         if self.textComplete or self.ticker <= DELAY_AT_START:
             return

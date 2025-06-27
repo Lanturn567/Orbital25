@@ -67,6 +67,10 @@ FINAL_DELAY = 5
 
 SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/Surf.txt")
 NO_SURF_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/NoSurf.txt")
+DOWN_WATERFALL_TEXT_PATH = os.path.join(BASE_DIR, "./EventText/WaterfallDown.txt")
+
+WATER_PATH =  os.path.join(BASE_DIR, "../Data/TilemapsPNG/PLAT Nature.png")
+WATER_FRAMES = 8
 
 
 class AllSprites(pygame.sprite.LayeredUpdates):
@@ -114,6 +118,7 @@ class BattleSprites(pygame.sprite.Group):
             else:
                 self.display_surface.blit(sprite.image, sprite.rect)
 
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, image, groups, z=0):
         super().__init__(groups)
@@ -122,6 +127,7 @@ class Sprite(pygame.sprite.Sprite):
         self.z = z
         self.y_sort = self.rect.centery - BLOCK_SIZE // 2
         self.hitbox = self.rect.copy()
+
 
 class AnimatedSprite(Sprite):
     assets = []
@@ -153,6 +159,7 @@ class AnimatedSprite(Sprite):
         self.currImage += WATER_SPEED * dt
         self.image = cls.assets[int(self.currImage) % cls.length]
 
+
 class AnimatedSpriteFromSheet(Sprite):
     assets = []
     ini = False
@@ -183,6 +190,7 @@ class AnimatedSpriteFromSheet(Sprite):
         self.currImage += WATER_SPEED * dt
         self.image = cls.assets[int(self.currImage) % cls.length]
 
+
 class BaseWarp(Sprite):
     pygame.mixer.init()
     warpSound = pygame.mixer.Sound(WARP_SOUND_PATH)
@@ -201,6 +209,7 @@ class BaseWarp(Sprite):
         self.game.nextStage = True
         SaveSystem.write(self.game.save)
         BaseWarp.warpSound.play()
+
 
 class EventWarp(BaseWarp):
 
@@ -262,7 +271,7 @@ class Waterside(Event):
     tolerance = BLOCK_SIZE
 
     def event(self):
-        if self.test():
+        if self.test() and not self.game.inEvent:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE] and self.game.water and self.game.player.moveWater():
                     StoryTextBox.init__text(NO_SURF_TEXT_PATH)
@@ -289,7 +298,6 @@ class Waterside(Event):
             return True
         else:
             return False
-
 
 class PokemonSprite(pygame.sprite.Sprite):
     def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity, apply_attack, create_pokemon):
@@ -544,3 +552,28 @@ class TimedSprite(pygame.sprite.Sprite):
 
     def update(self, _):
         self.death_timer.update()
+
+class WaterfallDown(Event):
+    tolerance = BLOCK_SIZE
+
+    def event(self):
+        if self.test() and not self.game.inEvent:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] and self.game.water:
+                StoryTextBox.init__text(DOWN_WATERFALL_TEXT_PATH)
+                self.game.buttons[TEXT_BUTTON].reset()
+                #change game state
+                self.game.inEvent = True
+                self.game.waterfall = True
+                self.game.player.toggleblock()
+                self.game.player.moveWaterfallStart()
+                self.game.player.collidable = []
+
+    def test(self):
+        return self.game.player.facing == DOWN and self.game.player.y < self.rect.y + WaterfallDown.tolerance and abs(self.game.player.x - self.rect.x) < WaterfallDown.tolerance
+
+
+class Water(AnimatedSpriteFromSheet):
+    def update(self, dt, *args, **kwargs):
+        self.currImage += WATER_SPEED * dt
+        self.image = Water.assets[int(self.currImage) % Water.length]

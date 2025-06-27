@@ -27,10 +27,19 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
+SNORLAX_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/SnorlaxL.png'),
+                 os.path.join(BASE_DIR, '../../../Assets/Pokemon/SnorlaxR.png')]
+SNORLAX_SIZE = (384, 384)
+SNORLAX_SOUND = os.path.join(BASE_DIR, '../../../Audio/Snorlax.wav')
 
 
 GAME_VOLUME = 0.3
 ANIM_SPEED = 8
+
+WATER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Water/0.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/1.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/2.png'),
+               os.path.join(BASE_DIR, '../../../Assets/Water/3.png')]
 
 DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
@@ -71,6 +80,147 @@ fonts = {
     'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
+
+class RiverVolumeButton(LakeVolumeButton):
+
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
+            Snorlax.sound.set_volume(0 if self.playing else GAME_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
+    def toggle_volume(self):
+        pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+        StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+        BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
+        Snorlax.sound.set_volume(0 if self.playing else GAME_VOLUME)
+        self.game.save.updateMuted()
+        self.playing = not self.playing
+        self.update_image()
+
+class Snorlax(Entity):
+
+    ini = False
+    assets = {}
+
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        if not Snorlax.ini:
+            Snorlax.init_assets(SNORLAX_PATHS)
+            Snorlax.ini = True
+        super().__init__(pos, groups, size, z)
+        self.game = game
+        self.facing = dirs[facing]
+
+        self.road = [] if not road else road
+        if not road:
+            for i in range(dis):
+                self.road.append(self.facing)
+            dir = self.facing + 1 if self.facing == LEFT or self.facing == DOWN else DOWN if self.facing == UP else LEFT
+            for i in range(dis):
+                self.road.append(dir)
+
+        self.images = Snorlax.assets
+        self.image = self.images[self.facing]
+        self.currentStep = 0
+        self.maxSteps = len(self.road)
+        self.box = pygame.Rect(self.x, self.y, self.rect.width + INTERACTABLE_BOUNDS[0] * 2, self.rect.height + INTERACTABLE_BOUNDS[1] * 2)
+        self.hitbox = pygame.Rect(self.x, self.y, self.rect.width, self.rect.height)
+        self.hitbox.center = (self.x, self.y)
+        self.box.center = (self.x, self.y)
+
+        if self.facing == LEFT:
+            self.maxFrames = Snorlax.leftFrames
+        if self.facing == RIGHT:
+            self.maxFrames = Snorlax.rightFrames
+        if self.facing == UP:
+            self.maxFrames = Snorlax.upFrames
+        if self.facing == DOWN:
+            self.maxFrames = Snorlax.downFrames
+
+        self.TRAINER_GO_SPEED = random.randint(2, 4) * BLOCK_SIZE
+
+        #info from database
+        self.name = name
+        self.info = database[self.name]
+        if not self.info:
+            self.info = database["Default"]
+
+        #GO event
+        self.text = text if text else self.info["talk"]
+        self.currText = 0
+        self.maxTalks = len(self.text) if self.text[0].endswith(".txt") else 1
+        self.ticker = 0
+        self.inEvent = False
+        self.delayAfterEvent = 0
+
+
+    @classmethod
+    def init_assets(cls, paths):
+        cls.assets = []
+        for path in paths:
+            #images 192 x 192 so scale by 2x
+            curr = pygame.image.load(path)
+            curr = pygame.transform.scale_by(curr, 2)
+            curr = pygame.transform.rotate(curr, -50)
+            cls.assets.append(curr)
+
+        cls.leftFrames = 1
+        cls.rightFrames = 1
+        cls.downFrames = 0
+        cls.upFrames = 0
+
+        cls.sound = pygame.mixer.Sound(SNORLAX_SOUND)
+
+
+
+    def move(self, dt):
+        pass
+
+    def collide(self):
+        keys = pygame.key.get_pressed()
+        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+            self.inEvent = True
+            self.game.inEvent = True
+            self.makeEvent()
+
+    def update(self, dt):
+        # Update position
+        self.rect.center = (self.x, self.y)
+        self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
+        if not self.inEvent and not self.game.inEvent:
+            self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
+        elif self.game.inEvent:
+            self.delayAfterEvent = 0
+        # Check for collisions
+        if not self.inEvent and self.game.textComplete:
+            self.move(dt)
+            self.y_sort = self.rect.centery
+            self.image = self.images[self.facing]
+        elif self.inEvent and self.game.textComplete:
+            self.inEvent = False
+            self.game.inEvent = False
+            self.delayAfterEvent = 0
+            Snorlax.sound.play()
+            self.kill()
+
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
+
+
 
 
 class River:
@@ -128,9 +278,17 @@ class River:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 
+        for x, y, surf in River.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=4)
+
         for x, y, surf in River.tmx.get_layer_by_name("Flowers").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=1)
+
+        for x, y, surf in River.tmx.get_layer_by_name("Grass").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 
         for x, y, surf in River.tmx.get_layer_by_name("Buildings").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -142,7 +300,7 @@ class River:
 
         for x, y, surf in River.tmx.get_layer_by_name("Bridge").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos, image=surf, groups=(self.sprite_group), z=2)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=1)
 
         # Players
         for obj in River.tmx.get_layer_by_name("Player"):
@@ -152,7 +310,7 @@ class River:
         # 1warer tiles
         for x, y, surf in River.tmx.get_layer_by_name("UnderBridge").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group), z=1)
+            AnimatedSprite(pos, WATER_PATHS, groups=(self.sprite_group), z=0)
 
         # Warps
         for obj in River.tmx.get_layer_by_name("Warps"):
@@ -163,7 +321,10 @@ class River:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if obj.name == "Snorlax":
+                Snorlax((obj.x + 108, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=SNORLAX_SIZE, facing=facing, z=2)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
@@ -254,8 +415,8 @@ class River:
         pygame.mixer.music.play(-1, 10, 5000)
         StoryTextBox.init__text(TEXT_PATH1)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        RiverVolumeButton.init_images(VOL_BUTTON_PATHS)
+        self.buttons = [RiverVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()

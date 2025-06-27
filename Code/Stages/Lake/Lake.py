@@ -48,6 +48,7 @@ POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 GAME_VOLUME = 0.3
+UI_VOLUME = 0.3
 ANIM_SPEED = 8
 
 DELAY_AFTER_CLICK = 4
@@ -283,6 +284,18 @@ class Lake:
         for x, y, surf in Lake.tmx.get_layer_by_name("Trunk").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=2)
+
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in Lake.tmx.get_layer_by_name("FixTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=3)
+
+        # Trees
+        #tree_image = pygame.image.load(TREE_PATH[0])
+        for x, y, surf in Lake.tmx.get_layer_by_name("TreesBelowBuildings").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            tree = Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
 
         for x, y, surf in Lake.tmx.get_layer_by_name("Waterside").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)

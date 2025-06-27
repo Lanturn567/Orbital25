@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="80" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="79">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="80" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="80">
  <tileset firstgid="1" source="Floor.tsx"/>
  <tileset firstgid="513" source="Furniture2.tsx"/>
  <tileset firstgid="6186" source="Objects.tsx"/>
@@ -1069,6 +1069,12 @@
   <object id="76" name="Bodyguard" type="office" gid="6188" x="638.364" y="1663.83" width="32" height="64">
    <properties>
     <property name="dir" value="down"/>
+    <property name="dis" type="int" value="0"/>
+   </properties>
+  </object>
+  <object id="79" name="Raysen" type="guide" gid="6186" x="832.181" y="1311.63" width="32" height="64">
+   <properties>
+    <property name="dir" value="right"/>
     <property name="dis" type="int" value="0"/>
    </properties>
   </object>

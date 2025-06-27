@@ -7,15 +7,23 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 save = {
     "events": {"Mom" : False,
+               "Dawn": False,
                "Prof" : False,
                "Daniel" : False,
                "Found" : False,
-               "GymOne" : False,
                "RivalTown" : False,
-               "event7" : False,
-               "event8" : False,
+               "GymOne" : False,
+               "SeenElder" : False,
+               "Snorlax" : False,
+               "DawnCity": False,
                "GymTwo" : False,
+               "RivalMount" : False,
+               "BeatDLKLPeak" : False,
+               "FirstTimeInGym": False,
+               "SeenSister" : False,
                "GymThree" : False,
+               "BeatChampion" : False,
+               "EndgameDawn" : False,
                },
     "pokemon": [], #list of poke objects
     #to change item to dict if item does not store quantity.
@@ -23,7 +31,7 @@ save = {
     "stage": "LevelOne", #string
     "pos": "default", #default last pos
     "name": "", #string
-    "muted": False,
+    "muted": True,
     "pokedex": defaultdict(int), # list of unique ids of pokemon seen
 }
 
@@ -33,6 +41,8 @@ class Save:
         self.data["name"] = name
 
     def getBadges(self):
+        if self.data["events"]["BeatChampion"]:
+            return "All! :D"
         count = 0
         if self.data["events"]["GymOne"]:
             count += 1
@@ -97,6 +107,9 @@ class Save:
     def seenMom(self):
         return self.data["events"]["Mom"]
 
+    def seenDawn(self):
+        return self.data["events"]["Dawn"]
+
     def seenProf(self):
         return self.data["events"]["Prof"]
 
@@ -120,7 +133,38 @@ class Save:
     def foughtRivalAtTown(self):
         return self.data["events"]["RivalTown"]
 
+    def seenElder(self):
+        return self.data["events"]["SeenElder"]
 
+    def wokeSnorlax(self):
+        return self.data["events"]["Snorlax"]
+
+    def foughtDawnAtCity(self):
+        return self.data["events"]["DawnCity"]
+
+    def beatGymTwo(self):
+        return self.data["events"]["GymTwo"]
+
+    def foughtRivalAtMount(self):
+        return self.data["events"]["RivalMount"]
+
+    def beatDLKLAtPeak(self):
+        return self.data["events"]["BeatDLKLPeak"]
+
+    def beenInGym(self):
+        return self.data["events"]["FirstTimeInGym"]
+
+    def seenRaysenSister(self):
+        return self.data["events"]["SeenSister"]
+
+    def beatGymThree(self):
+        return self.data["events"]["GymThree"]
+
+    def beatChampion(self):
+        return self.data["events"]["BeatChampion"]
+
+    def beatEndgameDawn(self):
+        return self.data["events"]["EndgameDawn"]
 
 #Before: Let player choose name of save file aka Character
 #New game: Make new save, write, pass save into stage.

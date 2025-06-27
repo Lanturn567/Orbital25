@@ -19,8 +19,9 @@ MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Mart.mp3")
+HEALING_SOUND_PATH = os.path.join(BASE_DIR, "../../../Audio/Heal.wav")
 FADE_LEVEL = 0
-FADE_CHANGE_PER_FRAME = 12
+FADE_CHANGE_PER_FRAME = 24
 FADE_IN_CHANGE_PER_FRAME = 36
 PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLeft.png'),
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkRight.png'),
@@ -30,6 +31,7 @@ INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 
 GAME_VOLUME = 0.3
+HEAL_VOLUME = 0.3
 ANIM_SPEED = 8
 
 DELAY_AFTER_CLICK = 4
@@ -70,6 +72,52 @@ fonts = {
     'small': pygame.font.Font(get_font_path('PixeloidSans.ttf'), 11),
     'bold': pygame.font.Font(get_font_path('dogicapixelbold.otf'), 13),
 }
+
+class Healy(Trainer):
+    init = False
+    def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
+        super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        if not Healy.init:
+            Healy.init_sounds()
+            Healy.init = True
+
+    @classmethod
+    def init_sounds(cls):
+        cls.healingSound = pygame.mixer.Sound(HEALING_SOUND_PATH)
+        cls.healingSound.set_volume(HEAL_VOLUME)
+
+    def makeEvent(self):
+        StoryTextBox.init__text(self.text)
+        self.game.buttons[TEXT_BUTTON].reset()
+        self.talkedTo = True
+        Healy.healingSound.play()
+        #heal pokemon here
+
+class MartVolumeButton(LakeVolumeButton):
+
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Healy.healingSound.set_volume(0 if self.playing else HEAL_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
+    def toggle_volume(self):
+        pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+        StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
+        BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Healy.healingSound.set_volume(0 if self.playing else HEAL_VOLUME)
+        self.game.save.updateMuted()
+        self.playing = not self.playing
+        self.update_image()
 
 class Mart:
     tmx = load_pygame(TMX_PATH)
@@ -123,15 +171,20 @@ class Mart:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=2)
 
-        #Movable
-        for x, y, surf in Mart.tmx.get_layer_by_name("Movable").tiles():
-            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
-            Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
-
         # Furniture
         for x, y, surf in Mart.tmx.get_layer_by_name("Furniture").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=pygame.transform.scale_by(surf, 2), groups=(self.sprite_group, self.collide), z=3)
+
+        # Furniture
+        for x, y, surf in Mart.tmx.get_layer_by_name("TallFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group), z=4)
+
+        # Furniture
+        for x, y, surf in Mart.tmx.get_layer_by_name("OtherFurniture").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
         # Furniture
         for x, y, surf in Mart.tmx.get_layer_by_name("Doorway").tiles():
@@ -150,14 +203,56 @@ class Mart:
 
         # Warps
         for obj in Mart.tmx.get_layer_by_name("Warps"):
-            BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
+            if obj.properties["pos"] == start_pos:
+                BaseWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Trainers
         for obj in Mart.tmx.get_layer_by_name("Trainers"):
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if obj.name == "Healy":
+                Healy((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        # Trainers
+        if start_pos == "city":
+            for obj in Mart.tmx.get_layer_by_name("TrainersCity"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        # Trainers
+        elif start_pos == "town":
+            for obj in Mart.tmx.get_layer_by_name("TrainersTown"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+        # Trainers
+        elif start_pos == "home":
+            for obj in Mart.tmx.get_layer_by_name("TrainersHome"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        # Trainers
+        elif start_pos == "crater":
+            for obj in Mart.tmx.get_layer_by_name("TrainersCrater"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+
+        # Trainers
+        elif start_pos == "mountain":
+            for obj in Mart.tmx.get_layer_by_name("TrainersMountain"):
+                facing = obj.properties["dir"]
+                type = obj.type
+                dis = obj.properties["dis"]
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
         self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
@@ -249,7 +344,7 @@ class Mart:
         StoryTextBox.init__text(TEXT_PATH1)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons = [MartVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()

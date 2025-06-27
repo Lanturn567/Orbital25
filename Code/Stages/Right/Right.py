@@ -79,7 +79,6 @@ fonts = {
 }
 
 
-
 class RightEventWarp(EventWarp):
 
     def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
@@ -209,6 +208,11 @@ class Right:
 
         # 1warer tiles
         for x, y, surf in Right.tmx.get_layer_by_name("UpperTrees").tiles():
+            pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
+            Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
+
+        # 1warer tiles
+        for x, y, surf in Right.tmx.get_layer_by_name("FixTrees").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos, image=surf, groups=(self.sprite_group), z=3)
 

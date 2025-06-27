@@ -9,6 +9,7 @@ from Code.Battle import Battle
 from Code.support import *
 from Code.Entities.Pokemon import Pokemon
 from Code.timer import Timer
+from Code.entities import *
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCK_SIZE = 32
@@ -55,6 +56,19 @@ TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walk
                   "madam" : [os.path.join(BASE_DIR, '../../Assets/Players/madam.png')],
                   "skiier" : [os.path.join(BASE_DIR, '../../Assets/Players/skiier.png')],
                   "rhymond" : [os.path.join(BASE_DIR, '../../Assets/Players/rhymond.png')],
+                  "furina" : [os.path.join(BASE_DIR, '../../Assets/Players/Furina/WalkLeftFurina.png'),
+                              os.path.join(BASE_DIR, '../../Assets/Players/Furina/WalkRightFurina.png')],
+                  "daniel" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "squirtle" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "ponyta" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "munchlax" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "snorlax" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "happiny" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "pikachu" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "starly" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "clodsire" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "bidoof" : [os.path.join(BASE_DIR, '../../Assets/Players/moon.png')],
+                  "bossdlkl" : [os.path.join(BASE_DIR, '../../Assets/Players/waterwoman.png')],
                   }
 ANIM_SPEED = 4
 ANIM_DIST = 3
@@ -162,7 +176,7 @@ class Trainer(Entity):
         for key in database:
             paths = database[key]
             curr = []
-            #or 4 spritesheets (4x1)
+            #or 4 spritesheets (4x1) if 2 sheets, ignore last 2 dont access down up
             if len(paths) > 1:
                 for path in paths:
                     try:
@@ -270,6 +284,20 @@ class Trainer(Entity):
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
+            if self.facing == UP:
+                self.game.player.facing = DOWN
+                self.game.player.maxFrames = MC.downFrames
+            elif self.facing == DOWN:
+                self.game.player.facing = UP
+                self.game.player.maxFrames = MC.upFrames
+            elif self.facing == RIGHT:
+                self.game.player.facing = LEFT
+                self.game.player.maxFrames = MC.leftFrames
+            elif self.facing == LEFT:
+                self.game.player.facing = RIGHT
+                self.game.player.maxFrames = MC.rightFrames
+            self.game.player.currImage = 0
+            self.game.player.image = MC.assets[self.game.player.facing][int(self.game.player.currImage) % self.game.player.maxFrames]
 
             if not self.defeated and self.can_battle:
                 self.awaiting_battle = True
@@ -317,4 +345,5 @@ class Trainer(Entity):
     def defeat(self):
         self.defeated = True
         Trainer.trainer_states[self.name] = {"defeated": True}
+
 

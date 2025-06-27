@@ -3,6 +3,7 @@ import os
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
+from Code.Stages.Mart.Mart import HEAL_VOLUME
 from Code.sprites import *
 from Code.entities import *
 from Code.Save import *
@@ -19,6 +20,8 @@ MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Home.mp3")
+HEALING_SOUND_PATH = os.path.join(BASE_DIR, "../../../Audio/Heal.wav")
+
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -30,6 +33,7 @@ INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 
 
 GAME_VOLUME = 0.3
+HEAL_VOLUME = 0.3
 ANIM_SPEED = 8
 
 DELAY_AFTER_CLICK = 4
@@ -74,20 +78,86 @@ fonts = {
 
 
 class Mom(Trainer):
+    init = False
+
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
         self.can_battle = False
         self.talked = self.info["talked"]
         self.talkedTo = False
+        self.first = False
+        self.rocket = False
+        self.second = False
+        self.third = False
+        self.champ = False
+        self.firstText = self.info["first"]
+        self.rocketText = self.info["rocket"]
+        self.secondText = self.info["second"]
+        self.thirdText = self.info["third"]
+        self.champText = self.info["champ"]
         if self.game.save.seenMom():
             self.talkedTo = True
+        if self.game.save.beatGymOne():
+            self.first = True
+        if self.game.save.gotDaniel():
+            self.rocket = True
+        if self.game.save.beatGymTwo():
+            self.second = True
+        if self.game.save.beatGymThree():
+            self.three = True
+        if self.game.save.beatChampion():
+            self.champ = True
+
+        if not Mom.init:
+            Mom.init_sounds()
+            Mom.init = True
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
+        StoryTextBox.init__text(self.champText if self.champ
+                                else self.thirdText if self.third
+                                else self.secondText if self.second
+                                else self.rocketText if self.rocket
+                                else self.firstText if self.first
+                                else self.talked if self.talkedTo
+                                else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.updateEvent("Mom")
         SaveSystem.write(self.game.save)
+        Mom.healingSound.play()
         self.talkedTo = True
+
+    @classmethod
+    def init_sounds(cls):
+        cls.healingSound = pygame.mixer.Sound(HEALING_SOUND_PATH)
+        cls.healingSound.set_volume(HEAL_VOLUME)
+
+
+class HouseVolumeButton(LakeVolumeButton):
+
+    def first_toggle(self):
+        if self.game.save.getMuted():
+            pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+            Mom.healingSound.set_volume(0 if self.playing else HEAL_VOLUME)
+            self.playing = not self.playing
+            self.update_image()
+
+    def toggle_volume(self):
+        pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
+        StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
+        BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+        Mom.healingSound.set_volume(0 if self.playing else HEAL_VOLUME)
+        self.game.save.updateMuted()
+        self.playing = not self.playing
+        self.update_image()
+
 
 class House:
     tmx = load_pygame(TMX_PATH)
@@ -265,7 +335,7 @@ class House:
         StoryTextBox.init__text(TEXT_PATH1)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        self.buttons = [HouseVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
 
         self.clock = pygame.time.Clock()
