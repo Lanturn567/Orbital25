@@ -82,6 +82,7 @@ class Mom(Trainer):
 
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=None, dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
+        self.can_battle = False
         self.talked = self.info["talked"]
         self.talkedTo = False
         self.first = False
@@ -204,7 +205,11 @@ class House:
         # Players
         for obj in House.tmx.get_layer_by_name("Player"):
             if obj.properties["pos"] == start_pos:
-                self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
+                if MC._instance is None:
+                    self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self,
+                                     size=PLAYER_SIZE, z=3)
+                else:
+                    self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
 
         # Boundary
         for x, y, surf in House.tmx.get_layer_by_name("Exit").tiles():
@@ -335,6 +340,8 @@ class House:
 
         self.clock = pygame.time.Clock()
         self.running = True
+
+        self.player.heal_pokemon()
 
         while self.running and not self.stageDone:
             dt = self.clock.tick(MAX_FPS) / 1000.0  # Convert milliseconds to seconds

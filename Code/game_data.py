@@ -63,6 +63,10 @@ POKEMON_DATA = {
 		'stats': {'element': 'water', 'max_health': 13, 'max_energy': 20, 'attack': 4, 'defense': 6, 'recovery': 1.3, 'speed': 2},
 		'abilities': {0: 'scratch', 5: 'spark', 15: 'splash', 20: 'ice', 25: 'heal'},
 		'evolve': None},
+	'Daniel': {
+		'stats': {'element': 'water', 'max_health': 13, 'max_energy': 20, 'attack': 4, 'defense': 6, 'recovery': 1.3, 'speed': 2},
+		'abilities': {0: 'scratch', 5: 'spark', 15: 'splash', 20: 'ice', 25: 'heal'},
+		'evolve': None},
 	'Blitzle': {
 		'stats': {'element': 'fire', 'max_health': 11, 'max_energy': 17, 'attack': 4, 'defense': 9, 'recovery': 2.5, 'speed': 2.1},
 		'abilities': {0: 'scratch', 5: 'spark', 15: 'burn', 25: 'heal'},
@@ -131,10 +135,10 @@ POKEMON_DATA = {
 
 ATTACK_DATA = {
 	'burn':       {'target': 'opponent', 'amount': 2,    'cost': 15, 'element': 'fire',   'animation': 'fire'},
-	'heal':       {'target': 'player',   'amount': -1.2, 'cost': 600, 'element': 'plant',  'animation': 'green'},
+	'heal':       {'target': 'player',   'amount': -1.2, 'cost': 15, 'element': 'plant',  'animation': 'green'},
 	'battlecry':  {'target': 'player',   'amount': -1.4, 'cost': 20, 'element': 'normal', 'animation': 'green'},
 	'spark':      {'target': 'opponent', 'amount': 1.1,  'cost': 20, 'element': 'fire',   'animation': 'fire'},
-	'scratch':    {'target': 'opponent', 'amount': 1.2,  'cost': 20, 'element': 'normal', 'animation': 'scratch'},
+	'scratch':    {'target': 'opponent', 'amount': 1.2,  'cost': 0, 'element': 'normal', 'animation': 'scratch'},
 	'splash':     {'target': 'opponent', 'amount': 2,    'cost': 15, 'element': 'water',  'animation': 'splash'},
 	'fire':       {'target': 'opponent', 'amount': 2,    'cost': 15, 'element': 'fire',   'animation': 'fire'},
 	'explosion':  {'target': 'opponent', 'amount': 2,    'cost': 90, 'element': 'fire',   'animation': 'explosion'},

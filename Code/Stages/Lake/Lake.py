@@ -13,6 +13,7 @@ from Code.Entities.Trainer import Trainer
 from Code.sprites import *
 from Code.entities import *
 from Code.Save import *
+from Code.Battle import Battle
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -173,22 +174,26 @@ class LakeVolumeButton(LevelOneVolumeButton):
     def first_toggle(self):
         if self.game.save.getMuted():
             pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
-            StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
-            BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
-            Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
-            Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
-            Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+            StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+            BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Battle.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+            Battle.toggle_sound.set_volume(0 if self.playing else GAME_VOLUME)
             Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
             self.playing = not self.playing
             self.update_image()
 
     def toggle_volume(self):
         pygame.mixer.music.set_volume(0 if self.playing else GAME_VOLUME)
-        StoryTextBox.clickSound.set_volume(0 if self.playing else UI_VOLUME)
-        BaseWarp.warpSound.set_volume(0 if self.playing else UI_VOLUME)
-        Menu.open_sound.set_volume(0 if self.playing else UI_VOLUME)
-        Menu.click_sound.set_volume(0 if self.playing else UI_VOLUME)
-        Menu.select_sound.set_volume(0 if self.playing else UI_VOLUME)
+        StoryTextBox.clickSound.set_volume(0 if self.playing else GAME_VOLUME)
+        BaseWarp.warpSound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.open_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.click_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Menu.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Battle.select_sound.set_volume(0 if self.playing else GAME_VOLUME)
+        Battle.toggle_sound.set_volume(0 if self.playing else GAME_VOLUME)
         Daniel.cry.set_volume(0 if self.playing else GAME_VOLUME)
         self.game.save.updateMuted()
         self.playing = not self.playing
@@ -196,6 +201,9 @@ class LakeVolumeButton(LevelOneVolumeButton):
 
     def update_image(self):
         self.image_idx = 1 if not self.playing else 0
+
+    def draw(self, surface):
+        surface.blit(self.images[self.image_idx], self.rect)
 
 
 class Lake:

@@ -1,27 +1,29 @@
-from Code.game_data import POKEMON_DATA
+from Code.game_data import *
 import random
 
 class Pokemon:
     def __init__(self, name, level):
         self.name, self.level = name, level
+        self.paused = False
 
         # stats
         self.element = POKEMON_DATA[name]['stats']['element']
         self.base_stats = POKEMON_DATA[name]['stats']
         self.health = self.base_stats['max_health'] * self.level
-        self.health -= random.randint(0, 200)
         self.energy = self.base_stats['max_energy'] * self.level
-        self.energy -= random.randint(0, 200)
+        self.initiative = 0
         self.abilities = POKEMON_DATA[name]['abilities']
+        self.defending = False
 
         # experience
-        self.xp = 1500
+        self.xp = 0
         self.level_up = self.level * 150
 
+    def __repr__(self):
+        return f'pokemon: {self.name}, lvl: {self.level}'
 
     def get_stat(self, stat):
         return self.base_stats[stat] * self.level
-
 
     def get_stats(self):
         return {
@@ -34,5 +36,38 @@ class Pokemon:
         }
 
 
-    def get_abilities(self):
-        return [ability for lvl, ability in self.abilities.items() if self.level >= lvl]
+    def get_abilities(self, all = True):
+        if all:
+            return [ability for lvl, ability in self.abilities.items() if self.level >= lvl]
+        else:
+            return [ability for lvl, ability in self.abilities.items() if self.level >= lvl and ATTACK_DATA[ability]['cost'] < self.energy]
+
+    def get_info(self):
+        return (
+            (self.health, self.get_stat('max_health')),
+            (self.energy, self.get_stat('max_energy')),
+            (self.initiative, 100)
+        )
+
+    def reduce_energy(self, attack):
+        self.energy -= ATTACK_DATA[attack]['cost']
+
+    def get_base_damage(self, attack):
+        return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
+
+    def heal(self):
+        self.health = self.base_stats['max_health'] * self.level
+        self.energy = self.base_stats['max_energy'] * self.level
+
+
+    def update_xp(self, amount):
+        if self.level_up - self.xp > amount:
+            self.xp += amount
+        else:
+            self.level += 1
+            self.xp = amount - (self.level_up - self.xp)
+            self.level_up = self.level * 150
+
+    def update(self, dt):
+        if not self.paused:
+            self.initiative += 50 * self.get_stat('speed') * dt

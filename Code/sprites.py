@@ -9,6 +9,9 @@ from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 from Code.LevelOneStage.LevelOne import LevelOneVolumeButton, VOL_BUTTON_PATHS
 from Code.Opening.Opening import BGAsset
 from Code.Save import *
+from random import uniform
+from Code.support import draw_bar
+from Code.timer import Timer
 
 # Constants
 TMX_PATH = "../../../Data/TilemapsPNG/LevelTwo-TileMap.tmx"
@@ -95,6 +98,25 @@ class AllSprites(pygame.sprite.LayeredUpdates):
             for sprite in lis:
                 x, y = sprite.rect.topleft
                 self.surf.blit(sprite.image, (x + self.offsetX, y + self.offsetY))
+
+class BattleSprites(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+
+    def draw(self, current_pokemon_sprite, side, mode, target_index, player_sprites, opponent_sprites):
+        #get available positions
+        sprite_group = opponent_sprites if side == 'opponent' else player_sprites
+        sprites = {sprite.pos_index: sprite for sprite in sprite_group}
+        pokemon_sprite = sprites[list(sprites.keys())[target_index]] if sprites else None
+
+        for sprite in sorted(self, key = lambda sprite: sprite.z):
+            if sprite.z == BATTLE_LAYERS['outline']:
+                if (sprite.pokemon_sprite == current_pokemon_sprite and not (mode == 'target' and side == 'player')
+                        or sprite.pokemon_sprite == pokemon_sprite and sprite.pokemon_sprite.entity == side and mode and mode == 'target'):
+                    self.display_surface.blit(sprite.image, sprite.rect)
+            else:
+                self.display_surface.blit(sprite.image, sprite.rect)
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -277,6 +299,259 @@ class Waterside(Event):
         else:
             return False
 
+class PokemonSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, frames, groups, pokemon, index, pos_index, entity, apply_attack, create_pokemon):
+        # data
+        self.index = index
+        self.pos_index = pos_index
+        self.entity = entity
+        self.pokemon = pokemon
+        self.frame_index, self.frames, self.state = 0, frames, 'idle'
+        self.animation_speed = ANIMATION_SPEED + uniform(-1, 1)
+        self.z = BATTLE_LAYERS['monster']
+        self.highlight = False
+        self.target_sprite = None
+        self.current_attack = None
+        self.apply_attack = apply_attack
+        self.create_pokemon = create_pokemon
+
+        self.dying = False
+        self.die_duration = 1.0  # seconds
+        self.die_elapsed = 0
+
+        self.spawning = True
+        self.spawn_duration = 1.0  # seconds
+        self.spawn_elapsed = 0
+
+        # sprite setup - must come before using self.image.copy()
+        super().__init__(groups)
+        self.image = self.frames[self.state][self.frame_index]
+        self.rect = self.image.get_rect(center=pos)
+        self.original_image = self.image.copy()  # safe now
+
+        # timers
+        self.timers = {
+            'remove highlight': Timer(200, func=lambda: self.set_highlight(False)),
+            'kill': Timer(400, func=self.destroy)
+        }
+
+    def animate(self, dt):
+        self.frame_index += ANIMATION_SPEED * dt
+        if self.state == 'attack' and self.frame_index >= len(self.frames['attack']):
+            self.apply_attack(self.target_sprite, self.current_attack, self.pokemon.get_base_damage(self.current_attack))
+            self.state = 'idle'
+
+        self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
+        self.image = self.frames[self.state][self.adjusted_frame_index]
+
+        if self.highlight:
+            white_surf = pygame.mask.from_surface(self.image).to_surface()
+            white_surf.set_colorkey('black')
+            self.image = white_surf
+
+    def set_highlight(self, value):
+        self.highlight = value
+        if value:
+            self.timers['remove highlight'].activate()
+
+    def activate_attack(self, target_sprite, attack):
+        self.state = 'attack'
+        self.frame_index = 0
+        self.target_sprite = target_sprite
+        self.current_attack = attack
+        self.pokemon.reduce_energy(attack)
+
+    def delayed_kill(self, new_pokemon):
+        if not self.dying:
+            self.dying = True
+            self.die_elapsed = 0
+            self.next_pokemon_data = new_pokemon
+            self.original_image = self.image.copy()  # Copy for scaling
+
+    def destroy(self):
+        if self.next_pokemon_data:
+            self.create_pokemon(*self.next_pokemon_data)
+        self.kill()
+
+    # In PokemonSprite
+    def is_busy(self):
+        return self.dying or self.spawning or self.state == 'attack'
+
+    def update(self, dt):
+        for timer in self.timers.values():
+            timer.update()
+
+        if self.dying:
+            self.die_elapsed += dt
+            scale = max(0, 1 - self.die_elapsed / self.die_duration)
+            w, h = self.original_image.get_size()
+            new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
+            self.image = pygame.transform.scale(self.original_image, new_size)
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+            if self.die_elapsed >= self.die_duration:
+                self.destroy()
+
+        elif self.spawning:
+            self.spawn_elapsed += dt
+            scale = min(1, self.spawn_elapsed / self.spawn_duration)
+            w, h = self.original_image.get_size()
+            new_size = (max(1, int(w * scale)), max(1, int(h * scale)))
+            self.image = pygame.transform.scale(self.original_image, new_size)
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+            # Prevent AttributeError during spawn
+            self.adjusted_frame_index = int(self.frame_index % len(self.frames[self.state]))
+
+            if self.spawn_elapsed >= self.spawn_duration:
+                self.spawning = False
+
+        else:
+            self.animate(dt)
+            self.pokemon.update(dt)
+
+class PokemonNamesprite(pygame.sprite.Sprite):
+    def __init__(self, pos, pokemon_sprite, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.z = BATTLE_LAYERS['name']
+
+        text_surf = font.render(pokemon_sprite.pokemon.name, False, COLORS['black'])
+        padding = 10
+
+
+        self.image = pygame.Surface((text_surf.get_width() + 2 * padding, text_surf.get_height() + 2 * padding))
+        self.image.fill(COLORS['white'])
+        self.image.blit(text_surf, (padding, padding))
+        self.rect = self.image.get_rect(midtop=pos)
+
+    def update(self, _):
+        if self.pokemon_sprite.dying or not self.pokemon_sprite.groups():
+            self.kill()
+
+        # Hide the name tag until the Pokémon finishes its spawn animation
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
+class PokemonLevelSprite(pygame.sprite.Sprite):
+    def __init__(self, entity, pos, pokemon_sprite, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.font = font
+        self.z = BATTLE_LAYERS['name']
+
+        self.image = pygame.Surface((60,26))
+        self.rect = self.image.get_rect(topleft = pos) if entity == 'player' else self.image.get_rect(topright = pos)
+        self.xp_rect = pygame.Rect(0,self.rect.height - 2,self.rect.width,2)
+
+    def update(self, _):
+        self.image.fill(COLORS['white'])
+
+        text_surf = self.font.render(f'Lvl {self.pokemon_sprite.pokemon.level}', False, COLORS['black'])
+        text_rect = text_surf.get_rect(center=(self.rect.width / 2, self.rect.height / 2))
+        self.image.blit(text_surf, text_rect)
+
+        draw_bar(self.image, self.xp_rect, self.pokemon_sprite.pokemon.xp, self.pokemon_sprite.pokemon.level_up, COLORS['black'], COLORS['white'], 0)
+
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
+            self.kill()
+
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
+class PokemonStatsSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, pokemon_sprite, size, groups, font):
+        super().__init__(groups)
+        self.pokemon_sprite = pokemon_sprite
+        self.image = pygame.Surface(size)
+        self.rect = self.image.get_rect(midbottom = pos)
+        self.font = font
+        self.z = BATTLE_LAYERS['overlay']
+
+    def update(self, _):
+        self.image.fill(COLORS['white'])
+
+        for index, (value, max_value) in enumerate(self.pokemon_sprite.pokemon.get_info()):
+            color = (COLORS['red'], COLORS['blue'], COLORS['gray'])[index]
+            if index < 2:  # health and energy
+                text_surf = self.font.render(f'{int(value)}/{max_value}', False, COLORS['black'])
+                text_rect = text_surf.get_rect(topleft=(self.rect.width * 0.05, index * self.rect.height / 2))
+                bar_rect = pygame.Rect(text_rect.bottomleft + vector(0, -2), (self.rect.width * 0.9, 4))
+
+                self.image.blit(text_surf, text_rect)
+                draw_bar(self.image, bar_rect, value, max_value, color, COLORS['black'], 2)
+            else:  # initiative
+                init_rect = pygame.Rect((0, self.rect.height - 2), (self.rect.width, 2))
+                draw_bar(self.image, init_rect, value, max_value, color, COLORS['white'], 0)
+
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
+            self.kill()
+
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
+class PokemonOutlineSprite(pygame.sprite.Sprite):
+    def __init__(self, pokemon_sprite, groups, frames):
+        super().__init__(groups)
+        self.z = BATTLE_LAYERS['outline']
+        self.pokemon_sprite = pokemon_sprite
+        self.frames = frames
+
+        self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.frame_index]
+        self.rect = self.image.get_rect(center = self.pokemon_sprite.rect.center)
+
+    def update(self, _):
+        self.image = self.frames[self.pokemon_sprite.state][self.pokemon_sprite.adjusted_frame_index]
+        if not self.pokemon_sprite.groups() or self.pokemon_sprite.dying:
+            self.kill()
+
+        if self.pokemon_sprite.spawning:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
+
+class AttackSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, frames, groups, z=BATTLE_LAYERS['overlay']):
+        super().__init__(groups)
+        self.frames = frames
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+
+        # Positioning
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = self.rect.copy()
+        self.z = z
+        self.y_sort = self.rect.centery
+
+    def animate(self, dt):
+        self.frame_index += ANIMATION_SPEED * dt
+        if self.frame_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.kill()
+
+    def update(self, dt):
+        self.animate(dt)
+
+class TimedSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups, duration, z=BATTLE_LAYERS['overlay']):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_rect(topleft=pos)
+        self.rect.center = pos  # Override to set center if needed
+        self.z = z
+        self.y_sort = self.rect.centery
+        self.hitbox = self.rect.copy()
+        self.death_timer = Timer(duration, autostart=True, func=self.kill)
+
+    def update(self, _):
+        self.death_timer.update()
 
 class WaterfallDown(Event):
     tolerance = BLOCK_SIZE
@@ -302,4 +577,3 @@ class Water(AnimatedSpriteFromSheet):
     def update(self, dt, *args, **kwargs):
         self.currImage += WATER_SPEED * dt
         self.image = Water.assets[int(self.currImage) % Water.length]
-

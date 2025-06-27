@@ -34,8 +34,8 @@ WORLD_LAYERS = {
 }
 
 BATTLE_POSITIONS = {
-    'left': {'top': (360, 260), 'center': (190, 400), 'bottom': (410, 520)},
-    'right': {'top': (900, 260), 'center': (1110, 390), 'bottom': (900, 550)}
+    'left': {'top': (150, 100), 'center': (200, 250), 'bottom': (150, 400)},
+    'right': {'top': (600, 100), 'center': (550, 250), 'bottom': (600, 400)}
 }
 
 BATTLE_LAYERS = {
