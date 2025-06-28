@@ -227,31 +227,6 @@ class EventWarp(BaseWarp):
     def makeEvent(self):
         pass
 
-class FurinaWarp(EventWarp):
-
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, z)
-
-    def makeEvent(self):
-        StoryTextBox.init__text(FURINA_PROD_TEXT)
-        self.game.buttons[TEXT_BUTTON].reset()
-        self.game.poke.cry.play()
-        self.game.player.x = self.rect.x
-        self.game.player.y = self.rect.y
-        self.game.inEvent = True
-        self.afterEvent()
-
-    def afterEvent(self):
-        def checker():
-            if self.game.textComplete:
-                self.game.inEvent = False
-                self.game.updateEvent = None
-                self.game.player.x = self.rect.x - BLOCK_SIZE
-                self.game.player.facing = LEFT
-
-        self.game.updateEvent = checker
-
-
 class Event(Sprite):
 
     def __init__(self, pos, image, groups, game, z=0):
