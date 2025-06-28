@@ -297,7 +297,7 @@ class Trainer(Entity):
             self.game.player.currImage = 0
             self.game.player.image = MC.assets[self.game.player.facing][int(self.game.player.currImage) % self.game.player.maxFrames]
 
-            if not self.defeated and self.can_battle:
+            if not self.defeated and self.can_battle and not self.game.player.has_no_pokemon():
                 self.awaiting_battle = True
 
     def update(self, dt):

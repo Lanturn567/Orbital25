@@ -163,7 +163,7 @@ class Battle:
                         self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
                         self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
                     else:
-                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.9:
+                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.9 and self.trainer == None:
                             self.pokemon_data['player'][len(self.pokemon_data['player'])] = pokemon_sprite.pokemon
                             pokemon_sprite.delayed_kill(None)
                             self.update_all_pokemon('resume')

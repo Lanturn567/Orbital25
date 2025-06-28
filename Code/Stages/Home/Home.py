@@ -518,7 +518,7 @@ class Home:
     def pokemon_encounter(self):
         print('lol')
         if [sprite for sprite in self.encounter if
-            sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving:
+            sprite.rect.colliderect(self.player.hitbox)] and not self.battle and self.player.moving and not self.player.has_no_pokemon():
             selected_monsters = random.choice(self.monsters)
             self.start_battle(copy.deepcopy(selected_monsters), None)
 

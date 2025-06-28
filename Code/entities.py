@@ -146,9 +146,7 @@ class MC(Entity):
 
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Altaria', 5),
-            1: Pokemon('Blitzle', 3),
-            2: Pokemon('Plumette', 20)
+            0: Pokemon('Daniel', 5)
         }
 
         # Animation frame setup
@@ -396,6 +394,9 @@ class MC(Entity):
         self.y += BLOCK_SIZE * 2
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
+
+    def has_no_pokemon(self):
+        return len(self.player_pokemon) == 0
 
 class Furina(Entity):
 
