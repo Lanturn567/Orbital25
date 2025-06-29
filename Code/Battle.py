@@ -25,6 +25,7 @@ class Battle:
     def __init__(self, player_pokemon, opponent_pokemon, pokemon_frames, bg_surf, fonts, trainer, game):
         # general
         self.display_surface = pygame.display.get_surface()
+        self.player_pokemon = player_pokemon
         self.bg_surf = bg_surf
         self.pokemon_frames = pokemon_frames
         self.fonts = fonts
@@ -139,15 +140,17 @@ class Battle:
 
             if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
                 Battle.toggle_sound.play()
+                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
 
             if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
                 Battle.toggle_sound.play()
+                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
 
             if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
                 Battle.select_sound.play()
-                if self.selection_mode == 'switch':
+                if self.selection_mode == 'switch' and len(self.player_pokemon) > 1:
                     index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
                     self.current_pokemon.kill()
                     self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
