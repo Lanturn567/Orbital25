@@ -1529,7 +1529,7 @@ database = {
                        "talked" : ["Lanturn: Your strength really is amazing.", "Lanturn: Me and my Pokemon have truly been blown away!"],
                        "dead" : True,
                         "battle" : True},
-    "BlueFinalBoss" : {"team" : {0: Pokemon('Daniel', 21)},
+    "BlueFinalBoss" : {"team" : {0: Pokemon('Clodsire', 21)},
                 "talk" : ["Rhymond: Welcome. To the end of your journey.", "Rhymond: You have bested me twice before. We know your tendencies inside and out.", "Rhymond: But now, it is different. As Champion, I formally accept your challenge.", "Rhymond: With this, fall by my hand!"],
                 "talked" : ["Rhymond: Astonishing. You are truly strong.", "Rhymond: At the start of your journey, you showed me ambition.", "Rhymond: And at the end, you showed me poise and unrivalled skill.", "Rhymond: Well done. You are truly worthy of the title of Champion!"],
                 "dead" : True,
