@@ -146,8 +146,7 @@ class MC(Entity):
 
         #player Pokemon
         self.player_pokemon = {
-            0: Pokemon('Daniel', 5),
-            1: Pokemon('Daniel', 5),
+            0: Pokemon('Daniel', 500)
         }
 
         # Animation frame setup
