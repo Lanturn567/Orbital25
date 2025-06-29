@@ -485,11 +485,7 @@ class Opening:
             ]
         elif phase == SAVE_SELECT_PHASE:
             # Get all save files from the Saves directory
-            save_files = []
-            save_dir = os.path.join(BASE_DIR, "../../Data/Saves")
-            if os.path.exists(save_dir):
-                save_files = [f for f in os.listdir(save_dir) if f.endswith('.txt')]
-
+            save_files = SaveSystem.list_saves()
             self.buttons = []
 
             # Create buttons for each save file (up to 3 slots)
