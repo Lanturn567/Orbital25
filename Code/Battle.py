@@ -30,6 +30,7 @@ class Battle:
         self.fonts = fonts
         self.pokemon_data = {'player': player_pokemon, 'opponent': opponent_pokemon}
         self.battle_over = False
+        self.player_pokemon = player_pokemon
 
         # timers
         self.timers = {
@@ -139,15 +140,17 @@ class Battle:
 
             if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
                 Battle.toggle_sound.play()
+                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
 
             if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
                 Battle.toggle_sound.play()
+                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
                 self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
 
             if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
                 Battle.select_sound.play()
-                if self.selection_mode == 'switch':
+                if self.selection_mode == 'switch' and len(self.player_pokemon) > 1:
                     index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
                     self.current_pokemon.kill()
                     self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
