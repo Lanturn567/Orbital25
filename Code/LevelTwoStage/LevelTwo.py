@@ -24,8 +24,8 @@ DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
 ASSET_SIZE = 32
 PLAYER_SIZE = (32, 64)
-PLAYER_SPEED = BLOCK_SIZE // 12 * 5
-MAX_SPEED = BLOCK_SIZE // 4 * 3
+PLAYER_SPEED = BLOCK_SIZE // 3
+MAX_SPEED = BLOCK_SIZE // 3 * 2
 MAX_X, MAX_Y = 740, 493
 MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../Audio/LevelTwoBGM.mp3")
@@ -80,6 +80,7 @@ TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../Assets/UI/TextBoxArrow.png")]
 DELAY_AT_START = 55
 WARP_PATH = os.path.join(BASE_DIR, "../../Assets/Background/Warp.png")
+PINK = os.path.join(BASE_DIR, "../../Assets/Background/Pink.png")
 LOCATION = "lake"
 MAX_ALPHA = 255
 FINAL_DELAY = 5
@@ -283,55 +284,19 @@ class AnimatedSprite(Sprite):
         self.currImage += WATER_SPEED * dt
         self.image = AnimatedSprite.assets[int(self.currImage) % AnimatedSprite.length]
 
-class Warp(Sprite):
-
-    def __init__(self, pos, stage, image, groups, game, z=1):
-        super().__init__(pos, image, groups, z)
-        self.game = game
-        self.stage = stage
-        self.hitbox = pygame.Rect(self.rect.x + self.rect.width // 4, self.rect.y + self.rect.height // 4, self.rect.width // 2, self.rect.height // 2)
-
-    def warp(self):
-        self.game.save.updateStage(self.stage.title())
-        self.game.save.updatePos(LOCATION)
-        SaveSystem.write(self.game.save)
-        self.game.nextStage = True
-
-
-class EventWarp(Warp):
-
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, z)
-        self.cond = cond
-        self.eventDone = False
-
-
-    def warp(self):
-        if self.cond():
-            self.game.save.updateStage(self.stage.title())
-            self.game.save.updatePos(LOCATION)
-            self.game.nextStage = True
-            SaveSystem.write(self.game.save)
-        else:
-            self.makeEvent()
-
-    def makeEvent(self):
-        pass
-
 
 class FurinaWarp(EventWarp):
 
-    def __init__(self, pos, stage, image, groups, game, cond, z=1):
-        super().__init__(pos, stage, image, groups, game, cond, z)
+    def __init__(self, pos, stage, image, groups, game, loc, cond, z=1):
+        super().__init__(pos, stage, image, groups, game, loc, cond, z)
 
     def makeEvent(self):
         StoryTextBox.init__text(FURINA_PROD_TEXT)
         self.game.buttons[TEXT_BUTTON].reset()
-        self.game.poke.cry.play()
         self.game.player.x = self.rect.x
-        self.game.player.y = self.rect.y
         self.game.inEvent = True
         self.afterEvent()
+        self.game.poke.cry.play()
 
     def afterEvent(self):
         def checker():
@@ -342,6 +307,7 @@ class FurinaWarp(EventWarp):
                 self.game.player.facing = LEFT
 
         self.game.updateEvent = checker
+
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, pos, groups, size, z=2):
@@ -710,10 +676,9 @@ class LevelTwo:
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             Sprite(pos=pos, image=surf, groups=(self.sprite_group, self.collide), z=3)
 
-
         # Warps
         for obj in LevelTwo.tmx.get_layer_by_name("Warps"):
-            FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, cond=lambda:self.met, z=2)
+            FurinaWarp((obj.x, obj.y), obj.properties["pos"], image=pygame.image.load(WARP_PATH), groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, cond=lambda:self.met, z=1)
 
         self.poke = Poke((self.player.x - DIST_FROM_PLAYER, self.player.y), image_paths=POKEMON_PATHS, group=self.sprite_group, game=self, size=POKEMON_SIZE, z=4)
 

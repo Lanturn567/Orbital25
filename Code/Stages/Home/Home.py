@@ -117,8 +117,10 @@ class HomeEventWarp(EventWarp):
     def makeEvent(self):
         StoryTextBox.init__text(LOST_TEXT)
         self.game.buttons[TEXT_BUTTON].reset()
-        if self.dir in ["left", "right"]:
+        if self.dir == "left":
             self.game.player.x = self.rect.x
+        elif self.dir == "right":
+            self.game.player.x = self.rect.x + BLOCK_SIZE * 2
         else:
             self.game.player.y = self.rect.y
         self.game.inEvent = True
@@ -190,8 +192,10 @@ class HomeEventWarpPhaseTwo(EventWarp):
     def makeEvent(self):
         StoryTextBox.init__text(LOST_TEXT if self.val == 0 else PROF_TEXT)
         self.game.buttons[TEXT_BUTTON].reset()
-        if self.dir in ["left", "right"]:
+        if self.dir == "left":
             self.game.player.x = self.rect.x
+        elif self.dir == "right":
+            self.game.player.x = self.rect.x + BLOCK_SIZE * 2
         else:
             self.game.player.y = self.rect.y
         self.game.inEvent = True
