@@ -85,6 +85,7 @@ fonts = {
 #bg frames
 bg_frames = import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/backgrounds'))
 
+
 class RivalTown(Trainer):
     def __init__(self, pos, groups, game, size, facing, name, type="furina", road=[], dis=0, text=None, z=2):
         super().__init__(pos, groups, game, size, facing, name, type, road, dis, text, z)
@@ -128,15 +129,15 @@ class RivalTown(Trainer):
                     self.currImage = 0
                 self.x += dt * FURINA_AWAY_SPEED
             else:
-                self.kill()
                 self.game.player.blocked = False
+                self.kill()
                 self.game.save.updateEvent("RivalTown")
                 self.game.inEvent = False
 
     def update(self, dt):
         self.rect.center = (self.x, self.y)
         self.hitbox.center = (self.x, self.y + PLAYER_SIZE[1] // 4)
-        if self.defeated: self.block_input = False
+
         if not self.inEvent and not self.game.inEvent:
             self.delayAfterEvent += 0 if self.delayAfterEvent >= AFTER_EVENT_DELAY else dt * ANIM_SPEED
         elif self.game.inEvent:
@@ -152,14 +153,20 @@ class RivalTown(Trainer):
                 # After first interaction completes, prepare second interaction
                 self.first_interaction_done = True
                 self.talkedTo = True
-                if not self.defeated:
-                    self.block_input = True
+                if self.game.textComplete:
                     self.game.start_battle(self.monsters, self)
+                    self.block_input = True
             elif self.talkedTo:
                 # After second interaction completes, walk away
-                self.walkAway = True
+                if self.defeated:
+                    self.block_input = False
+                    self.walkAway = True
             self.game.inEvent = False
             self.delayAfterEvent = 0
+
+        if self.block_input and self.first_interaction_done and self.talkedTo and self.defeated and not self.inEvent and not self.game.inEvent:
+            self.makeEvent(first_interaction=False)
+            self.block_input = False  # Allow interaction again
 
     def makeEvent(self, first_interaction=False):
         if first_interaction:
@@ -197,6 +204,7 @@ class RivalTown(Trainer):
 
             if not self.defeated and self.can_battle:
                 self.awaiting_battle = True
+
 
 
 class TownEventWarp(EventWarp):

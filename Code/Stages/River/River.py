@@ -34,7 +34,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
 INTERACTABLE_BOUNDS = [BLOCK_SIZE, BLOCK_SIZE]
 SNORLAX_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/SnorlaxL.png'),
                  os.path.join(BASE_DIR, '../../../Assets/Pokemon/SnorlaxR.png')]
-SNORLAX_SIZE = (384, 384)
+SNORLAX_SIZE = (384 * 2, 384 * 2)
 SNORLAX_SOUND = os.path.join(BASE_DIR, '../../../Audio/Snorlax.wav')
 
 
@@ -91,6 +91,7 @@ fonts = {
 #bg frames
 bg_frames = import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/backgrounds'))
 
+
 class RiverVolumeButton(LakeVolumeButton):
 
     def first_toggle(self):
@@ -145,7 +146,7 @@ class Snorlax(Entity):
         self.currentStep = 0
         self.maxSteps = len(self.road)
         self.box = pygame.Rect(self.x, self.y, self.rect.width + INTERACTABLE_BOUNDS[0] * 2, self.rect.height + INTERACTABLE_BOUNDS[1] * 2)
-        self.hitbox = pygame.Rect(self.x, self.y, self.rect.width, self.rect.height)
+        self.hitbox = pygame.Rect(self.x, self.y, self.rect.width, self.rect.height // 2)
         self.hitbox.center = (self.x, self.y)
         self.box.center = (self.x, self.y)
 
@@ -174,14 +175,13 @@ class Snorlax(Entity):
         self.inEvent = False
         self.delayAfterEvent = 0
 
-
     @classmethod
     def init_assets(cls, paths):
         cls.assets = []
         for path in paths:
             #images 192 x 192 so scale by 2x
             curr = pygame.image.load(path)
-            curr = pygame.transform.scale_by(curr, 2)
+            curr = pygame.transform.scale_by(curr, 4)
             curr = pygame.transform.rotate(curr, -50)
             cls.assets.append(curr)
 
@@ -191,8 +191,6 @@ class Snorlax(Entity):
         cls.upFrames = 0
 
         cls.sound = pygame.mixer.Sound(SNORLAX_SOUND)
-
-
 
     def move(self, dt):
         pass
@@ -229,8 +227,6 @@ class Snorlax(Entity):
         StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
-
-
 
 
 class River:
@@ -309,7 +305,6 @@ class River:
 
 
     def init_assets(self, start_pos):
-
         # Ground tiles
         for x, y, surf in River.tmx.get_layer_by_name("Ground").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
@@ -376,7 +371,7 @@ class River:
             type = obj.type
             dis = obj.properties["dis"]
             if obj.name == "Snorlax":
-                Snorlax((obj.x + 108, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=SNORLAX_SIZE, facing=facing, z=2)
+                Snorlax((obj.x, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=SNORLAX_SIZE, facing=facing, z=2)
             else:
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 

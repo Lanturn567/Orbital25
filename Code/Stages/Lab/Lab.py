@@ -3,7 +3,6 @@ import os
 import random
 import copy
 
-from pygame.draw_py import clip_line
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
