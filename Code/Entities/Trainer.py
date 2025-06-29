@@ -166,6 +166,9 @@ class Trainer(Entity):
         self.transitioning_to_battle = False  # Prevents retriggering
 
         self.can_battle = self.info.get("battle", False)
+        if self.can_battle:
+            self.battleText = self.info.get("beaten", [""])
+
         #self.can_battle = False
 
 
@@ -325,7 +328,7 @@ class Trainer(Entity):
 
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.text)
+        StoryTextBox.init__text(self.text[self.currText] if self.text[self.currText].endswith(".txt") else self.battleText if self.defeated else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.currText = self.currText + 1 if self.currText < self.maxTalks - 1 else self.currText
 
