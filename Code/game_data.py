@@ -183,6 +183,10 @@ POKEMON_DATA = {
 		'stats': {'element': 'fire', 'max_health': 22, 'max_energy': 17, 'attack': 9, 'defense': 7, 'recovery': 1.9, 'speed': 2.6},
 		'abilities': {0: 'scratch', 12: 'burn', 25: 'heal', 30: 'annihilate', 37: 'explosion'},
 		'evolve': None},
+	'Clodsire': {
+		'stats': {'element': 'water', 'max_health': 17, 'max_energy': 14, 'attack': 5, 'defense': 11, 'recovery': 2.1, 'speed': 2.4},
+		'abilities': {0: 'scratch', 5: 'spark', 15: 'splash', 20: 'ice', 25: 'heal', 32: 'annihilate',},
+		'evolve': None},
 }
 
 ATTACK_DATA = {
