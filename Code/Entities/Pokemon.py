@@ -19,6 +19,10 @@ class Pokemon:
         self.xp = 0
         self.level_up = self.level * 150
 
+        self.can_run = False
+        self.run_counter = 0
+        self.turns_to_run = 3  # Customize per species if desired
+
     def __repr__(self):
         return f'pokemon: {self.name}, lvl: {self.level}'
 
@@ -71,3 +75,19 @@ class Pokemon:
     def update(self, dt):
         if not self.paused:
             self.initiative += 10 * self.get_stat('speed') * dt
+
+    def start_running(self, turns_to_run=2):
+        self.can_run = True
+        self.run_counter = 0
+        self.turns_to_run = turns_to_run
+
+    def update_run_counter(self):
+        if self.can_run:
+            self.run_counter += 1
+            return self.run_counter >= self.turns_to_run
+        return False
+
+    def cancel_run(self):
+        self.can_run = False
+        self.run_counter = 0
+

@@ -7,6 +7,7 @@ from Code.sprites import (PokemonSprite, PokemonNamesprite, PokemonLevelSprite, 
 from Code.support import *
 from Code.timer import Timer
 from random import choice
+from random import randint
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BATTLE_TOGGLE_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Battle/battle_toggle.mp3")
@@ -64,6 +65,8 @@ class Battle:
         self.battle_timer = 0  # time since battle began
         self.ready = False  # controls when setup() should run
         self.pause_initiative = False
+
+        self.runaway_tracker = {}
 
     def setup(self):
         # 1. Clear any existing sprites from a previous battle
@@ -218,10 +221,33 @@ class Battle:
                 pokemon_sprite.pokemon.defending = False
                 self.update_all_pokemon('pause')
                 pokemon_sprite.pokemon.initiative = 0
+
+                # 🏃 Runaway logic for wild Pokémon
+                if pokemon_sprite.entity == 'opponent' and self.trainer is None:
+                    if pokemon_sprite not in self.runaway_tracker:
+                        self.runaway_tracker[pokemon_sprite] = (0, pokemon_sprite.pokemon.turns_to_run)
+
+                    run_counter, turns_to_run = self.runaway_tracker[pokemon_sprite]
+                    run_counter += 1
+                    self.runaway_tracker[pokemon_sprite] = (run_counter, turns_to_run)
+
+                    if run_counter == turns_to_run - 1:
+                        print(f"Wild {pokemon_sprite.pokemon.name} is about to run away!")
+                        self.update_all_pokemon('resume')
+                        continue  # skip turn, but continue checking other Pokémon
+
+                    elif run_counter >= turns_to_run:
+                        print(f"{pokemon_sprite.pokemon.name} ran away!")
+                        pokemon_sprite.delayed_kill(None)
+                        if pokemon_sprite.index in self.pokemon_data['opponent']:
+                            del self.pokemon_data['opponent'][pokemon_sprite.index]
+                        del self.runaway_tracker[pokemon_sprite]
+                        self.update_all_pokemon('resume')
+                        continue  # skip turn
+
+                # If not skipped, let Pokémon act
                 pokemon_sprite.set_highlight(True)
-
-                self.current_pokemon = pokemon_sprite  # ✅ Set this first
-
+                self.current_pokemon = pokemon_sprite
                 if self.player_sprites in pokemon_sprite.groups():
                     self.selection_mode = 'general'
                 else:
