@@ -59,9 +59,23 @@ save = {
 }
 
 class Save:
-    def __init__(self, name, data=save):
-        self.data = data
-        self.data["name"] = name
+    def __init__(self, name, data=None):
+        # Deep copy the default template
+        from copy import deepcopy
+        base = deepcopy(save)
+
+        if data:
+            # Merge loaded data into base template
+            for key, value in data.items():
+                if key in ['items', 'pokedex']:
+                    base[key].update(value)
+                elif key == 'events':
+                    base['events'].update(value)
+                else:
+                    base[key] = value
+
+        base["name"] = name
+        self.data = base
 
     def getBadges(self):
         if self.data["events"]["BeatChampion"]:
