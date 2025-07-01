@@ -176,7 +176,7 @@ class Blue:
                 BaseWarp((obj.x, obj.y), obj.properties["pos"], image=image, groups=(self.sprite_group, self.collide), game=self, loc=LOCATION, z=1)
 
         # Pokemon menu
-        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames, self.player)
         self.menu_open = False
 
     def fade(self, dt):

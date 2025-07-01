@@ -14,12 +14,12 @@ MENU_SELECT_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_select.mp3")
 class Menu:
     _instance = None
 
-    def __new__(cls, pokemon, fonts, pokemon_frames):
+    def __new__(cls, pokemon, fonts, pokemon_frames, player):
         if cls._instance is None:
             cls._instance = super(Menu, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, pokemon, fonts, pokemon_frames):
+    def __init__(self, pokemon, fonts, pokemon_frames, player):
         if hasattr(self, '_initialized') and self._initialized:
             return  # Skip re-initialization
 
@@ -28,6 +28,7 @@ class Menu:
         self.fonts = fonts
         self.pokemon = pokemon
         self.frame_index = 0
+        self.player = player
 
         # sounds
         Menu.open_sound = pygame.mixer.Sound(MENU_OPEN_SOUND_PATH)
@@ -264,6 +265,7 @@ class Menu:
 
     def update(self, dt):
         self.display_surface.blit(self.tint_surf, (0, 0))
+        self.pokemon = self.player.player_pokemon
 
         if len(self.pokemon) == 0:
             # Draw blank grey background box

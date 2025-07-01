@@ -708,7 +708,7 @@ class Crater:
                 break
 
         # Pokemon menu
-        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames, self.player)
         self.menu_open = False
 
         # Battle

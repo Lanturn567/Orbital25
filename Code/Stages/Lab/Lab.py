@@ -3,6 +3,7 @@ import os
 import random
 import copy
 
+import pygame
 from pytmx.util_pygame import load_pygame
 from Code.Stages.Lake.Lake import *
 from Code.Entities.Trainer import *
@@ -102,7 +103,8 @@ class Prof(Trainer):
         obj = self.game.dawn
         self.dawn = None
         if not self.talkedTo:
-            self.game.player.player_pokemon[0] = Pokemon('Daniel', 5)
+            dt = self.game.clock.tick(MAX_FPS) / 1000.0
+            self.game.save.updatePokemon({"name" : "Daniel", "level" : 5})
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
@@ -373,7 +375,7 @@ class Lab:
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu
-        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames, self.player)
         self.menu_open = False
 
         # Battle

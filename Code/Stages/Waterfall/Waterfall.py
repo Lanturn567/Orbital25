@@ -390,7 +390,7 @@ class Waterfall:
         self.seb = Sebastian((self.seb.x + 16, self.seb.y),friends=self.sebFriends, name=self.seb.name, dis=self.seb.properties["dis"], type=self.seb.type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=self.seb.properties["dir"], z=3)
 
         # Pokemon menu
-        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames, self.player)
         self.menu_open = False
 
         # Battle

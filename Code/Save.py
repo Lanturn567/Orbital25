@@ -4,6 +4,7 @@ import sys
 import importlib
 from collections import defaultdict
 import platform
+from Code.Entities.Pokemon import Pokemon
 
 # Cross-platform save directory handling
 def get_save_directory():
@@ -48,7 +49,7 @@ save = {
         "BeatChampion": False,
         "EndgameDawn": False,
     },
-    "pokemon": [],  # list of poke objects
+    "pokemon": [{"name" : "Daniel", "level" : 5}],  # list of poke objects
     "items": defaultdict(int),  # dict (string map to int)
     "stage": "LevelOne",  # string
     "pos": "default",  # default last pos
@@ -107,8 +108,19 @@ class Save:
     def updateItems(self, item):
         self.data["items"][item] += 1
 
+    def getPokemon(self):
+        player_pokemon = {}
+        for idx, pokemon_data in enumerate(self.data["pokemon"]):
+            name = pokemon_data["name"]
+            level = pokemon_data["level"]
+            player_pokemon[idx] = Pokemon(name, level)
+        return player_pokemon
+
     def updatePokemon(self, poke):
         self.data["pokemon"].append(poke)
+
+    def removePokemon(self):
+        self.data["pokemon"].remove(self.data["pokemon"][0])
 
     def getMuted(self):
         return self.data["muted"]

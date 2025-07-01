@@ -166,8 +166,10 @@ class Battle:
                         self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
                         self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
                     else:
-                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.9 and self.trainer == None:
-                            self.pokemon_data['player'][len(self.pokemon_data['player'])] = pokemon_sprite.pokemon
+                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and self.trainer == None and self.game.save.data["events"]["Prof"]:
+                            poke_dict = {"name" : pokemon_sprite.pokemon.name,
+                                         "level" : pokemon_sprite.pokemon.level}
+                            self.game.save.updatePokemon(poke_dict)
                             pokemon_sprite.delayed_kill(None)
                             self.update_all_pokemon('resume')
                         else:

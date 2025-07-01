@@ -422,7 +422,6 @@ class Furina(Entity):
             self.game.met = True
             self.kill()
             self.game.poke.kill()
-            del self.game.player.player_pokemon[0]
         else:
             pass
 
@@ -451,6 +450,7 @@ class Furina(Entity):
     def makeEvent(self):
         StoryTextBox.init__text(FURINA_EVENT_PATH)
         self.game.buttons[TEXT_BUTTON].reset()
+        self.game.save.removePokemon()
 
 
 class Poke(Entity):
@@ -689,7 +689,7 @@ class LevelTwo:
                     self.furina = Furina((obj.x + FURINA_SIZE[0] // 4, obj.y + FURINA_SIZE[1] // 2), FURINA_PATHS, group=(self.sprite_group, self.collide, self.entities), game=self, size=FURINA_SIZE, road=FURINA_ROAD, z=3)
 
         # Pokemon menu
-        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames)
+        self.menu = Menu(self.player.player_pokemon, fonts, pokemon_frames, self.player)
         self.menu_open = False
 
         # Battle

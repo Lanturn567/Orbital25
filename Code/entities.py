@@ -145,9 +145,7 @@ class MC(Entity):
         self.follow_distance = BLOCK_SIZE // 4  # Distance to maintain from the leader
 
         #player Pokemon
-        self.player_pokemon = {
-            0: Pokemon('Daniel', 9),
-        }
+        self.player_pokemon = self.game.save.getPokemon()
 
         # Animation frame setup
         if self.facing == LEFT:
@@ -397,6 +395,11 @@ class MC(Entity):
 
     def has_no_pokemon(self):
         return len(self.player_pokemon) == 0
+
+    def update(self, dt):
+        self.input(dt)
+        self.move()
+        self.player_pokemon = self.game.save.getPokemon()
 
 class Furina(Entity):
 
