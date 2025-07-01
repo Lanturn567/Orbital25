@@ -1536,85 +1536,104 @@ database = {
                        "battle" : True},
     "Mea" : { "team" : [],
                "talk" : ["Mea: This gym acts as the city's community centre! Its so lively and joyful!"],
-               "dead" : True
+               "dead" : True,
+              "battle" : False
                },
-    "Jason" : { "team" : [],
+    "Jason" : { "team" : {0: Pokemon('Daniel', 2)},
                "talk" : ["Jason: Want to battle? Just for the fun of it."],
-               "dead" : True
+               "dead" : True,
+                "battle" : True
                },
     "Klaus" : { "team" : [],
                "talk" : ["Klaus: Here have this. It'll help if you want to challenge the gym!"],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "ReceptionGym21" : { "team" : [],
                "talk" : ["Receptionist: Welcome to this city's gym -- suspended between challenge and triumph!",
                          "Receptionist: The Leader’s waiting at the far end of the bridge.",
                          "Receptionist: Hope your footing’s as steady as your team!",
                          "Receptionist: Just take the elevator upstairs. Good luck!"],
-               "dead" : True
+               "dead" : True,
+                "battle" : False
                },
     "Naz" : { "team" : [],
                "talk" : ["Naz: One wrong move, and you're swept away -- metaphorically, of course."],
                "dead" : True
                },
-    "Paint" : { "team" : [],
+    "Paint" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Paint: We battle not just with strength, but with balance. Hope you've got both!"],
-              "dead" : True
+              "dead" : True,
+                "battle" : True
               },
-    "Parr" : { "team" : [],
+    "Parr" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Parr: This is the end of the bridge. Good luck if you're about to fight the leader!"],
-              "dead" : True
+              "dead" : True,
+               "battle" : True
               },
-    "Sandra" : { "team" : [],
+    "Sandra" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Sandra: You’ll need more than fancy moves to cross this bridge!"],
-              "dead" : True
+              "dead" : True,
+                 "battle" : True
               },
-    "Olly" : { "team" : [],
+    "Olly" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Olly: Lollipop."],
-              "dead" : True
+              "dead" : True,
+               "battle" : True
               },
-    "Poppy" : { "team" : [],
+    "Poppy" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Poppy: Poplolly!"],
-              "dead" : True
+              "dead" : True,
+                "battle" : True
               },
-    "Gwen" : { "team" : [],
+    "Gwen" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Gwen: Don’t look down. Not at the river, and not in battle."],
-              "dead" : True
+              "dead" : True,
+               "battle" : True
               },
-    "Nuny" : { "team" : [],
+    "Nuny" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Nuny: Sometimes the wind picks up mid-battle. Just part of the challenge!"],
-              "dead" : True
+              "dead" : True,
+               "battle" : True
               },
-    "Mista" : { "team" : [],
+    "Mista" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Mista: Welcome! I'm your first opponent. Think you can handle me?"],
-              "dead" : True
+              "dead" : True,
+                "battle" : True
               },
-    "Lang" : { "team" : [],
+    "Lang" : { "team" : {0: Pokemon('Daniel', 2)},
                 "talk" : ["Lang: Want to play roulette with me? No? Ok..."],
-                "dead" : True
+                "dead" : True,
+               "battle" : True
                 },
     "Scott" : { "team" : [],
                 "talk" : ["Scott: Feel free to relax here once you're done with the challenge."],
-                "dead" : True
+                "dead" : True,
+                "battle" : False
                 },
     "Ram" : { "team" : [],
                 "talk" : ["Ram: Here have a cookie."],
-                "dead" : True
+                "dead" : True,
+              "battle" : False
                 },
-    "Dominique" : {"team" : [],
+    "Dominique" : {"team" : {0: Pokemon('Daniel', 2)},
                         "talk" : ["Dominique: Hm, isn't the breeze wonderful?", "Dominique: The birds are chirping, the water's lush and what a sight the river is!", "Dominique: Oh hello, a new challenger perhaps. I'm this city's gym leader!", "Dominique: Come on then, show me what you got!"],
                         "talked" : ["Dominique: Lalala... Amazing. You simply are amazing.", "Dominique: You have bested me and as a symbol of that, have this gym badge.", "Dominique: Now, on to another problem.", "Dominique: It seems that strange things have happened on the mountain north of the city.", "Dominique: Could I trouble you to investigate? You're the best! Lalala..."],
-                        "dead" : True},
-    "Champ" : { "team" : [],
+                        "dead" : True,
+                   "battle" : True},
+    "Champ" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Champ: Ah, this place is so relaxing..."],
-              "dead" : True
+              "dead" : True,
+                "battle" : True
               },
     "Ex" : { "team" : [],
               "talk" : ["Ex: I'm thinking of heading upstairs to play some roulette. Wanna come?"],
-              "dead" : True
+              "dead" : True,
+             "battle" : False
               },
-    "Artoria" : { "team" : [],
+    "Artoria" : { "team" : {0: Pokemon('Daniel', 2)},
               "talk" : ["Artoria: Battle me! For honour and for glory!"],
-              "dead" : True
+              "dead" : True,
+                  "battle" : True
               },
 }
