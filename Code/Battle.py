@@ -170,6 +170,8 @@ class Battle:
                             poke_dict = {"name" : pokemon_sprite.pokemon.name,
                                          "level" : pokemon_sprite.pokemon.level}
                             self.game.save.updatePokemon(poke_dict)
+                            from Code.Save import SaveSystem  # Prevent top-level circular import
+                            SaveSystem.write(self.game.save)  # Save immediately after catching
                             pokemon_sprite.delayed_kill(None)
                             self.update_all_pokemon('resume')
                         else:

@@ -451,6 +451,8 @@ class Furina(Entity):
         StoryTextBox.init__text(FURINA_EVENT_PATH)
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.removePokemon()
+        from Code.Save import SaveSystem
+        SaveSystem.write(self.game.save)
 
 
 class Poke(Entity):

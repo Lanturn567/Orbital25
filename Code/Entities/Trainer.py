@@ -160,8 +160,7 @@ class Trainer(Entity):
         self.monsters = self.info["team"]
 
         self.awaiting_battle = False
-        state = Trainer.trainer_states.get(name, {})
-        self.defeated = state.get("defeated", False)
+        self.defeated = self.game.save.isTrainerDefeated(self.name)
 
         self.transitioning_to_battle = False  # Prevents retriggering
 
@@ -345,6 +344,8 @@ class Trainer(Entity):
 
     def defeat(self):
         self.defeated = True
-        Trainer.trainer_states[self.name] = {"defeated": True}
+        self.game.save.defeatTrainer(self.name)
+        from Code.Save import SaveSystem
+        SaveSystem.write(self.game.save)
 
 

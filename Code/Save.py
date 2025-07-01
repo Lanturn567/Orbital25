@@ -56,6 +56,7 @@ save = {
     "name": "",  # string
     "muted": True,
     "pokedex": defaultdict(int),  # list of unique ids of pokemon seen
+    "trainer_states": {}
 }
 
 class Save:
@@ -135,6 +136,12 @@ class Save:
 
     def removePokemon(self):
         self.data["pokemon"].remove(self.data["pokemon"][0])
+
+    def isTrainerDefeated(self, trainer_name):
+        return self.data["trainer_states"].get(trainer_name, False)
+
+    def defeatTrainer(self, trainer_name):
+        self.data["trainer_states"][trainer_name] = True
 
     def getMuted(self):
         return self.data["muted"]
