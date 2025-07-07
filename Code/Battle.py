@@ -175,8 +175,14 @@ class Battle:
                         self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
                     else:
                         if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and self.trainer == None and self.game.save.data["events"]["Prof"]:
-                            poke_dict = {"name" : pokemon_sprite.pokemon.name,
-                                         "level" : pokemon_sprite.pokemon.level}
+                            poke = pokemon_sprite.pokemon
+                            poke_dict = {
+                                "name": poke.name,
+                                "level": poke.level,
+                                "health": poke.health,
+                                "energy": poke.energy,
+                                "xp": poke.xp
+                            }
                             self.game.save.updatePokemon(poke_dict)
                             from Code.Save import SaveSystem  # Prevent top-level circular import
                             SaveSystem.write(self.game.save)  # Save immediately after catching
@@ -330,16 +336,19 @@ class Battle:
             for pokemon in self.pokemon_data['player'].values():
                 pokemon.initiative = 0
 
-            updated_pokemon_data = []
-            for pokemon in self.pokemon_data['player'].values():
-                updated_pokemon_data.append({
-                    "name": pokemon.name,
-                    "level": pokemon.level,
-                    "health": pokemon.health,
-                    "energy": pokemon.energy,
-                    "xp": pokemon.xp
-                })
-            self.game.save.data['pokemon'] = updated_pokemon_data  # Replace save's Pokémon with updated list
+            for i, pokemon in enumerate(self.pokemon_data['player'].values()):
+                try:
+                    print(pokemon)
+                    self.game.save.data['pokemon'][i] = {
+                        "name": pokemon.name,
+                        "level": pokemon.level,
+                        "health": pokemon.health,
+                        "energy": pokemon.energy,
+                        "xp": pokemon.xp
+                    }
+                except IndexError:
+                    # This might happen if new Pokémon were caught
+                    print(f"Index {i} out of range while saving Pokémon.")
 
             # Optionally write save to disk immediately
             from Code.Save import SaveSystem

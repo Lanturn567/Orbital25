@@ -32,7 +32,7 @@ save = {
     "events": {
         "Mom": False,
         "Dawn": False,
-        "Prof": False,
+        "Prof": True,
         "Daniel": False,
         "Found": False,
         "RivalTown": False,
