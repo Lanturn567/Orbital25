@@ -8,12 +8,17 @@ from Code.support import *
 from Code.timer import Timer
 from random import choice
 from random import randint
+from Code.LevelTwoStage.StoryTextBox import StoryTextBox
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BATTLE_TOGGLE_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Battle/battle_toggle.mp3")
 MENU_OPEN_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_open.mp3")
 MENU_CLICK_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_click.mp3")
 MENU_SELECT_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Menu/menu_select.mp3")
+
+MAX_X, MAX_Y = 740, 493
+TEXT_BUTTON, VOLUME_BUTTON = 1, 0
+TEXT_BOX_POS = (65, MAX_Y - 140)
 
 class Battle:
     # Class-level attributes (shared across all instances)
@@ -232,17 +237,14 @@ class Battle:
                     self.runaway_tracker[pokemon_sprite] = (run_counter, turns_to_run)
 
                     if run_counter == turns_to_run - 1:
-                        print(f"Wild {pokemon_sprite.pokemon.name} is about to run away!")
-                        self.update_all_pokemon('resume')
-                        continue  # skip turn, but continue checking other Pokémon
+                        self.show_story_textbox([f"Wild {pokemon_sprite.pokemon.name} is about to run away!"])
+                        self.game.inEvent = True  # Don't resume initiative yet
+                        continue  # skip turn
 
                     elif run_counter >= turns_to_run:
-                        print(f"{pokemon_sprite.pokemon.name} ran away!")
-                        pokemon_sprite.delayed_kill(None)
-                        if pokemon_sprite.index in self.pokemon_data['opponent']:
-                            del self.pokemon_data['opponent'][pokemon_sprite.index]
-                        del self.runaway_tracker[pokemon_sprite]
-                        self.update_all_pokemon('resume')
+                        self.show_story_textbox([f"{pokemon_sprite.pokemon.name} ran away!"])
+                        self.game.inEvent = True
+                        self.to_remove = pokemon_sprite  # queue removal for later
                         continue  # skip turn
 
                 # If not skipped, let Pokémon act
@@ -327,14 +329,27 @@ class Battle:
             print('battle won')
             for pokemon in self.pokemon_data['player'].values():
                 pokemon.initiative = 0
+
+            updated_pokemon_data = []
+            for pokemon in self.pokemon_data['player'].values():
+                updated_pokemon_data.append({
+                    "name": pokemon.name,
+                    "level": pokemon.level,
+                    "health": pokemon.health,
+                    "energy": pokemon.energy,
+                    "xp": pokemon.xp
+                })
+            self.game.save.data['pokemon'] = updated_pokemon_data  # Replace save's Pokémon with updated list
+
+            # Optionally write save to disk immediately
+            from Code.Save import SaveSystem
+            SaveSystem.write(self.game.save)
+
             if self.trainer:
                 self.trainer.defeat()
-                self.trainer.transitioning_to_battle = False  # Reset lock
-            self.game.end_battle()
+                self.trainer.transitioning_to_battle = False
 
-        if len(self.player_sprites) == 0:
-            pygame.quit()
-            exit()
+            self.game.end_battle()
 
     def any_pokemon_busy(self):
         for sprite in self.battle_sprites:
@@ -453,26 +468,69 @@ class Battle:
 
         return min(base_chance, 0.95)
 
-    def update(self, dt):
+    def show_story_textbox(self, lines):
+        StoryTextBox.init__text(lines)
+        self.game.buttons[TEXT_BUTTON] = StoryTextBox(TEXT_BOX_POS[0], TEXT_BOX_POS[1], self.game)
+        self.game.textComplete = False
+        self.game.boxFinished = False
+        self.game.isClicked = False
+        self.game.clickDelay = 0
+        self.game.inEvent = True
 
-        # Wait before spawning Pokémon
+    def update(self, dt):
+        # Draw background
+        self.display_surface.blit(self.bg_surf, (0, 0))
+
+        # Wait for initial delay to setup battle
         if not self.ready:
-            self.battle_timer += dt * 1000  # dt is in seconds
-            self.display_surface.blit(self.bg_surf, (0, 0))  # just background
+            self.battle_timer += dt * 1000
             if self.battle_timer >= self.initial_delay:
                 self.ready = True
                 self.setup()
-            return  # Stop here until ready
+            return
 
-        # updates
+        # Always update animations
+        self.battle_sprites.update(dt)
+
+        # Always draw battle sprites and UI
+        self.battle_sprites.draw(
+            self.current_pokemon,
+            self.selection_side,
+            self.selection_mode,
+            self.indexes['target'],
+            self.player_sprites,
+            self.opponent_sprites
+        )
+        self.draw_ui()
+
+        # If story textbox is active, draw it on top and pause battle updates
+        if self.game.inEvent:
+            # Draw the StoryTextBox (assuming it’s stored in buttons[TEXT_BUTTON])
+            self.game.buttons[TEXT_BUTTON].draw(self.display_surface)
+
+            # If text finished and player clicked, reset flags and resume
+            if self.game.textComplete:
+                self.game.textComplete = False
+                self.game.boxFinished = False
+                self.game.isClicked = False
+                self.game.inEvent = False
+
+                self.update_all_pokemon("resume")  # Resume initiative gain
+
+                # Cleanup runaway Pokémon removal if needed
+                if hasattr(self, "to_remove") and self.to_remove:
+                    sprite = self.to_remove
+                    sprite.delayed_kill(None)
+                    if sprite.index in self.pokemon_data['opponent']:
+                        del self.pokemon_data['opponent'][sprite.index]
+                    if sprite in self.runaway_tracker:
+                        del self.runaway_tracker[sprite]
+                    self.to_remove = None
+
+            return  # Pause all other battle updates while textbox is active
+
+        # Normal battle updates when textbox NOT active
         self.check_end_battle()
         self.input()
         self.update_timers()
-        self.battle_sprites.update(dt)
         self.check_active()
-
-        # draw
-        self.display_surface.blit(self.bg_surf, (0, 0))
-        self.battle_sprites.draw(self.current_pokemon, self.selection_side, self.selection_mode, self.indexes['target'],
-                                 self.player_sprites, self.opponent_sprites)
-        self.draw_ui()

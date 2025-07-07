@@ -128,7 +128,17 @@ class Save:
         for idx, pokemon_data in enumerate(self.data["pokemon"]):
             name = pokemon_data["name"]
             level = pokemon_data["level"]
-            player_pokemon[idx] = Pokemon(name, level)
+            poke = Pokemon(name, level)
+
+            # Restore optional fields
+            if "health" in pokemon_data:
+                poke.health = pokemon_data["health"]
+            if "energy" in pokemon_data:
+                poke.energy = pokemon_data["energy"]
+            if "xp" in pokemon_data:
+                poke.xp = pokemon_data["xp"]
+
+            player_pokemon[idx] = poke
         return player_pokemon
 
     def updatePokemon(self, poke):
