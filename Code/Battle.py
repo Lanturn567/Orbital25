@@ -235,11 +235,15 @@ class Battle:
                 if self.indexes['general'] == 0:  # Fight
                     self.selection_mode = 'attacks'
                 elif self.indexes['general'] == 1:  # Run
-                    self.show_story_textbox([f"NIGERUNDAYOOOO!!!!!"])
-                    self.to_remove = self.current_pokemon
-                    self.update_all_pokemon('pause')  # Pause everyone until textbox finishes
-                    self.selection_mode = None
-                    self.indexes['general'] = 0
+                    if self.trainer is None:
+                        self.show_story_textbox([f"NIGERUNDAYOOOO!!!!!"])
+                        self.to_remove = self.current_pokemon
+                        self.update_all_pokemon('pause')  # Pause everyone until textbox finishes
+                        self.selection_mode = None
+                        self.indexes['general'] = 0
+                    else:
+                        TimedSprite((200,250), self.pokemon_frames['ui']['cross'], self.battle_sprites,
+                                    1000)
                 elif self.indexes['general'] == 2:  # Switch
                     self.selection_mode = 'switch'
                 elif self.indexes['general'] == 3:  # Attempt Catch (target selection)
