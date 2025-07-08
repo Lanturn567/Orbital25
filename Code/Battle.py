@@ -234,10 +234,10 @@ class Battle:
             elif self.selection_mode == 'general':
                 if self.indexes['general'] == 0:  # Fight
                     self.selection_mode = 'attacks'
-                elif self.indexes['general'] == 1:  # Defend
-                    self.current_pokemon.pokemon.defending = True
-                    self.update_all_pokemon('resume')
-                    self.current_pokemon = None  # ✅ End turn
+                elif self.indexes['general'] == 1:  # Run
+                    self.show_story_textbox([f"NIGERUNDAYOOOO!!!!!"])
+                    self.to_remove = self.current_pokemon
+                    self.update_all_pokemon('pause')  # Pause everyone until textbox finishes
                     self.selection_mode = None
                     self.indexes['general'] = 0
                 elif self.indexes['general'] == 2:  # Switch
@@ -380,7 +380,7 @@ class Battle:
         self.current_pokemon.activate_attack(random_target, ability)
 
     def check_end_battle(self):
-        if len(self.opponent_sprites) == 0 and not self.battle_over:
+        if (len(self.opponent_sprites) == 0 or len(self.player_sprites) == 0) and not self.battle_over:
             self.battle_over = True
             print('battle won')
             for pokemon in self.pokemon_data['player'].values():
