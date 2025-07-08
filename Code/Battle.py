@@ -75,6 +75,8 @@ class Battle:
 
         self.ready_queue = []  # Queue of Pokémon sprites ready to act
 
+        self.turns_to_run_map = {}  # pokemon_sprite -> turns_to_run
+
     def setup(self):
         # 1. Clear any existing sprites from a previous battle
         self.battle_sprites.empty()
@@ -279,7 +281,9 @@ class Battle:
             # Runaway logic (only for opponent wild Pokémon)
             if pokemon_sprite.entity == 'opponent' and self.trainer is None:
                 if pokemon_sprite not in self.runaway_tracker:
-                    self.runaway_tracker[pokemon_sprite] = (0, pokemon_sprite.pokemon.turns_to_run)
+                    turns_to_run = randint(3, 5)
+                    self.turns_to_run_map[pokemon_sprite] = turns_to_run
+                    self.runaway_tracker[pokemon_sprite] = (0, turns_to_run)
 
                 run_counter, turns_to_run = self.runaway_tracker[pokemon_sprite]
                 run_counter += 1

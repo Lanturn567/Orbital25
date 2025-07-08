@@ -21,7 +21,6 @@ class Pokemon:
 
         self.can_run = False
         self.run_counter = 0
-        self.turns_to_run = 5
 
     def __repr__(self):
         return f'pokemon: {self.name}, lvl: {self.level}'
