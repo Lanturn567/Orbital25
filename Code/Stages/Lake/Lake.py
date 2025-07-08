@@ -254,9 +254,7 @@ class Lake:
         self.madeADaniel = False
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Jacana', 5)}
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

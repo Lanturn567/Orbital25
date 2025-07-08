@@ -73,6 +73,8 @@ class Battle:
 
         self.runaway_tracker = {}
 
+        self.ready_queue = []  # Queue of Pokémon sprites ready to act
+
     def setup(self):
         # 1. Clear any existing sprites from a previous battle
         self.battle_sprites.empty()
@@ -134,132 +136,175 @@ class Battle:
                            pokemon_sprite,(110, 40), self.battle_sprites, self.fonts['small'])
 
     def input(self):
-        if self.battle_over or self.any_pokemon_busy() or self.lock_input:
-            return  # Block input while Pokémon are animating
+        # Don't allow input if:
+        # - battle over
+        # - animations running
+        # - locked input
+        # - no current_pokemon
+        # - it's not the player's turn
+        if (
+                self.battle_over or
+                self.any_pokemon_busy() or
+                self.lock_input or
+                not self.current_pokemon or
+                self.current_pokemon not in self.player_sprites
+        ):
+            return
 
-        if self.selection_mode and self.current_pokemon:
-            keys = pygame.key.get_pressed()
+        keys = pygame.key.get_pressed()
 
-            match self.selection_mode:
-                case 'general': limiter = len(BATTLE_CHOICES['full'])
-                case 'attacks': limiter = len(self.current_pokemon.pokemon.get_abilities(all = False))
-                case 'switch' : limiter = len(self.available_pokemon)
-                case 'target' : limiter = len(self.opponent_sprites) if self.selection_side == 'opponent' else len(self.player_sprites)
+        match self.selection_mode:
+            case 'general':
+                limiter = len(BATTLE_CHOICES['full'])
+            case 'attacks':
+                limiter = len(self.current_pokemon.pokemon.get_abilities(all=False))
+            case 'switch':
+                limiter = len(self.available_pokemon)
+            case 'target':
+                limiter = len(self.opponent_sprites) if self.selection_side == 'opponent' else len(self.player_sprites)
 
-            if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
-                Battle.toggle_sound.play()
-                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
-                self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
+        # Navigation input
+        if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
+            Battle.toggle_sound.play()
+            if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
+            self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
 
-            if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
-                Battle.toggle_sound.play()
-                if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
-                self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
+        if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
+            Battle.toggle_sound.play()
+            if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
+            self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
 
-            if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
-                Battle.select_sound.play()
-                if self.selection_mode == 'switch' and len(self.player_pokemon) > 1:
-                    index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
-                    self.current_pokemon.kill()
-                    self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
+        # Confirm action
+        if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
+            Battle.select_sound.play()
+
+            # SWITCH
+            if self.selection_mode == 'switch' and len(self.player_pokemon) > 1:
+                index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
+                self.current_pokemon.kill()
+                self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
+                self.selection_mode = None
+                self.current_pokemon = None  # ✅ End turn
+                self.update_all_pokemon('resume')
+
+            # TARGET
+            elif self.selection_mode == 'target':
+                sprite_group = self.opponent_sprites if self.selection_side == 'opponent' else self.player_sprites
+                sprites = {sprite.pos_index: sprite for sprite in sprite_group}
+                pokemon_sprite = sprites[list(sprites.keys())[self.indexes['target']]]
+
+                if self.selected_attack:
+                    self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
+                    self.selected_attack = None
                     self.selection_mode = None
-                    self.update_all_pokemon('resume')
-
-                if self.selection_mode == 'target':
-                    sprite_group = self.opponent_sprites if self.selection_side == 'opponent' else self.player_sprites
-                    sprites = {sprite.pos_index: sprite for sprite in sprite_group}
-                    pokemon_sprite = sprites[list(sprites.keys())[self.indexes['target']]]
-
-                    if self.selected_attack:
-                        self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
-                        self.selected_attack, self.current_pokemon, self.selection_mode = None, None, None
-                    else:
-                        if pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and self.trainer == None and self.game.save.data["events"]["Prof"]:
-                            poke = pokemon_sprite.pokemon
-                            poke_dict = {
-                                "name": poke.name,
-                                "level": poke.level,
-                                "health": poke.health,
-                                "energy": poke.energy,
-                                "xp": poke.xp
-                            }
-                            self.game.save.updatePokemon(poke_dict)
-                            from Code.Save import SaveSystem  # Prevent top-level circular import
-                            SaveSystem.write(self.game.save)  # Save immediately after catching
-                            pokemon_sprite.delayed_kill(None)
-                            self.update_all_pokemon('resume')
-                        else:
-                            TimedSprite(pokemon_sprite.rect.center, self.pokemon_frames['ui']['cross'], self.battle_sprites, 1000)
-
-                if self.selection_mode == 'attacks':
-                    self.selection_mode = 'target'
-                    self.selected_attack = self.current_pokemon.pokemon.get_abilities(all = False)[self.indexes['attacks']]
-                    self.selection_side = ATTACK_DATA[self.selected_attack]['target']
-
-                if self.selection_mode == 'general':
-                    if self.indexes['general'] == 0:
-                        self.selection_mode = 'attacks'
-
-                    if self.indexes['general'] == 1:
-                        self.current_pokemon.pokemon.defending = True
+                    self.current_pokemon = None  # ✅ End turn
+                else:
+                    if (
+                            pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and
+                            self.trainer is None and
+                            self.game.save.data["events"]["Prof"]
+                    ):
+                        poke = pokemon_sprite.pokemon
+                        poke_dict = {
+                            "name": poke.name,
+                            "level": poke.level,
+                            "health": poke.health,
+                            "energy": poke.energy,
+                            "xp": poke.xp
+                        }
+                        self.game.save.updatePokemon(poke_dict)
+                        from Code.Save import SaveSystem
+                        SaveSystem.write(self.game.save)
+                        pokemon_sprite.delayed_kill(None)
                         self.update_all_pokemon('resume')
-                        self.current_pokemon, self.selection_mode = None, None
-                        self.indexes['general'] = 0
+                        self.current_pokemon = None  # ✅ End turn
+                    else:
+                        TimedSprite(pokemon_sprite.rect.center, self.pokemon_frames['ui']['cross'], self.battle_sprites,
+                                    1000)
 
-                    if self.indexes['general'] == 2:
-                        self.selection_mode = 'switch'
+            # ATTACKS → choose target next
+            elif self.selection_mode == 'attacks':
+                self.selection_mode = 'target'
+                self.selected_attack = self.current_pokemon.pokemon.get_abilities(all=False)[self.indexes['attacks']]
+                self.selection_side = ATTACK_DATA[self.selected_attack]['target']
 
-                    if self.indexes['general'] == 3:
-                        self.selection_mode = 'target'
-                        self.selection_side = 'opponent'
-                self.indexes = {k: 0 for k in self.indexes}
+            # GENERAL ACTIONS
+            elif self.selection_mode == 'general':
+                if self.indexes['general'] == 0:  # Fight
+                    self.selection_mode = 'attacks'
+                elif self.indexes['general'] == 1:  # Defend
+                    self.current_pokemon.pokemon.defending = True
+                    self.update_all_pokemon('resume')
+                    self.current_pokemon = None  # ✅ End turn
+                    self.selection_mode = None
+                    self.indexes['general'] = 0
+                elif self.indexes['general'] == 2:  # Switch
+                    self.selection_mode = 'switch'
+                elif self.indexes['general'] == 3:  # Attempt Catch (target selection)
+                    self.selection_mode = 'target'
+                    self.selection_side = 'opponent'
 
-            if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
-                Battle.toggle_sound.play()
-                if self.selection_mode in ('attacks', 'switch', 'target'):
-                    self.selection_mode = 'general'
+            self.indexes = {k: 0 for k in self.indexes}  # Reset all indexes
 
-            self.prev_keys = keys
+        # Cancel action
+        if keys[pygame.K_ESCAPE] and not self.prev_keys[pygame.K_ESCAPE]:
+            Battle.toggle_sound.play()
+            if self.selection_mode in ('attacks', 'switch', 'target'):
+                self.selection_mode = 'general'
+
+        self.prev_keys = keys
 
     def update_timers(self):
         for timer in self.timers.values():
             timer.update()
 
-    #battle system
     def check_active(self):
+        # Add any Pokémon with full initiative to the queue (if not already present)
         for pokemon_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
-            if pokemon_sprite.pokemon.initiative >= 100:
-                pokemon_sprite.pokemon.defending = False
-                self.update_all_pokemon('pause')
-                pokemon_sprite.pokemon.initiative = 0
+            if pokemon_sprite.pokemon.initiative >= 100 and pokemon_sprite not in self.ready_queue:
+                self.ready_queue.append(pokemon_sprite)
 
-                # 🏃 Runaway logic for wild Pokémon
-                if pokemon_sprite.entity == 'opponent' and self.trainer is None:
-                    if pokemon_sprite not in self.runaway_tracker:
-                        self.runaway_tracker[pokemon_sprite] = (0, pokemon_sprite.pokemon.turns_to_run)
+        # If anyone is already taking a turn, stop here
+        if self.current_pokemon is not None or self.game.inEvent:
+            return
 
-                    run_counter, turns_to_run = self.runaway_tracker[pokemon_sprite]
-                    run_counter += 1
-                    self.runaway_tracker[pokemon_sprite] = (run_counter, turns_to_run)
+        # Process the first Pokémon in the queue
+        if self.ready_queue:
+            pokemon_sprite = self.ready_queue.pop(0)
 
-                    if run_counter == turns_to_run - 1:
-                        self.show_story_textbox([f"Wild {pokemon_sprite.pokemon.name} is about to run away!"])
-                        self.game.inEvent = True  # Don't resume initiative yet
-                        continue  # skip turn
+            pokemon_sprite.pokemon.defending = False
+            self.update_all_pokemon('pause')
+            pokemon_sprite.pokemon.initiative = 0
 
-                    elif run_counter >= turns_to_run:
-                        self.show_story_textbox([f"{pokemon_sprite.pokemon.name} ran away!"])
-                        self.game.inEvent = True
-                        self.to_remove = pokemon_sprite  # queue removal for later
-                        continue  # skip turn
+            # Runaway logic (only for opponent wild Pokémon)
+            if pokemon_sprite.entity == 'opponent' and self.trainer is None:
+                if pokemon_sprite not in self.runaway_tracker:
+                    self.runaway_tracker[pokemon_sprite] = (0, pokemon_sprite.pokemon.turns_to_run)
 
-                # If not skipped, let Pokémon act
-                pokemon_sprite.set_highlight(True)
-                self.current_pokemon = pokemon_sprite
-                if self.player_sprites in pokemon_sprite.groups():
-                    self.selection_mode = 'general'
-                else:
-                    self.timers['opponent delay'].activate()
+                run_counter, turns_to_run = self.runaway_tracker[pokemon_sprite]
+                run_counter += 1
+                self.runaway_tracker[pokemon_sprite] = (run_counter, turns_to_run)
+
+                if run_counter == turns_to_run - 1:
+                    self.show_story_textbox([f"Wild {pokemon_sprite.pokemon.name} is about to run away!"])
+                    self.game.inEvent = True
+                    return  # wait for textbox to finish
+
+                elif run_counter >= turns_to_run:
+                    self.show_story_textbox([f"{pokemon_sprite.pokemon.name} ran away!"])
+                    self.game.inEvent = True
+                    self.to_remove = pokemon_sprite
+                    return  # wait for textbox to finish
+
+            # Now it's their turn
+            pokemon_sprite.set_highlight(True)
+            self.current_pokemon = pokemon_sprite
+
+            # Player or opponent decision
+            if self.player_sprites in pokemon_sprite.groups():
+                self.selection_mode = 'general'
+            else:
+                self.timers['opponent delay'].activate()
 
     def update_all_pokemon(self, option):
         for pokemon_sprite in self.player_sprites.sprites() + self.opponent_sprites.sprites():
@@ -295,6 +340,7 @@ class Battle:
         self.check_death()
 
         # resume
+        self.current_pokemon = None  # ✅ ready for next Pokémon to act
         self.update_all_pokemon('resume')
 
     def check_death(self):

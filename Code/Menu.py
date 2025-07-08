@@ -83,11 +83,17 @@ class Menu:
             Menu.click_sound.play()
         if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
             Menu.select_sound.play()
-            if self.selected_index != None:
-                selected_pokemon = self.pokemon[self.selected_index]
-                current_pokemon = self.pokemon[self.index]
-                self.pokemon[self.index] = selected_pokemon
-                self.pokemon[self.selected_index] = current_pokemon
+
+            if self.selected_index is not None:
+                # Swap Pokémon objects
+                self.pokemon[self.index], self.pokemon[self.selected_index] = \
+                    self.pokemon[self.selected_index], self.pokemon[self.index]
+
+                # Now swap their dicts in the actual save data list
+                save_data_list = self.player.game.save.data['pokemon']
+                save_data_list[self.index], save_data_list[self.selected_index] = \
+                    save_data_list[self.selected_index], save_data_list[self.index]
+
                 self.selected_index = None
             else:
                 self.selected_index = self.index

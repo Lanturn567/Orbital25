@@ -146,6 +146,7 @@ class MC(Entity):
 
         #player Pokemon
         self.player_pokemon = self.game.save.getPokemon()
+        self.player_pokemon_save = self.game.save.data["pokemon"]
 
         # Animation frame setup
         if self.facing == LEFT:
@@ -343,8 +344,10 @@ class MC(Entity):
                     self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
 
     def heal_pokemon(self):
-        for pokemon in self.player_pokemon.values():
-            pokemon.heal()
+        for i, pokemon in enumerate(self.player_pokemon_save):
+            pokemon["health"] = Pokemon(pokemon["name"], pokemon["level"]).get_stat("max_health")
+            pokemon["energy"] = Pokemon(pokemon["name"], pokemon["level"]).get_stat("max_energy")
+            # XP is preserved automatically because we don't overwrite it
 
     def toggleblock(self):
         self.blocked = not self.blocked
