@@ -1,4 +1,5 @@
 import pygame
+import sys
 import os
 from Code.game_data import *
 from Code.settings import *
@@ -76,6 +77,8 @@ class Battle:
         self.ready_queue = []  # Queue of Pokémon sprites ready to act
 
         self.turns_to_run_map = {}  # pokemon_sprite -> turns_to_run
+
+        self.running = False
 
     def setup(self):
         # 1. Clear any existing sprites from a previous battle
@@ -236,6 +239,7 @@ class Battle:
                     self.selection_mode = 'attacks'
                 elif self.indexes['general'] == 1:  # Run
                     if self.trainer is None:
+                        self.running = True
                         self.show_story_textbox([f"NIGERUNDAYOOOO!!!!!"])
                         self.to_remove = self.current_pokemon
                         self.update_all_pokemon('pause')  # Pause everyone until textbox finishes
@@ -353,7 +357,7 @@ class Battle:
 
     def check_death(self):
         for pokemon_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
-            if pokemon_sprite.pokemon.health <= 0.01:
+            if pokemon_sprite.pokemon.health < 1:
                 if self.player_sprites in pokemon_sprite.groups():
                     active_pokemon = [(pokemon_sprite.index, pokemon_sprite.pokemon) for pokemon_sprite in self.player_sprites.sprites()]
                     available_pokemon = [(index, pokemon) for index, pokemon in self.pokemon_data['player'].items() if pokemon.health > 0 and (index, pokemon) not in active_pokemon]
@@ -385,34 +389,72 @@ class Battle:
 
     def check_end_battle(self):
         if (len(self.opponent_sprites) == 0 or len(self.player_sprites) == 0) and not self.battle_over:
-            self.battle_over = True
-            print('battle won')
-            for pokemon in self.pokemon_data['player'].values():
-                pokemon.initiative = 0
+            if len(self.opponent_sprites) == 0 or self.running:
+                self.battle_over = True
+                print('battle won')
+                for pokemon in self.pokemon_data['player'].values():
+                    pokemon.initiative = 0
 
-            for i, pokemon in enumerate(self.pokemon_data['player'].values()):
-                try:
-                    print(pokemon)
-                    self.game.save.data['pokemon'][i] = {
-                        "name": pokemon.name,
-                        "level": pokemon.level,
-                        "health": pokemon.health,
-                        "energy": pokemon.energy,
-                        "xp": pokemon.xp
-                    }
-                except IndexError:
-                    # This might happen if new Pokémon were caught
-                    print(f"Index {i} out of range while saving Pokémon.")
+                for i, pokemon in enumerate(self.pokemon_data['player'].values()):
+                    try:
+                        print(pokemon)
+                        self.game.save.data['pokemon'][i] = {
+                            "name": pokemon.name,
+                            "level": pokemon.level,
+                            "health": pokemon.health,
+                            "energy": pokemon.energy,
+                            "xp": pokemon.xp
+                        }
+                    except IndexError:
+                        # This might happen if new Pokémon were caught
+                        print(f"Index {i} out of range while saving Pokémon.")
 
-            # Optionally write save to disk immediately
-            from Code.Save import SaveSystem
-            SaveSystem.write(self.game.save)
+                # Optionally write save to disk immediately
+                from Code.Save import SaveSystem
+                SaveSystem.write(self.game.save)
 
-            if self.trainer:
-                self.trainer.defeat()
-                self.trainer.transitioning_to_battle = False
+                if self.trainer:
+                    self.trainer.defeat()
+                    self.trainer.transitioning_to_battle = False
 
-            self.game.end_battle()
+                self.game.end_battle()
+
+
+
+            elif len(self.player_sprites) == 0 and not self.running:
+                print('battle lost')
+                self.battle_over = True
+                self.game.end_battle()  # Runs the usual fade and cleanup
+
+                self.game.player.blocked = False
+
+                if self.trainer:
+                    self.trainer.transitioning_to_battle = False
+
+                import pygame
+                clock = pygame.time.Clock()
+                fade_timer = 0
+                fade_duration = 1.5  # seconds
+
+                # Create a black surface the size of the screen
+                fade_surface = pygame.Surface(self.game.screen.get_size()).convert()
+                fade_surface.fill((0, 0, 0))
+
+                while fade_timer < fade_duration:
+                    dt = clock.tick(60) / 1000  # Seconds per frame
+                    fade_timer += dt
+
+                    # Calculate opacity from 0 to 255
+                    alpha = min(255, int((fade_timer / fade_duration) * 255))
+                    fade_surface.set_alpha(alpha)
+
+                    self.game.screen.blit(fade_surface, (0, 0))
+                    pygame.display.flip()
+
+                from Code.Opening.Opening import Opening, checkExit
+                opening = Opening()
+                next_stage = opening.run()
+                checkExit(next_stage)
 
     def any_pokemon_busy(self):
         for sprite in self.battle_sprites:

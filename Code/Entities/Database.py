@@ -622,7 +622,7 @@ database = {
                     },
 
     "Lek" : { "team" : [],
-                    "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, Let me give you a Pokemon from the bag of tricks.", "Lek: Treat it with care, and it will become your greatest friend.", "Lek: Oh? My assistant. Hello there!"],
+                    "talk" : ["Lek: Hello there! Welcome to the world of Pokémon!", "Lek: My name is Lek. People affectionately refer to me as the Pokémon Professor.", "Lek: This world is inhabited far and wide by creatures called Pokémon.", "Lek: For some people, Pokémon are pets. Others use them for battling.", "Lek: As for myself, I study Pokémon as a profession.", "Lek: But enough about me. It's time for you to begin your Pokémon adventure.", "Lek: Here, have a Wooper.", "Lek: Treat it with care, and it will become your greatest friend.", "Lek: Oh? My assistant. Hello there!"],
                     "talked" : ["Lek: That's a great Pokemon you have!", "Lek: Now off you go! On your Pokemon adventure!", "Lek: A good place to start would be the Gym past the North-East Exit of the city!"],
                     "late" : ["Lek: Wow! Darnielle, you've really matured into a fine woman.", "Lek: Your Pokemon are bustling with happiness and vigor!", "Lek: I knew I could count on you!"],
                     "dead" : True,

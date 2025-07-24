@@ -148,7 +148,7 @@ POKEMON_DATA = {
 		'abilities': {0: 'scratch', 5: 'spark', 12: 'burn', 20: 'ice', 25: 'heal', 35: 'explosion'},
 		'evolve': None},
 	'Chinchou': {
-		'stats': {'element': 'water', 'max_health': 19, 'max_energy': 15, 'attack': 5, 'defense': 9, 'recovery': 2.1, 'speed': 2},
+		'stats': {'element': 'water', 'max_health': 13, 'max_energy': 15, 'attack': 2, 'defense': 3, 'recovery': 2.1, 'speed': 2},
 		'abilities': {0: 'scratch', 5: 'spark', 15: 'splash', 20: 'ice', 25: 'heal'},
 		'evolve': ('Lanturn', 28)},
 	'Lanturn': {
@@ -168,8 +168,8 @@ POKEMON_DATA = {
 		'abilities': {0: 'scratch', 5: 'spark', 13: 'splash', 21: 'ice', 28: 'fire', 34: 'ice',},
 		'evolve': None},
 	'Wooper': {
-		'stats': {'element': 'water', 'max_health': 8, 'max_energy': 11, 'attack': 3, 'defense': 8, 'recovery': 1.8, 'speed': 2},
-		'abilities': {0: 'scratch', 5: 'spark', 15: 'splash', 20: 'ice', 25: 'heal'},
+		'stats': {'element': 'water', 'max_health': 9, 'max_energy': 10, 'attack': 5, 'defense': 9, 'recovery': 1.8, 'speed': 2},
+		'abilities': {0: 'scratch', 5: 'splash', 15: 'spark', 20: 'ice', 25: 'heal'},
 		'evolve': ('Quagsire', 32)},
 	'Quagsire': {
 		'stats': {'element': 'water', 'max_health': 17, 'max_energy': 14, 'attack': 5, 'defense': 11, 'recovery': 2.1, 'speed': 2.4},
@@ -191,7 +191,7 @@ POKEMON_DATA = {
 
 ATTACK_DATA = {
 	'burn':       {'target': 'opponent', 'amount': 2,    'cost': 15, 'element': 'fire',   'animation': 'fire'},
-	'heal':       {'target': 'player',   'amount': -1.2, 'cost': 600, 'element': 'plant',  'animation': 'green'},
+	'heal':       {'target': 'player',   'amount': -1.2, 'cost': 10, 'element': 'plant',  'animation': 'green'},
 	'battlecry':  {'target': 'player',   'amount': -1.4, 'cost': 20, 'element': 'normal', 'animation': 'green'},
 	'spark':      {'target': 'opponent', 'amount': 1.1,  'cost': 20, 'element': 'fire',   'animation': 'fire'},
 	'scratch':    {'target': 'opponent', 'amount': 1.2,  'cost': 0, 'element': 'normal', 'animation': 'scratch'},

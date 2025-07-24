@@ -104,7 +104,7 @@ class Prof(Trainer):
         self.dawn = None
         if not self.talkedTo:
             dt = self.game.clock.tick(MAX_FPS) / 1000.0
-            self.game.save.updatePokemon({"name" : "Daniel", "level" : 5})
+            self.game.save.updatePokemon({"name" : "Wooper", "level" : 5})
             # Save the game immediately after receiving Pokémon
             from Code.Save import SaveSystem
             SaveSystem.write(self.game.save)
