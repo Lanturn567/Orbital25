@@ -26,7 +26,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Left.mp3")
 BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Battle/battle_song.mp3")
 POKEBALL_PATH = [os.path.join(BASE_DIR, '../../../Assets/backgrounds/pokeball.png')]
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielLeft.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielRight.png')]
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -124,9 +124,15 @@ class Left:
         self.madeADaniel = False
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Maractus', 16)},
+            {0: Pokemon('Munna', 17)},
+            {0: Pokemon('Plumette', 15)},
+            {0: Pokemon('Pouch', 16)},
+            {0: Pokemon('Roselia', 15)},
+            {0: Pokemon('Swablu', 14)},
+            {0: Pokemon('Turtwig', 17)},
+            {0: Pokemon('Wooper', 15)},
+            {0: Pokemon('Chinchou', 14)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

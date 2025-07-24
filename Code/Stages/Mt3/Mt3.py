@@ -116,10 +116,13 @@ class Mt3:
         self.finalDelay = 0
 
         self.rival = None
+
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Sparchu', 32)},
+            {0: Pokemon('Quagsire', 35)},
+            {0: Pokemon('Torterra', 33)},
+            {0: Pokemon('Staraptor', 35)},
+            {0: Pokemon('Atrox', 32)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

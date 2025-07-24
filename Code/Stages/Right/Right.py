@@ -194,9 +194,11 @@ class Right:
         self.found = False
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Swablu', 4)},
+            {0: Pokemon('Starly', 5)},
+            {0: Pokemon('Cleaf', 4)},
+            {0: Pokemon('Cubone', 5)},
+            {0: Pokemon('Atrox', 6)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

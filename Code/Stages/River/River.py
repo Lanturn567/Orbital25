@@ -261,9 +261,13 @@ class River:
         self.finalDelay = 0
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Blitzle', 19)},
+            {0: Pokemon('Munchlax', 18)},
+            {0: Pokemon('Atrox', 17)},
+            {0: Pokemon('Buneary', 18)},
+            {0: Pokemon('Litwick', 19)},
+            {0: Pokemon('Starly', 17)},
+            {0: Pokemon('Sparchu', 16)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

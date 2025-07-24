@@ -47,7 +47,7 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkLe
                 os.path.join(BASE_DIR, '../../../Assets/Players/Darnielle/walkBack.png')]
 TREE_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Tree.png')]
 LEAF_PATH = [os.path.join(BASE_DIR, '../../../Assets/Background/Leaf.png')]
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielLeft.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielRight.png')]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
                     os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/Mute.png")]
 GAME_VOLUME = 0.3
@@ -254,7 +254,9 @@ class Lake:
         self.madeADaniel = False
 
         self.monsters = [
-            {0: Pokemon('Jacana', 5)}
+            {0: Pokemon('Atrox', 6)},
+            {0: Pokemon('Cleaf', 5)},
+            {0: Pokemon('Jacana', 4)}
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

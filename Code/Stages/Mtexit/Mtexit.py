@@ -15,7 +15,7 @@ from Code.Battle import Battle
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Mtexit.tmx")
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielLeft.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielRight.png')]
 START_POS = "topeak"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -146,9 +146,13 @@ class Mtexit:
         self.waterfall = False
         self.inContactWithWaterfall = True
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Staraptor', 40)},
+            {0: Pokemon('Sparchu', 40)},
+            {0: Pokemon('Zebstrika', 40)},
+            {0: Pokemon('Torterra', 40)},
+            {0: Pokemon('Rapidash', 41)},
+            {0: Pokemon('Musharna', 40)},
+            {0: Pokemon('Snorlax', 39)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

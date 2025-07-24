@@ -244,9 +244,12 @@ class Snow:
 
         self.blizzard = BlizzardEffect(MAX_X, MAX_Y)
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Ponyta', 10)},
+            {0: Pokemon('Atrox', 10)},
+            {0: Pokemon('Swablu', 11)},
+            {0: Pokemon('Ditto', 9)},
+            {0: Pokemon('Litwick', 10)},
+            {0: Pokemon('Blitzle', 12)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

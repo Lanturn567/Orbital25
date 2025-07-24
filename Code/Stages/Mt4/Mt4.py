@@ -13,7 +13,7 @@ from Code.Battle import Battle
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TMX_PATH = os.path.join(BASE_DIR, "../../../Data/TilemapsPNG/Mt4.tmx")
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielLeft.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielRight.png')]
 START_POS = "mt42"
 DOWN, LEFT, RIGHT, UP = 2, 0, 1, 3
 BLOCK_SIZE = 32
@@ -147,9 +147,16 @@ class Mt4:
         self.daniel = None
         self.madeADaniel = False
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Altaria', 37)},
+            {0: Pokemon('Zebstrika', 37)},
+            {0: Pokemon('Charmadillo', 35)},
+            {0: Pokemon('Clodsire', 37)},
+            {0: Pokemon('Marowak', 38)},
+            {0: Pokemon('Draem', 38)},
+            {0: Pokemon('Lanturn', 39)},
+            {0: Pokemon('Lopunny', 40)},
+            {0: Pokemon('Maractus', 42)},
+            {0: Pokemon('Atrox', 39)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

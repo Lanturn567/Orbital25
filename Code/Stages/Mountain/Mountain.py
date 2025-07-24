@@ -294,9 +294,13 @@ class Mountain:
 
         self.ash_effect = AshEffect(MAX_X, MAX_Y, particle_count=150)
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Altaria', 33)},
+            {0: Pokemon('Chandelure', 32)},
+            {0: Pokemon('Pouch', 34)},
+            {0: Pokemon('Quagsire', 31)},
+            {0: Pokemon('Roselia', 32)},
+            {0: Pokemon('Snorlax', 33)},
+            {0: Pokemon('Zebstrika', 34)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)
