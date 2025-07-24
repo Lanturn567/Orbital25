@@ -186,7 +186,7 @@ class Battle:
                 self.current_pokemon.kill()
                 self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
                 self.selection_mode = None
-                self.current_pokemon = None  #  End turn
+                self.current_pokemon = None  # ✅ End turn
                 self.update_all_pokemon('resume')
 
             # TARGET
@@ -199,7 +199,7 @@ class Battle:
                     self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
                     self.selected_attack = None
                     self.selection_mode = None
-                    self.current_pokemon = None  #  End turn
+                    self.current_pokemon = None  # ✅ End turn
                 else:
                     if (
                             pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and
@@ -219,7 +219,7 @@ class Battle:
                         SaveSystem.write(self.game.save)
                         pokemon_sprite.delayed_kill(None)
                         self.update_all_pokemon('resume')
-                        self.current_pokemon = None  # End turn
+                        self.current_pokemon = None  # ✅ End turn
                     else:
                         TimedSprite(pokemon_sprite.rect.center, self.pokemon_frames['ui']['cross'], self.battle_sprites,
                                     1000)
@@ -348,12 +348,12 @@ class Battle:
         self.check_death()
 
         # resume
-        self.current_pokemon = None  #  ready for next Pokémon to act
+        self.current_pokemon = None  # ✅ ready for next Pokémon to act
         self.update_all_pokemon('resume')
 
     def check_death(self):
         for pokemon_sprite in self.opponent_sprites.sprites() + self.player_sprites.sprites():
-            if pokemon_sprite.pokemon.health < 1:
+            if pokemon_sprite.pokemon.health <= 0.01:
                 if self.player_sprites in pokemon_sprite.groups():
                     active_pokemon = [(pokemon_sprite.index, pokemon_sprite.pokemon) for pokemon_sprite in self.player_sprites.sprites()]
                     available_pokemon = [(index, pokemon) for index, pokemon in self.pokemon_data['player'].items() if pokemon.health > 0 and (index, pokemon) not in active_pokemon]

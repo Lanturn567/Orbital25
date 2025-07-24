@@ -1514,7 +1514,7 @@ database = {
                   "talked" : ["Rhymond: Interesting. That's twice now...", "Rhymond: Indeed, you are formidable. But beware, it seems that you need so much more..."],
                   "dead" : True,
                     "battle" : True},
-    "DLKLFinalBoss" : {"team" : {0: Pokemon('Daniel', 40), 1: Pokemon('Daniel', 45), 2: Pokemon('Daniel', 50)},
+    "DLKLFinalBoss" : {"team" : {0: Pokemon('Daniel', 40), 1: Pokemon('Daniel', 42), 2: Pokemon('Daniel', 45)},
                     "talk" : ["LKLD: Hello Darnielle. I've been waiting for you, Daniel as well..", "LKLD: Your strength is not to be trifled with I see. Your rampage was noticeable indeed.", "LKLD: However...", "LKLD: I too am formidable.", "LKLD: Do you really think you have the power to stop me?", "LKLD: I am the promised one. A legend destined to conquer.", "LKLD: Tremble in fear as I tear you and your Pokemon apart!"],
                     "talked" : ["LKLD: Impossible!", "LKLD: I am the destined one! A legend a thousand years in the making!", "LKLD: To be felled by a kid is extraordinary...", "LKLD: I will be back and I will have my revenge!"],
                     "dead" : True,
