@@ -26,7 +26,7 @@ MAX_FPS = 0
 LEVEL_TWO_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Up.mp3")
 BATTLE_MUSIC_PATH = os.path.join(BASE_DIR, "../../../Audio/Battle/battle_song.mp3")
 POKEBALL_PATH = [os.path.join(BASE_DIR, '../../../Assets/backgrounds/pokeball.png')]
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeL.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/pokeR.png')]
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielLeft.png'), os.path.join(BASE_DIR, '../../../Assets/Pokemon/DanielRight.png')]
 FADE_LEVEL = 0
 FADE_CHANGE_PER_FRAME = 12
 FADE_IN_CHANGE_PER_FRAME = 36
@@ -128,9 +128,14 @@ class Up:
         self.madeADaniel = False
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Torterra', 26)},
+            {0: Pokemon('Rapidash', 27)},
+            {0: Pokemon('Snorlax', 27)},
+            {0: Pokemon('Quagsire', 26)},
+            {0: Pokemon('Marowak', 25)},
+            {0: Pokemon('Maractus', 25)},
+            {0: Pokemon('Lopunny', 25)},
+            {0: Pokemon('Luvdisc', 26)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)
