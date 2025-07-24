@@ -32,7 +32,7 @@ save = {
     "events": {
         "Mom": False,
         "Dawn": False,
-        "Prof": True,
+        "Prof": False,
         "Daniel": False,
         "Found": False,
         "RivalTown": False,
@@ -49,7 +49,7 @@ save = {
         "BeatChampion": False,
         "EndgameDawn": False,
     },
-    "pokemon": [{"name" : "Jacana", "level" : 5}, {"name" : "Jacana", "level" : 10}],  # list of poke objects
+    "pokemon": [{"name" : "Daniel", "level" : 5}],  # list of poke objects
     "items": defaultdict(int),  # dict (string map to int)
     "stage": "LevelOne",  # string
     "pos": "default",  # default last pos
