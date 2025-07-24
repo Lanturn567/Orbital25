@@ -20,10 +20,7 @@ dirs = {"left" : LEFT,
         "up" : UP,
         "down" : DOWN}
 INTERACTABLE_BOUNDS = [2 * BLOCK_SIZE, 2 * BLOCK_SIZE]
-TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnLeft.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnRight.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnFront.png'),
-                              os.path.join(BASE_DIR, '../../Assets/Players/walkLanturnBack.png')],
+TRAINER_PATHS = { "lanturn" : [os.path.join(BASE_DIR, '../../Assets/Players/lanturn.png')],
                   "blond" : [os.path.join(BASE_DIR, '../../Assets/Players/blond.png')],
                   "child" : [os.path.join(BASE_DIR, '../../Assets/Players/girl.png')],
                   "guide" : [os.path.join(BASE_DIR, '../../Assets/Players/fireman.png')],
