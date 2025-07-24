@@ -1,1 +1,0 @@
-{"events": {"Mom": false, "Prof": false, "Daniel": false, "Found": false, "GymOne": false, "RivalTown": false, "event7": false, "event8": false, "GymTwo": false, "GymThree": false}, "pokemon": [], "items": {}, "stage": "Home", "pos": "lake", "name": "noob", "muted": false, "pokedex": {}}
