@@ -42,8 +42,8 @@ PLAYER_PATHS = [os.path.join(BASE_DIR, '../../Assets/Players/Darnielle/walkLeft.
                 os.path.join(BASE_DIR, '../../Assets/Players/Darnielle/walkRight.png'),
                 os.path.join(BASE_DIR, '../../Assets/Players/Darnielle/walkFront.png'),
                 os.path.join(BASE_DIR, '../../Assets/Players/Darnielle/walkBack.png')]
-POKEMON_PATHS = [os.path.join(BASE_DIR, '../../Assets/Pokemon/pokeL.png'),
-                 os.path.join(BASE_DIR, '../../Assets/Pokemon/pokeR.png')]  # Assuming single image for simplicity
+POKEMON_PATHS = [os.path.join(BASE_DIR, '../../Assets/Pokemon/DanielLeft.png'),
+                 os.path.join(BASE_DIR, '../../Assets/Pokemon/DanielRight.png')]
 TREE_PATH = [os.path.join(BASE_DIR, '../../Assets/Background/Tree.png')]
 LEAF_PATH = [os.path.join(BASE_DIR, '../../Assets/Background/Leaf.png')]
 FURINA_PATHS = [os.path.join(BASE_DIR, '../../Assets/Players/Furina/WalkLeftFurina.png'),
@@ -68,7 +68,7 @@ SWAY_LENGTH = BLOCK_SIZE
 SWAY_DELAY = 15
 FLOAT_SPEED = BLOCK_SIZE // 3
 FLOAT_INTERVAL = 4
-FLOAT_LENGTH = BLOCK_SIZE
+FLOAT_LENGTH = BLOCK_SIZE * 1.5
 DIST_FROM_PLAYER = BLOCK_SIZE * 15
 POKEMON_CRY = os.path.join(BASE_DIR, "../../Audio/Poke.wav")
 POKEMON_SIZE = (64, 64)
@@ -530,7 +530,7 @@ class Poke(Entity):
             self.floatStage += self.float_interval * dt
 
             # Check if we should start following
-            if self.x >= self.player.x + BLOCK_SIZE * 1.5:
+            if self.x >= self.player.x + BLOCK_SIZE * 2.5:
                 self.ran = True
                 self.cry.play()
 
