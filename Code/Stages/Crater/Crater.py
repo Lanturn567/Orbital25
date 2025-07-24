@@ -499,9 +499,12 @@ class Crater:
         self.liftoff_distance = MAX_Y * 5    # Distance to move upwards before ending
 
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
-            {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Buneary', 12)},
+            {0: Pokemon('Cindrill', 10)},
+            {0: Pokemon('Draem', 12)},
+            {0: Pokemon('Finsta', 9)},
+            {0: Pokemon('Jacana', 13)},
+            {0: Pokemon('Atrox', 11)},
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)

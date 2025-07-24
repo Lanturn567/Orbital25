@@ -137,7 +137,6 @@ class Dawn:
         self.inEvent = False
         self.updateEvent = None
 
-
         self.nextStage = None
         self.stageDone = False
         self.finalDelay = 0

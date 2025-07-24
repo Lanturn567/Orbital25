@@ -260,9 +260,11 @@ class Home:
 
         #CHANGE
         self.monsters = [
-            {0: Pokemon('Atrox', 1)},
+            {0: Pokemon('Atrox', 5)},
+            {0: Pokemon('Buneary', 3)},
             {0: Pokemon('Cleaf', 3)},
-            {0: Pokemon('Jacana', 4)}
+            {0: Pokemon('Jacana', 4)},
+            {0: Pokemon('Happiny', 2)},
         ]
 
         self.encounter_timer = Timer(2000, func = self.pokemon_encounter)
