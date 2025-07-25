@@ -105,6 +105,8 @@ class Th1:
         self.stageDone = False
         self.finalDelay = 0
 
+        self.inBattle = False
+
 
     def init_assets(self, start_pos):
 
@@ -235,7 +237,7 @@ class Th1:
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+        if self.textComplete and not self.inBattle and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
             self.menu.open_sound.play()
             self.menu_open = not self.menu_open
             self.player.toggleblock()

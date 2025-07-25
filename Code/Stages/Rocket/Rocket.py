@@ -117,6 +117,8 @@ class Rocket:
         self.transition_complete = False
         self.all_slides_complete = False
 
+        self.inBattle = False
+
     def load_slide_images(self):
         """Load all slide images"""
         for path in SLIDE_IMAGES:

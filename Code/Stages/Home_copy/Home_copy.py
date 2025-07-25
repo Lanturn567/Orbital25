@@ -259,6 +259,8 @@ class Home:
         self.pokeball_rotation = 0  # Current rotation angle (degrees)
         self.pokeball_target_rotation = 360  # Complete 1 full rotation
 
+        self.inBattle = False
+
     def init_assets(self, start_pos):
 
         # Ground tiles
@@ -401,7 +403,7 @@ class Home:
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+        if self.textComplete and not self.inBattle and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
             self.menu.open_sound.play()
             self.menu_open = not self.menu_open
             self.player.toggleblock()
@@ -451,6 +453,7 @@ class Home:
                 trainer=trainer,
                 game=self
             )
+            self.inBattle = True
             self.tint_mode = 'tint'
             self.tint_type = 'flash'
             self.flash_count = 0
@@ -467,7 +470,7 @@ class Home:
 
             if not self.transition_music_playing:
                 pygame.mixer.music.load(self.transition_music_path)
-                volume = 0 if self.save.getMuted() else GAME_VOLUME * 0.3
+                volume = 0 if self.save.getMuted() else GAME_VOLUME * 0.8
                 pygame.mixer.music.set_volume(volume)
                 pygame.mixer.music.play(-1)
                 self.transition_music_playing = True

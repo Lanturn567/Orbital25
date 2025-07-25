@@ -136,7 +136,7 @@ class Battle:
         PokemonOutlineSprite(pokemon_sprite, self.battle_sprites, outline_frames)
 
         #ui
-        name_pos = pokemon_sprite.rect.midleft + vector(16,-100) if entity == 'player' else pokemon_sprite.rect.midright + vector(-40, -100)
+        name_pos = pokemon_sprite.rect.midleft + vector(-30,-50) if entity == 'player' else pokemon_sprite.rect.midright + vector(30, -50)
         name_sprite = PokemonNamesprite(name_pos, pokemon_sprite, self.battle_sprites, self.fonts['regular'])
         level_pos = name_sprite.rect.bottomleft if entity == 'player' else name_sprite.rect.bottomright
         PokemonLevelSprite(entity, level_pos, pokemon_sprite, self.battle_sprites, self.fonts['small'])
@@ -352,6 +352,8 @@ class Battle:
 
         # update the monster health
         target_sprite.pokemon.health -= amount * target_defense
+        if target_sprite.pokemon.health > target_sprite.pokemon.base_stats['max_health'] * target_sprite.pokemon.level:
+            target_sprite.pokemon.health = target_sprite.pokemon.base_stats['max_health'] * target_sprite.pokemon.level
         self.check_death()
 
         # resume
@@ -455,12 +457,21 @@ class Battle:
                     self.game.screen.blit(fade_surface, (0, 0))
                     pygame.display.flip()
 
+                # 🔁 Safety override: move back to Right.py if stuck in Town.py
+                if self.game.save.getStageName() == "Town":
+                    self.game.save.updateStage("Right")
+                    self.game.save.updatePos()
+
                 self.game.player.heal_pokemon()
                 Code.Save.SaveSystem.write(self.game.save)
                 self.game.running = False
 
                 back = Opening()
                 nextStage = back.run()
+
+                # ✅ Add this line to fix the crash:
+                nextStage.player = self.game.player
+
                 while True:
                     nextStage = checkExit(nextStage)
 
@@ -530,7 +541,7 @@ class Battle:
 
     def draw_switch(self):
         # data
-        width, height = 200, 215
+        width, height = 200, 275
         visible_pokemon = 4
         item_height = height / visible_pokemon
         v_offset = 0 if self.indexes['switch'] < visible_pokemon else -(self.indexes['switch'] - visible_pokemon + 1) * item_height

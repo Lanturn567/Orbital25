@@ -49,7 +49,8 @@ save = {
         "BeatChampion": False,
         "EndgameDawn": False,
     },
-    "pokemon": [{"name" : "Daniel", "level" : 5}],  # list of poke objects
+    "pokemon": [{"name" : "Daniel", "level" : 21},
+                ],  # list of poke objects
     "items": defaultdict(int),  # dict (string map to int)
     "stage": "LevelOne",  # string
     "pos": "default",  # default last pos

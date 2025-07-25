@@ -277,7 +277,7 @@ class Trainer(Entity):
 
     def collide(self):
         keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and not self.transitioning_to_battle and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and not self.transitioning_to_battle and self.delayAfterEvent >= AFTER_EVENT_DELAY and not self.game.inBattle:
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()

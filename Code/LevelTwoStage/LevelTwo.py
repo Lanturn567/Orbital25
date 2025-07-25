@@ -578,6 +578,7 @@ class LevelTwo:
         ]
 
         self.encounter_timer = Timer(2000, func=self.pokemon_encounter)
+        self.inBattle = False
 
         # transition / tint
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -798,7 +799,7 @@ class LevelTwo:
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if self.textComplete and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
+        if self.textComplete and not self.inBattle and not self.inEvent and keys[pygame.K_RETURN] and not self.prev_keys[pygame.K_RETURN]:
             self.menu.open_sound.play()
             self.menu_open = not self.menu_open
             self.player.toggleblock()
@@ -819,6 +820,7 @@ class LevelTwo:
             self.start_battle(copy.deepcopy(selected_monsters), None)
 
     def end_battle(self):
+        self.inBattle = False
         self.encounter_timer.deactivate()
         self.transition_target = 'level'  # Signal we're returning to overworld
         self.tint_mode = 'tint'  # Start fading to black
@@ -851,6 +853,7 @@ class LevelTwo:
                 trainer=trainer,
                 game=self
             )
+            self.inBattle = True
             self.tint_mode = 'tint'
             self.tint_type = 'flash'
             self.flash_count = 0
@@ -867,7 +870,7 @@ class LevelTwo:
 
             if not self.transition_music_playing:
                 pygame.mixer.music.load(self.transition_music_path)
-                volume = 0 if self.save.getMuted() else GAME_VOLUME * 0.3
+                volume = 0 if self.save.getMuted() else GAME_VOLUME * 0.8
                 pygame.mixer.music.set_volume(volume)
                 pygame.mixer.music.play(-1)
                 self.transition_music_playing = True
