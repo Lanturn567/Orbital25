@@ -41,6 +41,7 @@ DELAY_AFTER_CLICK = 4
 TEXT_BOX_POS = (65, MAX_Y - 140)
 TEXT_BUTTON, VOLUME_BUTTON = 1, 0
 TEXT_PATH1 = os.path.join(BASE_DIR, "Basement.txt")
+TEXT_PATH2 = os.path.join(BASE_DIR, "Final.txt")
 TEXT_BOX_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/TextBox.png"),
                   os.path.join(BASE_DIR, "../../../Assets/UI/TextBoxArrow.png")]
 VOL_BUTTON_PATHS = [os.path.join(BASE_DIR, "../../../Assets/UI/Buttons/NoMute.png"),
@@ -522,7 +523,7 @@ class Basement:
         pygame.mixer.music.load(LEVEL_TWO_MUSIC_PATH)
         pygame.mixer.music.set_volume(GAME_VOLUME)
         pygame.mixer.music.play(-1, 10, 5000)
-        StoryTextBox.init__text(TEXT_PATH1)
+        StoryTextBox.init__text(TEXT_PATH1 if not self.save.beatGymThree() else TEXT_PATH2)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
         LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
         self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]

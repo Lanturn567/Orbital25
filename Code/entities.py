@@ -130,6 +130,7 @@ class MC(Entity):
 
         super().__init__(pos, group, size, z)
         self.game = game
+        self.currImage = 0
         self.image = MC.assets[self.facing][self.currImage]
         self.moved = False
         self.collidable = collidable

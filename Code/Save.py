@@ -192,6 +192,23 @@ class Save:
     def beatChampion(self): return self.data["events"]["BeatChampion"]
     def beatEndgameDawn(self): return self.data["events"]["EndgameDawn"]
 
+    def getNearestMart(self):
+        if not self.foughtRivalAtTown():
+            return "home"
+        elif not self.gotDaniel() and not self.getPos() == "crater":
+            return "town"
+        elif not self.gotDaniel():
+            return "crater"
+        elif not self.foughtDawnAtCity():
+            return "home"
+        elif not self.foughtRivalAtMount():
+            return "city"
+        elif not self.beatDLKLAtPeak():
+            return "mountain"
+        else:
+            return "home"
+
+
 class SaveSystem:
     @staticmethod
     def write(save):
