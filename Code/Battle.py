@@ -175,24 +175,26 @@ class Battle:
         if keys[pygame.K_DOWN] and not self.prev_keys[pygame.K_DOWN]:
             Battle.toggle_sound.play()
             if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
-            self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
+            if limiter != 0:
+                self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] + 1) % limiter
 
         if keys[pygame.K_UP] and not self.prev_keys[pygame.K_UP]:
             Battle.toggle_sound.play()
             if self.selection_mode == 'switch' and len(self.player_pokemon) <= 1: return
-            self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
+            if limiter != 0:
+                self.indexes[self.selection_mode] = (self.indexes[self.selection_mode] - 1) % limiter
 
         # Confirm action
         if keys[pygame.K_SPACE] and not self.prev_keys[pygame.K_SPACE]:
             Battle.select_sound.play()
 
             # SWITCH
-            if self.selection_mode == 'switch' and len(self.player_pokemon) > 1:
+            if self.selection_mode == 'switch' and len(self.player_pokemon) > 1 and len(self.available_pokemon.items()) > 0:
                 index, new_pokemon = list(self.available_pokemon.items())[self.indexes['switch']]
                 self.current_pokemon.kill()
                 self.create_pokemon(new_pokemon, index, self.current_pokemon.pos_index, 'player')
                 self.selection_mode = None
-                self.current_pokemon = None  # ✅ End turn
+                self.current_pokemon = None  # End turn
                 self.update_all_pokemon('resume')
 
             # TARGET
@@ -374,9 +376,9 @@ class Battle:
                     if self.pokemon_data['opponent']:
                         del self.pokemon_data['opponent'][min(self.pokemon_data['opponent'])]
                     # xp
-                    xp_amount = pokemon_sprite.pokemon.level * 100 / len(self.player_sprites)
-                    for player_sprite in self.player_sprites:
-                        player_sprite.pokemon.update_xp(xp_amount)
+                    xp_amount = pokemon_sprite.pokemon.level * 100
+                    for pokemon in self.player_pokemon.values():
+                        pokemon.update_xp(xp_amount)
                 self.pause_initiative = True
                 pokemon_sprite.delayed_kill(new_pokemon_data)
                 self.lock_input = True
@@ -422,17 +424,9 @@ class Battle:
 
                 self.game.end_battle()
 
-
-
             elif len(self.player_sprites) == 0 and not self.running:
                 print('battle lost')
                 self.battle_over = True
-                self.game.end_battle()  # Runs the usual fade and cleanup
-
-                self.game.player.blocked = False
-
-                if self.trainer:
-                    self.trainer.transitioning_to_battle = False
 
                 import pygame
                 clock = pygame.time.Clock()
@@ -456,13 +450,13 @@ class Battle:
                     pygame.display.flip()
 
                 self.game.player.heal_pokemon()
+                if self.game.player.blocked:
+                    self.game.player.toggleblock()
+                next = self.game.save.getNearestMart()
+                self.game.save.updateStage("Mart")
+                self.game.save.updatePos(next)
                 Code.Save.SaveSystem.write(self.game.save)
-                self.game.running = False
-
-                back = Opening()
-                nextStage = back.run()
-                while True:
-                    nextStage = checkExit(nextStage)
+                self.game.nextStage = True
 
     def any_pokemon_busy(self):
         for sprite in self.battle_sprites:

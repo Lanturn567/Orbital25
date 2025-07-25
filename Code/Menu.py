@@ -200,7 +200,7 @@ class Menu:
         healthbar_rect.midtop = (bar_data['left_side'], bar_data['top'])
         draw_bar(self.display_surface, healthbar_rect, pokemon.health, pokemon.get_stat('max_health'), COLORS['red'],
                  COLORS['black'], 2)
-        hp_text = self.fonts['regular'].render(f"HP: {int(pokemon.health)}/{int(pokemon.get_stat('max_health'))}",
+        hp_text = self.fonts['regular'].render(f"HP: {int(pokemon.health) if pokemon.health > 0 else 0}/{int(pokemon.get_stat('max_health'))}",
                                                False,
                                                COLORS['white'])
         hp_rect = hp_text.get_rect(midleft=healthbar_rect.midleft + vector(10, 0))
