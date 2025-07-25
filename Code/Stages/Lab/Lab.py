@@ -11,6 +11,7 @@ from Code.sprites import *
 from Code.entities import *
 from Code.Save import *
 from Code.Battle import Battle
+import random
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -104,7 +105,9 @@ class Prof(Trainer):
         self.dawn = None
         if not self.talkedTo:
             dt = self.game.clock.tick(MAX_FPS) / 1000.0
-            self.game.save.updatePokemon({"name" : "Wooper", "level" : 5})
+            names = ["Wooper", "Starly", "Turtwig", "Buneary", "Plumette", "Sparchu", "Finsta"]
+            name = random.choice(names)
+            self.game.save.updatePokemon({"name" : name, "level" : 5})
             # Save the game immediately after receiving Pokémon
             from Code.Save import SaveSystem
             SaveSystem.write(self.game.save)
