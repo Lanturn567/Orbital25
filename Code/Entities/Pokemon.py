@@ -62,7 +62,6 @@ class Pokemon:
         self.health = self.base_stats['max_health'] * self.level
         self.energy = self.base_stats['max_energy'] * self.level
 
-
     def update_xp(self, amount):
         if self.level_up - self.xp > amount:
             self.xp += amount
@@ -75,7 +74,7 @@ class Pokemon:
         if not self.paused:
             self.initiative += 10 * self.get_stat('speed') * dt
 
-    def start_running(self, turns_to_run=2):
+    def start_running(self, turns_to_run=7):
         self.can_run = True
         self.run_counter = 0
         self.turns_to_run = turns_to_run

@@ -166,12 +166,12 @@ class Menu:
         self.display_surface.blit(pokemon_surf, pokemon_rect)
 
         # name
-        name_surf = self.fonts['bold'].render(pokemon.name, False, COLORS['white'])
+        name_surf = self.fonts['bold'].render(pokemon.name, False, COLORS['white'] if pokemon.element != 'normal' else COLORS['black'])
         name_rect = name_surf.get_rect(topleft=top_rect.topleft + vector(8, 8))
         self.display_surface.blit(name_surf, name_rect)
 
         # level
-        level_surf = self.fonts['regular'].render(f'Lvl: {pokemon.level}', False, COLORS['white'])
+        level_surf = self.fonts['regular'].render(f'Lvl: {pokemon.level}', False, COLORS['white'] if pokemon.element != 'normal' else COLORS['black'])
         level_rect = level_surf.get_rect(bottomleft=top_rect.bottomleft + vector(8, -8))
         self.display_surface.blit(level_surf, level_rect)
         draw_bar(
@@ -183,7 +183,7 @@ class Menu:
             bg_color=COLORS['dark'])
 
         # element
-        element_surf = self.fonts['regular'].render(pokemon.element, False, COLORS['white'])
+        element_surf = self.fonts['regular'].render(pokemon.element, False, COLORS['white'] if pokemon.element != 'normal' else COLORS['black'])
         element_rect = element_surf.get_rect(bottomright=top_rect.bottomright + vector(-8, -8))
         self.display_surface.blit(element_surf, element_rect)
 

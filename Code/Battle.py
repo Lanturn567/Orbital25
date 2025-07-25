@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import Code.Save
 from Code.game_data import *
 from Code.settings import *
 from Code.sprites import (PokemonSprite, PokemonNamesprite, PokemonLevelSprite, PokemonStatsSprite,
@@ -10,6 +11,8 @@ from Code.timer import Timer
 from random import choice
 from random import randint
 from Code.LevelTwoStage.StoryTextBox import StoryTextBox
+from Code.Opening.Opening import Opening, checkExit
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BATTLE_TOGGLE_SOUND_PATH = os.path.join(BASE_DIR, "../Audio/Battle/battle_toggle.mp3")
@@ -202,7 +205,7 @@ class Battle:
                     self.current_pokemon.activate_attack(pokemon_sprite, self.selected_attack)
                     self.selected_attack = None
                     self.selection_mode = None
-                    self.current_pokemon = None  # ✅ End turn
+                    self.current_pokemon = None  # End turn
                 else:
                     if (
                             pokemon_sprite.pokemon.health < pokemon_sprite.pokemon.get_stat('max_health') * 0.5 and
@@ -222,7 +225,7 @@ class Battle:
                         SaveSystem.write(self.game.save)
                         pokemon_sprite.delayed_kill(None)
                         self.update_all_pokemon('resume')
-                        self.current_pokemon = None  # ✅ End turn
+                        self.current_pokemon = None  # End turn
                     else:
                         TimedSprite(pokemon_sprite.rect.center, self.pokemon_frames['ui']['cross'], self.battle_sprites,
                                     1000)
@@ -352,7 +355,7 @@ class Battle:
         self.check_death()
 
         # resume
-        self.current_pokemon = None  # ✅ ready for next Pokémon to act
+        self.current_pokemon = None  # ready for next Pokémon to act
         self.update_all_pokemon('resume')
 
     def check_death(self):
@@ -434,7 +437,8 @@ class Battle:
                 import pygame
                 clock = pygame.time.Clock()
                 fade_timer = 0
-                fade_duration = 1.5  # seconds
+                fade_duration = 3  # seconds
+                pygame.mixer.music.fadeout(3000)
 
                 # Create a black surface the size of the screen
                 fade_surface = pygame.Surface(self.game.screen.get_size()).convert()
@@ -451,10 +455,14 @@ class Battle:
                     self.game.screen.blit(fade_surface, (0, 0))
                     pygame.display.flip()
 
-                from Code.Opening.Opening import Opening, checkExit
-                opening = Opening()
-                next_stage = opening.run()
-                checkExit(next_stage)
+                self.game.player.heal_pokemon()
+                Code.Save.SaveSystem.write(self.game.save)
+                self.game.running = False
+
+                back = Opening()
+                nextStage = back.run()
+                while True:
+                    nextStage = checkExit(nextStage)
 
     def any_pokemon_busy(self):
         for sprite in self.battle_sprites:
