@@ -91,7 +91,7 @@ class Dominique(Trainer):
         self.talkedTo = False
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.text if not self.talkedTo else self.talked)
+        StoryTextBox.init__text(self.text if not self.talkedTo and not self.defeated else self.talked)
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.updateEvent("GymTwo")
         self.talkedTo = True
