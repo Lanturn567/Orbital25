@@ -278,6 +278,7 @@ class Rocket:
         if self.stageDone:
             # Stop music before transitioning
             pygame.mixer.music.fadeout(500)
+            self.save.updatePokemon({"name": "Daniel", "level": 21})
             return self.save.getStage()(self.screen, LOCATION, self.save)
         return None
 

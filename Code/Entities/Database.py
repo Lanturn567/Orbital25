@@ -209,7 +209,7 @@ database = {
               "dead" : True,
                 "battle" : False
               },
-    "Jordan" : { "team" : {0: Pokemon('Cubone', 4), 1: Pokemon('Torterra', 6)},
+    "Jordan" : { "team" : {0: Pokemon('Cubone', 4), 1: Pokemon('Turtwig', 6)},
                 "talk" : ["Jordan: Just ignore him.", "Jordan: On second thoughts, can you do my laundry?"],
                  "beaten" : ["Jordan: Harlo?? Howw could I lose??"],
                  "dead" : True,
@@ -696,7 +696,7 @@ database = {
                  "talked" : ["Lanturn: Wow! You're this good already!?"],
                  "dead" : True,
                  "battle" : True},
-    "RivalTown" : {"team" : {0: Pokemon('Litwick', 7), 1: Pokemon('Clodsire', 9)},
+    "RivalTown" : {"team" : {0: Pokemon('Litwick', 7), 1: Pokemon('Wooper', 9)},
                  "talk" : ["Rhymond: So, you're the new kid on the block eh?", "Rhymond: You'll be a wonderful test for my Pokemon!"],
                  "talked" : ["Rhymond: ???", "Rhymond: So you're not completely hopeless after all...", "Rhymond: I'll see you around then..."],
                  "dead" : True,
