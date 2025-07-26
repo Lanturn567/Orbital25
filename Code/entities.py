@@ -345,10 +345,17 @@ class MC(Entity):
                     self.hitbox.center = (self.x + PLAYER_SIZE[0] // 4, self.y + PLAYER_SIZE[1] // 4)
 
     def heal_pokemon(self):
-        for i, pokemon in enumerate(self.player_pokemon_save):
-            pokemon["health"] = Pokemon(pokemon["name"], pokemon["level"]).get_stat("max_health")
-            pokemon["energy"] = Pokemon(pokemon["name"], pokemon["level"]).get_stat("max_energy")
-            # XP is preserved automatically because we don't overwrite it
+        for i, poke_obj in self.player_pokemon.items():
+            max_hp = poke_obj.get_stat("max_health")
+            max_energy = poke_obj.get_stat("max_energy")
+
+            # Heal the object
+            poke_obj.health = max_hp
+            poke_obj.energy = max_energy
+
+            # Update the save dict
+            self.player_pokemon_save[i]["health"] = max_hp
+            self.player_pokemon_save[i]["energy"] = max_energy
 
     def toggleblock(self):
         self.blocked = not self.blocked
