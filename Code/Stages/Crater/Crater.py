@@ -864,7 +864,7 @@ class Crater:
                 player_pokemon=self.player.player_pokemon,
                 opponent_pokemon=monsters,
                 pokemon_frames=pokemon_frames,
-                bg_surf=bg_frames['forest'],
+                bg_surf=bg_frames['ice'],
                 fonts=fonts,
                 trainer=trainer,
                 game=self

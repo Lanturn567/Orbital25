@@ -448,7 +448,7 @@ class Mtexit:
                 player_pokemon=self.player.player_pokemon,
                 opponent_pokemon=monsters,
                 pokemon_frames=pokemon_frames,
-                bg_surf=bg_frames['forest'],
+                bg_surf=bg_frames['sand'],
                 fonts=fonts,
                 trainer=trainer,
                 game=self
