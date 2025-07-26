@@ -97,21 +97,13 @@ class Sebastian(Trainer):
             self.talkedTo = True
 
     def makeEvent(self):
-        check = self.checkFriends()
-        StoryTextBox.init__text(self.text if not check else self.battle if not self.talkedTo else self.talked)
+        check = self.checkFriendsDefeat()
+        StoryTextBox.init__text(self.text if not check else self.battle if not self.talkedTo and not self.defeated else self.talked)
         self.game.buttons[TEXT_BUTTON].reset()
         if check:
             self.game.save.updateEvent("GymOne")
             SaveSystem.write(self.game.save)
             self.talkedTo = True
-
-    def checkFriends(self):
-        if self.game.save.beatGymOne():
-            return True
-        for friend in self.friends:
-            if not friend.talkedTo:
-                return False
-        return True
 
     def checkFriendsDefeat(self):
         if self.game.save.beatGymOne():
@@ -152,10 +144,9 @@ class SebFriend(Trainer):
         self.talkedTo = False
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.talked if self.talkedTo else self.text)
+        StoryTextBox.init__text(self.talked if self.talkedTo or self.defeated else self.text)
         self.game.buttons[TEXT_BUTTON].reset()
         self.talkedTo = True
-
 
 
 class WaterFallEventWarp(EventWarp):

@@ -219,6 +219,7 @@ class Snorlax(Entity):
             self.inEvent = False
             self.game.inEvent = False
             self.delayAfterEvent = 0
+            self.game.save.updateEvent("Snorlax")
             Snorlax.sound.play()
             self.kill()
 
@@ -375,9 +376,9 @@ class River:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            if obj.name == "Snorlax":
+            if obj.name == "Snorlax" and not self.save.wokeSnorlax():
                 Snorlax((obj.x, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=SNORLAX_SIZE, facing=facing, z=2)
-            else:
+            elif obj.name != "Snorlax":
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         # Pokemon menu

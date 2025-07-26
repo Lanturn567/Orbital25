@@ -9,6 +9,7 @@ from Code.sprites import *
 from Code.entities import *
 from Code.Save import *
 from Code.Battle import Battle
+from Code.Stages.Mart.Mart import Healy, MartVolumeButton
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -301,7 +302,10 @@ class Mt4:
             facing = obj.properties["dir"]
             type = obj.type
             dis = obj.properties["dis"]
-            Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities, self.collideUpper), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            if obj.name == "Noa":
+                Healy((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities, self.collideUpper), game=self, size=PLAYER_SIZE, facing=facing, z=3)
+            else:
+                Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type, groups=(self.sprite_group, self.collide, self.entities, self.collideUpper), game=self, size=PLAYER_SIZE, facing=facing, z=3)
 
         for obj in Mt4.tmx.get_layer_by_name("IncreaseZ"):
             image = pygame.image.load(WARP_PATH)
@@ -632,8 +636,8 @@ class Mt4:
         pygame.mixer.music.play(-1, 10, 5000)
         StoryTextBox.init__text(TEXT_PATH1)
         StoryTextBox.init_images(TEXT_BOX_PATHS)
-        LakeVolumeButton.init_images(VOL_BUTTON_PATHS)
-        self.buttons = [LakeVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
+        MartVolumeButton.init_images(VOL_BUTTON_PATHS)
+        self.buttons = [MartVolumeButton(MAX_X - 50, MAX_Y - 50, self)]
         self.buttons[VOLUME_BUTTON].first_toggle()
 
 

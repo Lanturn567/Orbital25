@@ -168,7 +168,6 @@ class Mart:
         for obj in Mart.tmx.get_layer_by_name("Player"):
             if obj.properties["pos"] == start_pos:
                 self.player = MC((obj.x + 16, obj.y), PLAYER_PATHS, self.sprite_group, self.collide, self, size=PLAYER_SIZE, z=3)
-                self.player.facing == DOWN
 
         # Boundary
         for x, y, surf in Mart.tmx.get_layer_by_name("Boundary").tiles():

@@ -92,7 +92,7 @@ class DanielFinalBoss(Trainer):
     def makeEvent(self):
         if self.talkedTo:
             self.talkedToAgain = True
-        StoryTextBox.init__text(self.text if not self.talkedTo else self.talked)
+        StoryTextBox.init__text(self.text if not self.talkedTo and not self.defeated else self.talked)
         self.game.buttons[TEXT_BUTTON].reset()
         self.talkedTo = True
         self.game.save.updateEvent("BeatDLKLPeak")
@@ -236,7 +236,7 @@ class Peak:
                 self.boss = DanielFinalBoss((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                        groups=(self.sprite_group, self.collide, self.entities),
                        game=self, size=PLAYER_SIZE, facing=facing, z=3)
-            else:
+            elif obj.name != "DLKLFinalBoss":
                 Trainer((obj.x + 16, obj.y), name=obj.name, dis=dis, type=type,
                         groups=(self.sprite_group, self.collide, self.entities),
                         game=self, size=PLAYER_SIZE, facing=facing, z=3)
