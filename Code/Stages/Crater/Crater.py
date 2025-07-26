@@ -86,7 +86,6 @@ ROCKET_SOUND = os.path.join(BASE_DIR, "../../../Audio/Rocket.wav")
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y))
-pygame.display.set_caption("Snow")
 
 # pokemon frames
 pokemon_frames = {

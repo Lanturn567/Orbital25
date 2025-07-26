@@ -73,8 +73,6 @@ pygame.init()
 #screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) # Andre
 screen = pygame.display.set_mode((MAX_X, MAX_Y)) # Rhysmond
 
-pygame.display.set_caption("Gym")
-
 # pokemon frames
 pokemon_frames = {
     'icons': import_folder_dict(os.path.join(BASE_DIR, '../../../Assets/Pokemon/icons')),

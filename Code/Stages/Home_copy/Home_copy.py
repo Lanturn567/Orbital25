@@ -75,7 +75,6 @@ STAGES = {}
 pygame.init()
 # screen = pygame.display.set_mode((MAX_X, MAX_Y), flags=SCALED, vsync=1) #Andre
 screen = pygame.display.set_mode((MAX_X, MAX_Y)) #Rhysmond
-pygame.display.set_caption("Home")
 
 # pokemon frames
 pokemon_frames = {
