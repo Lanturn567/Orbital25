@@ -64,7 +64,6 @@ BLIZZARD_ALPHA = 255  # Semi-transparent particles
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y))
-pygame.display.set_caption("Snow")
 
 # pokemon frames
 pokemon_frames = {

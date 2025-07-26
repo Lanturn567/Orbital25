@@ -53,7 +53,6 @@ STAGES = {}
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((MAX_X, MAX_Y))
-pygame.display.set_caption("BigHouse")
 
 # pokemon frames
 pokemon_frames = {
