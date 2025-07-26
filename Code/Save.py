@@ -195,7 +195,7 @@ class Save:
     def getNearestMart(self):
         if not self.foughtRivalAtTown():
             return "home"
-        elif not self.gotDaniel() and not self.getPos() == "crater":
+        elif not self.gotDaniel() and not self.getStageName() == "Crater":
             return "town"
         elif not self.gotDaniel():
             return "crater"

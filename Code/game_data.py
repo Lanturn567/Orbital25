@@ -60,7 +60,7 @@ POKEMON_DATA = {
 		'abilities': {0: 'scratch', 5: 'spark', 15: 'burn', 20: 'explosion', 25: 'heal'},
 		'evolve': None},
 	'Daniel': {
-		'stats': {'element': 'fire', 'max_health': 12, 'max_energy': 19, 'attack': 3, 'defense': 10, 'recovery': 2.1, 'speed': 2.6},
+		'stats': {'element': 'fire', 'max_health': 22, 'max_energy': 19, 'attack': 7, 'defense': 14, 'recovery': 2.1, 'speed': 2.6},
 		'abilities': {0: 'scratch', 5: 'spark', 15: 'burn', 20: 'explosion', 25: 'heal'},
 		'evolve': None},
 	'Friolera': {

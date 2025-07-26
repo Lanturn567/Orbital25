@@ -120,6 +120,7 @@ class MC(Entity):
             self.x, self.y = pos
             self.rect.center = (self.x, self.y)
             self.hitbox.center = (self.x + size[0] // 4, self.y + size[1] // 4)
+            self.currImage = 0
             return
 
         self._initialized = True
