@@ -140,10 +140,21 @@ class Trainer(Entity):
         self.TRAINER_GO_SPEED = random.randint(2, 4) * BLOCK_SIZE
 
         #info from database
+        import copy
+
         self.name = name
-        self.info = database[self.name]
+
+        # Deep copy to protect against shared state mutation
+        self.info = copy.deepcopy(database[self.name])
         if not self.info:
-            self.info = database["Default"]
+            self.info = copy.deepcopy(database["Default"])
+
+        # Get Pokémon team safely
+        team = self.info.get("team", {})
+        if isinstance(team, dict):
+            self.monsters = {i: copy.deepcopy(p) for i, p in team.items()}
+        else:
+            self.monsters = {}
 
         #GO event
         self.text = text if text else self.info["talk"]
@@ -152,9 +163,6 @@ class Trainer(Entity):
         self.ticker = 0
         self.inEvent = False
         self.delayAfterEvent = 0
-
-        #pokemon
-        self.monsters = self.info["team"]
 
         self.awaiting_battle = False
         self.defeated = self.game.save.isTrainerDefeated(self.name)
