@@ -102,13 +102,13 @@ database = {
                "talk" : ["Annie: Come on, 25 to go..."],
                "dead" : True
                },
-    "Wendy" : { "team" : {0: Pokemon('Quagsire', 21)},
+    "Wendy" : { "team" : {0: Pokemon('Wooper', 21)},
                "talk" : ["Wendy: The sand feels icky."],
                 "beaten" : ["Wendy: I lost because I felt icky..."],
                 "dead" : True,
                 "battle" : True
                },
-    "Tombo" : { "team" : {0: Pokemon('Musharna', 22), 1: Pokemon('Altaria', 20)},
+    "Tombo" : { "team" : {0: Pokemon('Musharna', 20), 1: Pokemon('Altaria', 20)},
                "talk" : ["Tombo: Tombo."],
                 "beaten" : ["Tombo: Tomboo..."],
                 "dead" : True,
@@ -262,11 +262,11 @@ database = {
                 "dead" : True,
                 "battle" : True
                  },
-    "Fish" : { "team" : {0: Pokemon('Draem', 21), 1: Pokemon('Finiette', 22)},
+    "Fish" : { "team" : {},
                  "talk" : ["Fish: Fishing..."],
                "beaten" : ["Fish: Fished..."],
                "dead" : True,
-               "battle" : True
+               "battle" : False
                  },
     "Snow" : { "team" : {0: Pokemon('Finiette', 12)},
                "talk" : ["Snow: Holy balls...", "Snow: I'm freezing my ass off."],
@@ -525,8 +525,9 @@ database = {
                     },
     "Oh" : { "team" : {0: Pokemon('Cindrill', 9)},
                     "talk" : ["Oh: My day today has been pretty slow. Want to battle to liven it up?"],
+                    "beaten" : ["Oh: Sigh..."],
                     "dead" : True,
-             "battle" : True
+                 "battle" : True
                     },
     "Kim" : { "team" : [],
                     "talk" : ["Kim: My fish are cheerfully flopping about!"],
@@ -1271,7 +1272,7 @@ database = {
                   "battle" : False
                   },
     "Bash" : { "team" : {0: Pokemon('Ditto', 33)},
-                  "talk" : ["Bash: Its so humid in here. The perfect place to build up stamina!"],
+                "talk" : ["Bash: Its so humid in here. The perfect place to build up stamina!"],
                "beaten" : ["Bash: I've run out of energy!"],
                "dead" : True,
                "battle" : True
@@ -1372,47 +1373,56 @@ database = {
                  },
     "DLKL1" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Clodsire?: CloDLKLsire."],
+                "beaten" : ["Clodsire?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL2" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Bidoof?: BiDLKLoof?"],
+                "beaten" : ["Bidoof?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL3" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Starly?: StarDLKLy. STARDLKLY!!"],
+                "beaten" : ["Starly?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL4" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Snorlax?: SnorrrrrrDLKLLLaxxxxxxxxx..."],
+                "beaten" : ["Snorlax?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL5" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Pikachu?: PIDLKLACHU!!!"],
+                "beaten" : ["Pikachu?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL6" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Happiny?: Happiny? DLKL? Happiny."],
+                "beaten" : ["Happiny?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
 
     "DLKL7" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Munchlax?: MunchDLKLaxxxxx..."],
+                "beaten" : ["Munchlax?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL8" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Ponyta?: Ponytadlkldlkldlkl..?"],
+                "beaten" : ["Ponyta?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
     "DLKL9" : { "team" : {0: Pokemon('Daniel', 40)},
                 "talk" : ["Squirtle?: SquirtDLKLe!"],
+                "beaten" : ["Squirtle?: ..."],
                 "dead" : True,
                 "battle" : True
                 },
@@ -1542,7 +1552,8 @@ database = {
                },
     "Jason" : { "team" : {0: Pokemon('Luvdisc', 25), 1: Pokemon('Maractus', 21)},
                "talk" : ["Jason: Want to battle? Just for the fun of it."],
-               "dead" : True,
+                "beaten" : ["Jason: Rip."],
+                "dead" : True,
                 "battle" : True
                },
     "Klaus" : { "team" : [],
@@ -1564,47 +1575,57 @@ database = {
                },
     "Paint" : { "team" : {0: Pokemon('Quagsire', 27), 1: Pokemon('Draem', 26)},
               "talk" : ["Paint: We battle not just with strength, but with balance. Hope you've got both!"],
-              "dead" : True,
+                "beaten" : ["Paint: Stunning."],
+                "dead" : True,
                 "battle" : True
               },
     "Parr" : { "team" : {0: Pokemon('Sparchu', 28)},
               "talk" : ["Parr: This is the end of the bridge. Good luck if you're about to fight the leader!"],
-              "dead" : True,
+               "beaten" : ["Parr: Too strong..."],
+
+               "dead" : True,
                "battle" : True
               },
     "Sandra" : { "team" : {0: Pokemon('Starly', 18), 1: Pokemon('Turtwig', 21), 2: Pokemon('Wooper', 24)},
               "talk" : ["Sandra: You’ll need more than fancy moves to cross this bridge!"],
-              "dead" : True,
+                 "beaten" : ["Sandra: Fancy enough."],
+                 "dead" : True,
                  "battle" : True
               },
     "Olly" : { "team" : {0: Pokemon('Zebstrika', 27)},
               "talk" : ["Olly: Lollipop."],
-              "dead" : True,
+               "beaten" : ["Olly: Lolly."],
+               "dead" : True,
                "battle" : True
               },
     "Poppy" : { "team" : {0: Pokemon('Rapidash', 27)},
               "talk" : ["Poppy: Poplolly!"],
-              "dead" : True,
+                "beaten" : ["Poppy: Lolly."],
+                "dead" : True,
                 "battle" : True
               },
     "Gwen" : { "team" : {0: Pokemon('Musharna', 28)},
               "talk" : ["Gwen: Don’t look down. Not at the river, and not in battle."],
-              "dead" : True,
+               "beaten" : ["Gwen: I should not have looked down on you."],
+               "dead" : True,
                "battle" : True
               },
     "Nuny" : { "team" : {0: Pokemon('Staraptor', 27), 1: Pokemon('Altaria', 27)},
               "talk" : ["Nuny: Sometimes the wind picks up mid-battle. Just part of the challenge!"],
-              "dead" : True,
+               "beaten" : ["Nuny: Well done."],
+               "dead" : True,
                "battle" : True
               },
     "Mista" : { "team" : {0: Pokemon('Ditto', 26)},
               "talk" : ["Mista: Welcome! I'm your first opponent. Think you can handle me?"],
+                "beaten" : ["Mista: You handled me well indeed."],
               "dead" : True,
                 "battle" : True
               },
     "Lang" : { "team" : {0: Pokemon('Cindrill', 26)},
                 "talk" : ["Lang: Want to play roulette with me? No? Ok..."],
-                "dead" : True,
+               "beaten" : ["Lang: Ok then..."],
+               "dead" : True,
                "battle" : True
                 },
     "Scott" : { "team" : [],
@@ -1624,7 +1645,8 @@ database = {
                    "battle" : True},
     "Champ" : { "team" : {0: Pokemon('Pouch', 26)},
               "talk" : ["Champ: Ah, this place is so relaxing..."],
-              "dead" : True,
+                "beaten" : ["Champ: Zzz..."],
+                "dead" : True,
                 "battle" : True
               },
     "Ex" : { "team" : [],
@@ -1634,7 +1656,8 @@ database = {
               },
     "Artoria" : { "team" : {0: Pokemon('Pluma', 25), 1: Pokemon('Altaria', 27)},
               "talk" : ["Artoria: Battle me! For honour and for glory!"],
-              "dead" : True,
+                  "beaten" : ["Artoria: You deserve that victory."],
+                  "dead" : True,
                   "battle" : True
               },
 }
