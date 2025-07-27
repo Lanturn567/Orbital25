@@ -92,7 +92,7 @@ class Save:
         return count
 
     def getSeen(self):
-        return len(self.data["pokedex"])
+        return len(self.data["pokemon"])
 
     def getName(self):
         return self.data["name"]
