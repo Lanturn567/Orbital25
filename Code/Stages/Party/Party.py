@@ -202,7 +202,7 @@ class W(Trainer):
 
     def collide(self):
         keys = pygame.key.get_pressed()
-        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and not self.transitioning_to_battle and self.delayAfterEvent >= AFTER_EVENT_DELAY:
+        if self.box.colliderect(self.game.player.hitbox) and not self.game.menu_open and keys[pygame.K_SPACE] and not self.game.inEvent and not self.inEvent and not self.transitioning_to_battle and self.delayAfterEvent >= AFTER_EVENT_DELAY and not self.game.inBattle:
             self.inEvent = True
             self.game.inEvent = True
             self.makeEvent()
@@ -223,53 +223,6 @@ class W(Trainer):
 
             if not self.defeated and self.can_battle and self.woo.defeated and self.wii.defeated:
                 self.awaiting_battle = True
-
-
-class Spectator(Trainer):
-    def move(self, dt):
-        # Store previous position
-        if not self.inEvent:
-            dir = self.road[int(self.currentStep) % self.maxSteps] if self.road else self.facing
-            if not self.box.colliderect(self.game.player.hitbox) and self.maxSteps:
-                if dir == LEFT:
-                    self.x -= dt * self.TRAINER_GO_SPEED
-                    if self.facing == LEFT:
-                        self.currImage += dt * ANIM_SPEED
-                    else:
-                        self.facing = LEFT
-                        self.currImage = 0
-                        self.maxFrames = Trainer.leftFrames
-
-                elif dir == RIGHT:
-                    self.x += dt * self.TRAINER_GO_SPEED
-                    if self.facing == RIGHT:
-                        self.currImage += dt * ANIM_SPEED
-                    else:
-                        self.facing = RIGHT
-                        self.currImage = 0
-                        self.maxFrames = Trainer.rightFrames
-
-                elif dir == DOWN:
-                    self.y += dt * self.TRAINER_GO_SPEED
-                    if self.facing == DOWN:
-                        self.currImage += dt * ANIM_SPEED
-                    else:
-                        self.facing = DOWN
-                        self.maxFrames = Trainer.downFrames
-                        self.currImage = 0
-
-                elif dir == UP:
-                    self.y -= dt * self.TRAINER_GO_SPEED
-                    if self.facing == UP:
-                        self.currImage += dt * ANIM_SPEED
-                    else:
-                        self.facing = UP
-                        self.currImage = 0
-                        self.maxFrames = Trainer.upFrames
-
-                self.currentStep += dt * ANIM_DIST
-                self.box.center = (self.x, self.y)
-
 
 class Party:
     tmx = load_pygame(TMX_PATH)
@@ -411,9 +364,9 @@ class Party:
         for x, y, surf in Party.tmx.get_layer_by_name("People").tiles():
             pos = (x * BLOCK_SIZE + 16, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
-            while type == "furina":
+            while type == "furina" or type == "lanturn" or type == "rhymond" or type == "bossdlkl":
                 type = random.choice([key for key in TRAINER_PATHS.keys()])
-            Spectator(pos, dis=0, type=type, name="Party", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="up", z=3)
+            Trainer(pos, dis=0, type=type, name="Party", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="up", z=3)
 
         # Warps
         for obj in Party.tmx.get_layer_by_name("Warps"):

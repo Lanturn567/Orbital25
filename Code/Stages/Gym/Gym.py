@@ -369,7 +369,7 @@ class Gym:
         for x, y, surf in Gym.tmx.get_layer_by_name("DownSpec").tiles():
             pos = (x * BLOCK_SIZE, y * BLOCK_SIZE)
             type = random.choice([key for key in TRAINER_PATHS.keys()])
-            while type == "furina":
+            while type == "furina" or type == "lanturn" or type == "rhymond" or type == "bossdlkl":
                 type = random.choice([key for key in TRAINER_PATHS.keys()])
             Spectator(pos, dis=0, type=type, name="Spectator", groups=(self.sprite_group, self.collide, self.entities), game=self, size=PLAYER_SIZE, facing="down", z=3)
 
