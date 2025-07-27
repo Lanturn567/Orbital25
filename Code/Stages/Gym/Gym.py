@@ -169,15 +169,12 @@ class Raysen(Trainer):
         self.talked = self.info["talked"]
         self.battle = self.info["battles"]
         self.talkedTo = False
-        self.battled = False
 
     def makeEvent(self):
-        StoryTextBox.init__text(self.text if not self.battled else self.battle if not self.talkedTo else self.talked)
+        StoryTextBox.init__text(self.text if not self.defeated else self.battle if not self.talkedTo else self.talked)
         self.game.buttons[TEXT_BUTTON].reset()
         self.game.save.updateEvent("GymThree")
-        if not self.battled:
-            self.battled = True
-        elif not self.talkedTo:
+        if not self.talkedTo:
             self.talkedTo = True
 
 

@@ -40,9 +40,9 @@ FINAL_DELAY = 5
 
 # New constants for slide show
 SLIDE_IMAGES = [
-    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/First.png"),
-    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/Second.png"),
-    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/Third.png"),
+    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/First.jpg"),
+    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/Second.jpeg"),
+    os.path.join(BASE_DIR, "../../../Assets/RocketSlides/Third.webp"),
     os.path.join(BASE_DIR, "../../../Assets/RocketSlides/Fourth.png"),
 ]
 
